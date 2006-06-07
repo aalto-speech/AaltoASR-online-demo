@@ -21,23 +21,24 @@ OPT = -g
 # HUOM!
 # JAAKKO TEHNYT LISÄYKSIÄ INCLUDESIIN
 ##############################3
-INCLUDES = -I/usr/include/SDL -I/usr/include/paragui -I/usr/include/freetype2
-LDFLAGS =
+INCLUDES = -I/home/thirsima/Work/online-demo-libs/akumod \
+	-I/usr/include/SDL -I/usr/include/paragui -I/usr/include/freetype2
+LDFLAGS = -L/home/thirsima/Work/online-demo-libs/akumod
 WARNINGS = -Wall
 DEPFLAG = -MM
 endif
 
 ##################################################
 
-PROGS = testi slave
+PROGS = recognizer
 
 PROGS_SRCS = $(PROGS:=.cc)
 
-CLASS_SRCS = AudioStream.cc AudioInput.cc FileOutput.cc AudioInputController.cc Process.cc
+CLASS_SRCS = AudioStream.cc AudioInput.cc FileOutput.cc AudioInputController.cc Process.cc Recognizer.cc msg.cc
 
 CLASS_OBJS = $(CLASS_SRCS:.cc=.o)
 
-LIBS = -lportaudio -lSDL -lpthread
+LIBS = -lportaudio -lSDL -lpthread -lakumod -lfftw3 -lsndfile
 
 ALL_SRCS = $(CLASS_SRCS) $(PROGS_SRCS)
 ALL_OBJS = $(ALL_SRCS:.cc=.o)
@@ -54,8 +55,7 @@ objs: $(ALL_OBJS)
 	$(CXX) -c $(CXXFLAGS) $< -o $@
 
 $(PROGS) : %: %.o $(CLASS_OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $< -o $@ \
-		$(CLASS_OBJS) $(LIBS)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $< -o $@ $(CLASS_OBJS) $(LIBS)
 
 .PHONY: dep
 dep:

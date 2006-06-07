@@ -1,0 +1,270 @@
+#include <fcntl.h>
+#include <errno.h>
+#include "msg.hh"
+
+namespace msg {
+
+  void
+  set_non_blocking(int fd)
+  {
+    int result;
+  
+    result = fcntl(fd, F_GETFL, 0);
+    if (result >= 0)
+      result = fcntl(fd, F_SETFL, result | O_NONBLOCK);
+    if (result < 0) {
+      perror("fcntl() failed");
+      exit(1);
+    }
+  }
+
+  InQueue::InQueue(int fd)
+    : buffer(header_size, 0), bytes_got(0), fd(fd), eof(false)
+  {
+    assert(sizeof(int) == 4);
+  }
+
+  void
+  InQueue::disable() 
+  { 
+    assert(fd > 0);
+    buffer.resize(header_size);
+    queue.clear();
+    bytes_got = 0;
+    fd = -1; 
+    eof = false;
+  }
+
+  void 
+  InQueue::enable(int fd) 
+  { 
+    assert(this->fd < 0);
+    assert(!eof);
+    this->fd = fd; 
+  }
+
+  void
+  InQueue::flush()
+  {
+    assert(!eof);
+    if (fd < 0)
+      return;
+
+    while (1) {
+      assert((int)buffer.size() >= header_size);
+      ssize_t ret;
+      assert(bytes_got < (int)buffer.size());
+      int bytes_left = buffer.size() - bytes_got;
+
+      // Read buffer with restart
+      while (1) {
+	ret = read(fd, &buffer[bytes_got], bytes_left);
+	if (ret < 0) {
+	  if (errno == EAGAIN) // read would block
+	    return;
+	  if (errno == EINTR) // interrupted by signal
+	    continue;
+	  perror("flush_read(): read() failed");
+	  exit(1);
+	}
+	if (ret == 0) { // end of file
+	  eof = true;
+	  return;
+	}
+	  
+	break;
+      }
+
+      assert(ret <= bytes_left);
+      bytes_got += ret;
+      if (ret == bytes_left) {
+
+	if (bytes_got == header_size) {
+	  int length = endian::get4<int>(&buffer[0]);
+	  if (length < header_size) {
+	    fprintf(stderr, "InQueue::flush() got message length %d\n", 
+		    length);
+	    exit(1);
+	  }
+
+	  buffer.resize(length);
+	  if (bytes_got < length)
+	    continue;
+	}
+      
+	Message message;
+	message.buf = buffer;
+	if (message.urgent())
+	  queue.push_front(message);
+	else
+	  queue.push_back(message);
+
+	buffer.resize(header_size);
+	bytes_got = 0;
+	break;
+      }
+    }
+  }
+
+  OutQueue::OutQueue(int fd)
+    : bytes_sent(0), fd(fd)
+  {
+    assert(sizeof(int) == 4);
+  }
+
+  void 
+  OutQueue::disable() 
+  { 
+    assert(fd > 0);
+    queue.clear();
+    buffer.clear();
+    bytes_sent = 0;
+    fd = -1; 
+  }
+
+  void
+  OutQueue::enable(int fd) 
+  { 
+    assert(this->fd < 0);
+    this->fd = fd; 
+  }
+
+  void 
+  OutQueue::flush()
+  {
+    if (fd < 0)
+      return;
+
+    while (1) {
+
+      if (buffer.empty()) {
+	assert(bytes_sent == 0);
+	if (queue.empty())
+	  return;
+	msg::Message &message = queue.front();
+	buffer = message.buf;
+
+	if (message.raw)
+	  buffer.erase(0, msg::header_size);
+	else {
+	  int length = endian::get4<int>(&buffer[0]);
+	  if (length != (int)buffer.size()) {
+	    fprintf(stderr, "OutQueue::flush() buffer size is %d bytes, "
+		    "but header says %d bytes\n", (int)buffer.size(), length);
+	    exit(1);
+	  }
+	}
+
+	queue.pop_front();
+      }
+
+      assert(bytes_sent < buffer.length());
+      int bytes_left = buffer.length() - bytes_sent;
+      ssize_t ret;
+
+      // Write buffer with restart
+      while (1) {
+	fprintf(stderr, "out 0x%p: writing %d bytes\n", this, bytes_left);
+	ret = write(fd, &buffer[bytes_sent], bytes_left);
+	fprintf(stderr, "out 0x%p: write() returned %d\n", this, ret);
+	if (ret < 0) {
+	  if (errno == EAGAIN) // write would block
+	    return;
+	  if (errno == EINTR) // interrupted by signal
+	    continue;
+	  perror("flush_send(): write() failed");
+	  exit(1);
+	}
+	break;
+      }
+
+      assert(ret <= bytes_left);
+      bytes_sent += ret;
+      if (ret == bytes_left) {
+	buffer.clear();
+	bytes_sent = 0;
+      }
+    }
+    assert(false);
+  }
+
+  Mux::Mux()
+    : max_fd(-1)
+  {
+  }
+
+  void // private
+  Mux::create_fd_sets()
+  {
+    FD_ZERO(&read_set);
+    FD_ZERO(&write_set);
+
+    max_fd = -1;
+
+    select_in_queues.clear();
+    for (int i = 0; i < (int)in_queues.size(); i++) {
+      int fd = in_queues[i]->fd;
+      if (fd < 0)
+	continue;
+      assert(!in_queues[i]->eof);
+      FD_SET(fd, &read_set);
+      max_fd = std::max(max_fd, fd);
+      select_in_queues.push_back(in_queues[i]);
+    }
+
+    select_out_queues.clear();
+    for (int i = 0; i < (int)out_queues.size(); i++) {
+      if (out_queues[i]->empty())
+	continue;
+      int fd = out_queues[i]->fd;
+      if (fd < 0)
+	continue;
+      FD_SET(fd, &write_set);
+      max_fd = std::max(max_fd, fd);
+      select_out_queues.push_back(out_queues[i]);
+    }
+  }
+
+  void
+  Mux::wait_and_flush()
+  {
+    bool message_pending = false;
+    while (!message_pending) {
+      create_fd_sets();
+      assert(max_fd >= 0);
+
+      fprintf(stderr, "mux: calling select\n");
+      int ret = select(max_fd + 1, &read_set, &write_set, NULL, NULL);
+      fprintf(stderr, "mux: select returned %d\n", ret);
+
+      if (ret < 0) {
+	if (errno == EINTR)
+	  continue;
+	perror("Mux(): select() failed");
+	exit(1);
+      }
+      
+      if (ret == 0)
+	continue;
+
+      for (int i = 0; i < (int)select_out_queues.size(); i++) {
+	OutQueue *queue = select_out_queues[i];
+	if (FD_ISSET(queue->fd, &write_set)) {
+	  fprintf(stderr, "rec: out queue %d pending\n", i);
+	  queue->flush();
+	}
+      }
+
+      for (int i = 0; i < (int)select_in_queues.size(); i++) {
+	InQueue *queue = select_in_queues[i];
+	if (FD_ISSET(queue->fd, &read_set)) {
+	  fprintf(stderr, "rec: in queue %d pending\n", i);
+	  queue->flush();
+	  if (!queue->empty() || queue->eof)
+	    message_pending = true;
+	}
+      }
+    }
+  }
+
+}
