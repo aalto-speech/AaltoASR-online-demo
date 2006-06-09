@@ -20,14 +20,19 @@ namespace msg {
 
   /** Message types */
   enum { 
-    M_AUDIO, // gui -> rec
-    M_RESET, // gui -> rec, rec -> dec
+    M_AUDIO, 		// gui -> rec
+    M_AUDIO_END,	// gui -> rec
+    M_RESET, 		// gui -> rec, rec -> dec
 
-    M_FEATURES, // rec <- ac
-    M_PROBS, // rec <- ac, rec -> dec
-    M_READY, // gui <- rec, rec <- dec, rec <- ac
-    M_FRAME, // gui <- rec, rec <- dec
-    M_RECOG, // gui <- rec, rec <- dec
+    M_FEATURES, 	// rec <- ac
+    M_PROBS, 		// rec <- ac, rec -> dec
+    M_PROBS_END, 	// rec -> dec
+    M_READY, 		// gui <- rec, rec <- dec, rec <- ac
+    M_FRAME, 		// gui <- rec, rec <- dec
+    M_RECOG, 		// gui <- rec, rec <- dec
+
+    M_MESSAGE,		// gui <- rec <- dec
+    M_ERROR, 		// gui <- rec
   };
 
   const int header_size = 6;
@@ -59,6 +64,14 @@ namespace msg {
       endian::put4((int)buf.size(), &buf[0]);
     }
 
+    void append(float f)
+    {
+      assert((int)buf.size() >= header_size);
+      std::string str(4, 0);
+      endian::put4(f, &str[0]);
+      buf.append(str);
+    }
+
     int type()
     {
       assert((int)buf.length() >= header_size);
@@ -86,32 +99,67 @@ namespace msg {
   class InQueue {
   public:
     std::deque<Message> queue;
-    std::string buffer;
-    int bytes_got;
-    int fd;
-    bool eof;
 
   public:
     InQueue(int fd = -1);
     void enable(int fd);
     void disable();
+
+    /** Fetch message from the file descriptor and insert it to the
+     * queue.  For non-blocking files the function may return before
+     * complete messages are read.
+     */
     void flush();
     bool empty() { return queue.empty(); }
+
+    /** File descriptor of the queue. */
+    int get_fd() { return fd; }
+
+    /** EOF reached? */
+    bool get_eof() { return eof; }
+
+  private:
+    std::string buffer;
+    int bytes_got;
+    int fd;
+    bool eof;
   };
 
   class OutQueue {
   public:
     std::deque<Message> queue;
-    std::string buffer;
-    size_t bytes_sent;
-    int fd;
 
   public:
     OutQueue(int fd = -1);
-    void flush();
     bool empty() { return queue.empty(); }
+
+    /** Enable the queue. 
+     * \param fd = file descriptor where messages are sent */
     void enable(int fd);
+
+    /** Disable the queue, so that Mux won't watch the queue. */
     void disable();
+
+    /** Move first message from the queue to internal send buffer */
+    void prepare_next();
+
+    /** Send data from the internal send buffer. \note If the file
+     * descriptor is in non-blocking state, some of the data may be unsent. 
+     * \return false if whole message was not sent
+     */
+    bool send_next(); 
+
+    /** Flush all messages in the queue.  If the file descriptor is in
+     * non-blocking state, the function returns if the file would block. */
+    void flush();
+
+    /** File descriptor of the queue. */
+    int get_fd() { return fd; }
+
+  private:
+    std::string buffer; //!< The internal buffer for the next message
+    size_t bytes_sent; //!< Bytes sent from the internal buffer.
+    int fd; //!< File descriptor where the messages are sent.
   };
 
   class Mux {

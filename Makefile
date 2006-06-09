@@ -1,73 +1,55 @@
-### TÄNNE PITI KORJATA -m EIKÄ -p
-ARCH = $(shell uname -m)
+arch = $(shell uname -m)
 
-#############################
-# Opteron cluster
-ifeq ($(ARCH),x86_64)
-CXX = /usr/bin/g++
-OPT = -g
-INCLUDES = -I/share/puhe/x86_64/include -I/share/puhe/linux/include
-LDFLAGS = 
-WARNINGS = -Wall
-DEPFLAG = -MM
-endif
+DECODER_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/decoder
+AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
 
-##############################
-# Linux
-ifeq ($(ARCH),i686)
-CXX = /usr/bin/g++
 OPT = -g
-##############################
-# HUOM!
-# JAAKKO TEHNYT LISÄYKSIÄ INCLUDESIIN
-##############################3
-INCLUDES = -I/home/thirsima/Work/online-demo-libs/akumod \
-	-I/usr/include/SDL -I/usr/include/paragui -I/usr/include/freetype2
-LDFLAGS = -L/home/thirsima/Work/online-demo-libs/akumod
-WARNINGS = -Wall
-DEPFLAG = -MM
-endif
+AUX_CXXFLAGS ?= -Wall
+INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH)
+LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH)
+CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT)
 
 ##################################################
 
-PROGS = recognizer
+progs = recognizer gui decoder
 
-PROGS_SRCS = $(PROGS:=.cc)
+default: $(progs)
 
-CLASS_SRCS = AudioStream.cc AudioInput.cc FileOutput.cc AudioInputController.cc Process.cc Recognizer.cc msg.cc
+decoder_srcs = decoder.cc Decoder.cc conf.cc msg.cc endian.cc
+decoder_libs = -ldecoder
+decoder: $(decoder_srcs:%.cc=%.o) $(DECODER_PATH)/libdecoder.a
 
-CLASS_OBJS = $(CLASS_SRCS:.cc=.o)
+recognizer_srcs = recognizer.cc conf.cc msg.cc Recognizer.cc Process.cc
+recognizer_libs = -lpthread -lakumod -lfftw3 -lsndfile
+recognizer: $(recognizer_srcs:%.cc=%.o)
 
-LIBS = -lportaudio -lSDL -lpthread -lakumod -lfftw3 -lsndfile
+gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
+gui_libs = -lakumod
+gui: $(gui_srcs:%.cc=%.o)
 
-ALL_SRCS = $(CLASS_SRCS) $(PROGS_SRCS)
-ALL_OBJS = $(ALL_SRCS:.cc=.o)
-
-CXXFLAGS += $(OPT) $(WARNINGS) $(INCLUDES)
+srcs = $(decoder_srcs) $(recognizer_srcs) $(gui_srcs)
+objs = $(srcs:%.cc=%.o)
 
 ##################################################
 
-all: $(PROGS)
-
-objs: $(ALL_OBJS)
+default: $(progs)
 
 %.o: %.cc
-	$(CXX) -c $(CXXFLAGS) $< -o $@
+	$(CXX) $(CXXFLAGS) -c $<
 
-$(PROGS) : %: %.o $(CLASS_OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $< -o $@ $(CLASS_OBJS) $(LIBS)
-
-.PHONY: dep
-dep:
-	rm .depend
-	make .depend
-
-.depend:
-	$(CXX) -MM $(CXXFLAGS) $(DEPFLAG) $(ALL_SRCS) > .depend
-include .depend
+$(progs): %: %.o
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) -o $@ $($@_srcs:%.cc=%.o) $($@_libs)
 
 .PHONY: clean
 clean:
-	rm -f $(ALL_OBJS) $(PROGS) .depend *~
-	rm -rf html
-	cd tests && $(MAKE) clean
+	rm -f $(progs) $(objs) $(extra_clean) dep
+
+.PHONY: cleaner
+cleaner: clean
+	rm -f *~ Makefile
+
+dep:
+	$(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(srcs) > dep
+
+include dep
+

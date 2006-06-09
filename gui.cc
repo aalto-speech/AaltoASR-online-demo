@@ -23,8 +23,9 @@ main(int argc, char *argv[])
     
     Process proc;
     if (proc.create() == 0) {
-      int ret = execl("./recognizer", "./recognizer", "--config", 
-		      "mfcc_p_dd.feaconf", (char*)NULL);
+      int ret = execl("./recognizer", "./recognizer",
+//                      "--verbosity", "1",
+                      (char*)NULL);
       if (ret < 0) {
 	perror("exec() failed");
 	exit(1);
@@ -37,36 +38,68 @@ main(int argc, char *argv[])
     msg::InQueue rec_in_queue(proc.read_fd);
     msg::OutQueue rec_out_queue(proc.write_fd);
 
-    int buf_size = 1280;
+    int buf_size = 3200;
     std::string buf(buf_size, 0);
     std::string line;
+    bool send_rest = false;
+    bool prompt = true;
     while (1) {
-      fprintf(stderr, "> ");
-      str::read_line(&line, stdin, true);
-      if (line == "r") {
-	fread(&buf[0], buf_size, 1, audio_stream);
+      line = "";
+      usleep(100*1000);
+      if (prompt) {
+        fprintf(stderr, "> ");
+        if (!str::read_line(&line, stdin, true))
+          break;
+      }
+      if (line == "s") {
+        send_rest = true;
+        prompt = false;
+      }
+      if (line == "e")
+	  rec_out_queue.queue.push_back(msg::Message(msg::M_AUDIO_END));
+      if (line == "r")
+	  rec_out_queue.queue.push_back(msg::Message(msg::M_RESET));
+      if (send_rest || line == "a") {
+	size_t ret = fread(&buf[0], buf_size, 1, audio_stream);
 	if (ferror(audio_stream)) {
 	  perror("fread failed");
 	  exit(1);
 	}
-	msg::Message message(msg::M_AUDIO);
-	message.append(buf);
-	rec_out_queue.queue.push_back(message);
+	if (ret == 0) {
+          fprintf(stderr, "gui: end of audio\n");
+          send_rest = false;
+	}
+        else {
+          msg::Message message(msg::M_AUDIO);
+          message.append(buf);
+          rec_out_queue.queue.push_back(message);
+        }
       }
 
       rec_out_queue.flush();
 
-      if (rec_in_queue.eof) {
+      if (rec_in_queue.get_eof()) {
 	fprintf(stderr, "gui: eof in rec_in_queue, exiting\n");
 	exit(1);
       }
       rec_in_queue.flush();
 
-      if (!rec_in_queue.empty()) {
+      while (!rec_in_queue.empty()) {
 	msg::Message &message = rec_in_queue.queue.front();
 
-	fprintf(stderr, "gui: got message %d of %d bytes\n", message.type(),
-	       (int)message.buf.size());
+	std::string word(message.data_ptr(), message.data_length());
+	if (message.type() == msg::M_RECOG)
+	  fprintf(stderr, "gui: got RECOG: %s\n", word.c_str());
+
+	else if (message.type() == msg::M_READY) {
+	  fprintf(stderr, "gui: got READY\n");
+          prompt = true;
+	}
+
+	else if (message.type() == msg::M_MESSAGE) {
+          std::string str(message.data_ptr(), message.data_length());
+	  fprintf(stderr, "gui: decoder says %s\n", str.c_str());
+	}
 
 	rec_in_queue.queue.pop_front();
       }

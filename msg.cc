@@ -27,7 +27,7 @@ namespace msg {
   void
   InQueue::disable() 
   { 
-    assert(fd > 0);
+    assert(fd >= 0);
     buffer.resize(header_size);
     queue.clear();
     bytes_got = 0;
@@ -115,7 +115,7 @@ namespace msg {
   void 
   OutQueue::disable() 
   { 
-    assert(fd > 0);
+    assert(fd >= 0);
     queue.clear();
     buffer.clear();
     bytes_sent = 0;
@@ -129,63 +129,74 @@ namespace msg {
     this->fd = fd; 
   }
 
-  void 
-  OutQueue::flush()
+  void
+  OutQueue::prepare_next()
   {
-    if (fd < 0)
-      return;
+    if (buffer.empty()) {
+      assert(bytes_sent == 0);
+      if (queue.empty())
+        return;
+      msg::Message &message = queue.front();
+      buffer = message.buf;
 
-    while (1) {
-
-      if (buffer.empty()) {
-	assert(bytes_sent == 0);
-	if (queue.empty())
-	  return;
-	msg::Message &message = queue.front();
-	buffer = message.buf;
-
-	if (message.raw)
-	  buffer.erase(0, msg::header_size);
-	else {
-	  int length = endian::get4<int>(&buffer[0]);
-	  if (length != (int)buffer.size()) {
-	    fprintf(stderr, "OutQueue::flush() buffer size is %d bytes, "
-		    "but header says %d bytes\n", (int)buffer.size(), length);
-	    exit(1);
-	  }
-	}
-
-	queue.pop_front();
+      if (message.raw)
+        buffer.erase(0, msg::header_size);
+      else {
+        int length = endian::get4<int>(&buffer[0]);
+        if (length != (int)buffer.size()) {
+          fprintf(stderr, "OutQueue::flush() buffer size is %d bytes, "
+                  "but header says %d bytes\n", (int)buffer.size(), length);
+          exit(1);
+        }
       }
 
-      assert(bytes_sent < buffer.length());
-      int bytes_left = buffer.length() - bytes_sent;
-      ssize_t ret;
+      queue.pop_front();
+    }
+  }
 
-      // Write buffer with restart
+  bool
+  OutQueue::send_next()
+  {
+    assert(fd >= 0);
+
+    assert(bytes_sent < buffer.length());
+    int bytes_left = buffer.length() - bytes_sent;
+    ssize_t ret;
+
+    // Write buffer with restart
+    while (1) {
       while (1) {
-	fprintf(stderr, "out 0x%p: writing %d bytes\n", this, bytes_left);
-	ret = write(fd, &buffer[bytes_sent], bytes_left);
-	fprintf(stderr, "out 0x%p: write() returned %d\n", this, ret);
-	if (ret < 0) {
-	  if (errno == EAGAIN) // write would block
-	    return;
-	  if (errno == EINTR) // interrupted by signal
-	    continue;
-	  perror("flush_send(): write() failed");
-	  exit(1);
-	}
-	break;
+        ret = write(fd, &buffer[bytes_sent], bytes_left);
+        if (ret < 0) {
+          if (errno == EAGAIN) // write would block
+            return false;
+          if (errno == EINTR) // interrupted by signal
+            continue;
+          perror("flush_send(): write() failed");
+          exit(1);
+        }
+        break;
       }
 
       assert(ret <= bytes_left);
       bytes_sent += ret;
       if (ret == bytes_left) {
-	buffer.clear();
-	bytes_sent = 0;
+        buffer.clear();
+        bytes_sent = 0;
+        return true;
       }
     }
     assert(false);
+  }
+
+  void
+  OutQueue::flush()
+  {
+    while (!queue.empty()) {
+      prepare_next();
+      if (!send_next())
+        return;
+    }
   }
 
   Mux::Mux()
@@ -203,10 +214,10 @@ namespace msg {
 
     select_in_queues.clear();
     for (int i = 0; i < (int)in_queues.size(); i++) {
-      int fd = in_queues[i]->fd;
+      int fd = in_queues[i]->get_fd();
       if (fd < 0)
 	continue;
-      assert(!in_queues[i]->eof);
+      assert(!in_queues[i]->get_eof());
       FD_SET(fd, &read_set);
       max_fd = std::max(max_fd, fd);
       select_in_queues.push_back(in_queues[i]);
@@ -216,7 +227,7 @@ namespace msg {
     for (int i = 0; i < (int)out_queues.size(); i++) {
       if (out_queues[i]->empty())
 	continue;
-      int fd = out_queues[i]->fd;
+      int fd = out_queues[i]->get_fd();
       if (fd < 0)
 	continue;
       FD_SET(fd, &write_set);
@@ -233,9 +244,7 @@ namespace msg {
       create_fd_sets();
       assert(max_fd >= 0);
 
-      fprintf(stderr, "mux: calling select\n");
       int ret = select(max_fd + 1, &read_set, &write_set, NULL, NULL);
-      fprintf(stderr, "mux: select returned %d\n", ret);
 
       if (ret < 0) {
 	if (errno == EINTR)
@@ -249,18 +258,15 @@ namespace msg {
 
       for (int i = 0; i < (int)select_out_queues.size(); i++) {
 	OutQueue *queue = select_out_queues[i];
-	if (FD_ISSET(queue->fd, &write_set)) {
-	  fprintf(stderr, "rec: out queue %d pending\n", i);
+	if (FD_ISSET(queue->get_fd(), &write_set))
 	  queue->flush();
-	}
       }
 
       for (int i = 0; i < (int)select_in_queues.size(); i++) {
 	InQueue *queue = select_in_queues[i];
-	if (FD_ISSET(queue->fd, &read_set)) {
-	  fprintf(stderr, "rec: in queue %d pending\n", i);
+	if (FD_ISSET(queue->get_fd(), &read_set)) {
 	  queue->flush();
-	  if (!queue->empty() || queue->eof)
+	  if (!queue->empty() || queue->get_eof())
 	    message_pending = true;
 	}
       }
