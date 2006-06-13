@@ -140,10 +140,6 @@ Process::create()
 void
 Process::finish()
 {
-  if (close(read_fd) < 0) {
-    perror("close(read_fd) failed");
-    exit(1);
-  }
   if (close(write_fd) < 0) {
     perror("close(write_fd) failed");
     exit(1);
@@ -151,4 +147,9 @@ Process::finish()
 
   kill(pid, SIGTERM);
   wait(&finish_result);
+
+  if (close(read_fd) < 0) {
+    perror("close(read_fd) failed");
+    exit(1);
+  }
 }
