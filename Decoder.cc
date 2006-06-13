@@ -58,10 +58,10 @@ Decoder::init(conf::Config &config)
 }
 
 void
-Decoder::message_result(bool guaranteed)
+Decoder::message_result(bool guaranteed, bool only_new)
 {
   TokenPassSearch &tp = t.tp_search();
-  tp.get_path(hist_vec, guaranteed);
+  tp.get_path(hist_vec, guaranteed, only_new);
   
   for (int i = hist_vec.size() - 1; i >= 0; i--) {
     msg::Message message(msg::M_RECOG);
@@ -122,7 +122,7 @@ Decoder::run()
       frame++;
       assert(t.frame() == frame);
 
-      message_result(true);
+      message_result(true, false);
     }
 
     // "End of acoustics" message
@@ -134,7 +134,7 @@ Decoder::run()
       bool ret = t.run();
       assert(!ret);
 
-      message_result(false);
+      message_result(false, false);
 
       t.reset(0);
       frame = 0;

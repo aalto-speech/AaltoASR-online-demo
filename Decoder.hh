@@ -10,7 +10,7 @@ public:
   void init(conf::Config &conf);
   void reset();
   void run();
-  void message_result(bool guaranteed);
+  void message_result(bool guaranteed, bool only_new);
 
   bool verbose;
   Toolbox t;
