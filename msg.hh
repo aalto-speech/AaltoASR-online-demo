@@ -63,6 +63,14 @@ namespace msg {
       buf.append(str);
       endian::put4((int)buf.size(), &buf[0]);
     }
+    
+    // Jaakko: Lisäsin tarpeisiini tällaisen funktion..
+    void append(const char *str, unsigned int size)
+    {
+      assert((int)buf.size() >= header_size);
+      buf.append(str, size);
+      endian::put4((int)buf.size(), &buf[0]);
+    }
 
     void append(float f)
     {

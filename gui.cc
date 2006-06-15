@@ -27,8 +27,8 @@ main(int argc, char *argv[])
 //                      "--verbosity", "1",
                       (char*)NULL);
       if (ret < 0) {
-	perror("exec() failed");
-	exit(1);
+        perror("exec() failed");
+        exit(1);
       }
       assert(false);
     }
@@ -101,7 +101,7 @@ main(int argc, char *argv[])
 	  fprintf(stderr, "gui: decoder says %s\n", str.c_str());
 	}
 
-	rec_in_queue.queue.pop_front();
+      	rec_in_queue.queue.pop_front();
       }
     }
 

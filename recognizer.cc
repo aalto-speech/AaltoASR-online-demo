@@ -21,7 +21,8 @@ main(int argc, char *argv[])
 
     rec.dec_command.clear();
     rec.dec_command +=
-      "./decoder " 
+      "./decoder "
+//      " --verbose" 
       " --binlm /share/work/thirsima/morph160000_4gram_1e-8.bin" 
       " --lookahead /share/work/thirsima/morph160000_2gram.bin" 
       " --lexicon /share/work/thirsima/morph160000.lex" 

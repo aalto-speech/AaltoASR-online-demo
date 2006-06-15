@@ -1,21 +1,42 @@
 
+#include <sndfile.h>
+#include <string.h>
 #include <stdio.h>
-
 #include "AudioStream.hh"
   
+//*  
+bool
+audio::read_wav_data(const char *filename, std::string *to)
+{
+  SF_INFO info;
+  SNDFILE *file;
+  char *data;
+  unsigned long read_size = 0;
+
+  info.format = 0;
+  file = sf_open(filename, SFM_READ, &info);
+  
+  if (file == NULL)
+    return false;
+    
+  data = new char[sizeof(AUDIO_FORMAT)*info.frames+1];
+  read_size = audio_read_function(file, (AUDIO_FORMAT*)data, info.frames);
+  fprintf(stderr, "read: %d, frames: %d\n", read_size, info.frames);
+  //datassa saattaa piillä lopetusmerkki, joten ei käytetä =-operaattoria.
+  to->append(data, read_size * sizeof(AUDIO_FORMAT));
+
+  delete [] data;
+  sf_close(file);
+  return true;
+}
+//*/
 AudioStream::AudioStream()
 {
   this->m_stream = NULL;
-  this->m_callback_function = NULL;
 }
 
 AudioStream::~AudioStream()
 {
-  // Close the stream and terminate PortAudio.
-  if (this->m_stream) {
-    Pa_CloseStream(this->m_stream);
-    this->m_stream = NULL;
-  }
 }
 
 //static
@@ -23,10 +44,11 @@ bool
 AudioStream::initialize()
 {
   PaError error;
+  // if initialized, nothing
   // Initialize PortAudio.
   error = Pa_Initialize();
   if (error != paNoError) {
-    print_error("Couldn't initialize audio stream:\n", &error);
+    print_error("Couldn't initialize audio:\n", &error);
     return false;
   }
   return true;
@@ -44,27 +66,20 @@ AudioStream::terminate()
 }
 
 bool
-AudioStream::open(bool (*callback_function)(const AUDIO_FORMAT *inputBuffer,
-                              				      AUDIO_FORMAT *outputBuffer,
-                                            unsigned long frameCount,
-                                            void *userData),
-            		  void *callback_data)
+AudioStream::open_stream(unsigned int input_channels, unsigned int output_channels)
 {
   // Open audio stream.
-  PaError error = Pa_OpenDefaultStream( &m_stream, //passes back stream pointer
-					1, // input channels
-					1, // output channels
-					PA_AUDIO_FORMAT,
-					SAMPLE_RATE, // sample rate
-					paFramesPerBufferUnspecified, // frames per bufffer
-					this->callback,
-					this );
-
-  this->m_callback_function = callback_function;
-  this->m_callback_data = callback_data;
+  PaError error = Pa_OpenDefaultStream(&this->m_stream, //passes back stream pointer
+                                       input_channels, // input channels
+                                       output_channels, // output channels
+                                       PA_AUDIO_FORMAT,
+                                       SAMPLE_RATE,
+                                       paFramesPerBufferUnspecified,
+                                       this->callback,
+                                       this);
 
   if (error != paNoError) {
-    print_error("Couldn't open audio stream.\n", &error);
+    print_error("Couldn't open audio stream:\n", &error);
     return false;
   }
   
@@ -92,6 +107,7 @@ AudioStream::start()
   }
 
   //Start stream
+//  this->m_paused = false;
   PaError error = Pa_StartStream(this->m_stream);
   if ( error != paNoError ) {
     print_error("Couldn't start audio stream:\n", &error);
@@ -99,7 +115,7 @@ AudioStream::start()
   }
   return true;
 }
-
+/*
 void
 AudioStream::stop() {
   PaError error;
@@ -121,24 +137,22 @@ AudioStream::abort() {
     }
   }
 }
-
-
+//*/
 //Static callback function.
 int
-AudioStream::callback(const void* inputBuffer, void* outputBuffer,
-		                  unsigned long frameCount,
-            		      const PaStreamCallbackTimeInfo *timeInfo,
-            		      PaStreamCallbackFlags statusFlags, void* instance)
+AudioStream::callback(const void* input_buffer, void* output_buffer,
+                      unsigned long frame_count,
+                      const PaStreamCallbackTimeInfo *time_info,
+                      PaStreamCallbackFlags status_flags, void* instance)
 {
   AudioStream *object = (AudioStream*)instance;
-  if (object->m_callback_function) {
-    if (!object->m_callback_function((AUDIO_FORMAT*)inputBuffer,
-				                             (AUDIO_FORMAT*)outputBuffer,
-                                     frameCount,
-                                     object->m_callback_data)) {
+//  if (!object->m_paused) {
+    if (!object->stream_callback((AUDIO_FORMAT*)input_buffer,
+                                 (AUDIO_FORMAT*)output_buffer,
+                                 frame_count)) {
       return paComplete;
     }
-  }
+//  }
   return paContinue;
 }
 

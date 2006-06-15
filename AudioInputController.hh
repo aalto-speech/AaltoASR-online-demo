@@ -3,54 +3,50 @@
 #define AUDIOINPUTCONTROLLER_HH_
 
 #include <iostream>
+#include <string.h>
 #include <queue>
-#include "FileOutput.hh"
-#include "AudioInput.hh"
-
-//using namespace std::queue;
+#include "msg.hh"
+#include "AudioInputStream.hh"
+//#include "FileOutput.hh"
 
 class AudioInputController
 {
   
 public:
   
-  AudioInputController();
-  ~AudioInputController();
+  AudioInputController(msg::OutQueue *out_queue);
+  virtual ~AudioInputController();
+  
+  virtual bool initialize();
+  virtual void terminate();
 
-  // Starts a new thread which listens audio in and sends it to file out
-  bool start_listening();
-  void stop_listening();
-  void check_buffer_size()  { AudioInput::check_buffer_size(); };
+  // Starts a new thread which listens audio in and sends it to out queue
+  virtual bool start_listening();
+  virtual void stop_listening();
+  virtual void pause_listening(bool pause);
   
-  void add_file(FILE *file)  { this->m_file_output.add_file(file); };
-  void remove_file(FILE *file)  { this->m_file_output.remove_file(file); };
-  void remove_all_files()  { this->m_file_output.remove_all_files(); };
+  unsigned long get_sample_rate() const;
+  unsigned int get_bytes_per_sample() const;
+  inline const std::string* get_audio_data() const { return &this->m_audio_data; };
   
-  unsigned long get_sample_rate();
-  unsigned int get_bytes_per_sample();
+protected:
+
+  void do_listening();
+  virtual unsigned long read_input() = 0;
+  
+  std::string m_audio_data;
+  unsigned long m_read_cursor;
+  msg::OutQueue *m_out_queue;
+  bool m_stop;
   
 private:
 
   static void* activate_thread(void *data);
-  void do_listening();
 
-  bool m_stop;
-  unsigned long m_block_size;
-  AUDIO_FORMAT *m_buffer;
-  FileOutput m_file_output;
-
-  struct Command {
-    char symbol;
-    void *data;
-    unsigned int size;
-    unsigned int count;
-  };
-
-  std::queue<Command> m_command_queue;
-  
+//  AudioInputStream m_audio_input;
   pthread_t m_thread;
-  
-  
+//  pthread_mutex_t *m_lock;
+  bool m_paused;
 };
 
 #endif /*AUDIOINPUTCONTROLLER_HH_*/

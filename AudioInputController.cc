@@ -1,40 +1,38 @@
 
-//#include <SDL.h>
-//#include <SDL_thread.h>
-#include "AudioInput.hh"
 #include "AudioInputController.hh"
 
-AudioInputController::AudioInputController()
+AudioInputController::AudioInputController(msg::OutQueue *out_queue)
+  : m_out_queue(out_queue)
 {
-  this->m_block_size = 250;
-  this->m_buffer = new AUDIO_FORMAT[this->m_block_size];
-
-  if (!AudioInput::initialize()) {
-    fprintf(stderr, "AIC constructor failed: Couldn't initialize AudioInput.\n");
-    exit(1);
-  }
+  this->m_read_cursor = 0;
+  this->m_paused = false;
+  this->m_audio_data.clear();
 }
 
 AudioInputController::~AudioInputController()
 {
-  if (this->m_buffer) {
-    delete [] this->m_buffer;
+}
+
+bool
+AudioInputController::initialize()
+{
+  if (!AudioStream::initialize()) {
+    fprintf(stderr, "AIC initialization failed: Audio stream initialization failed\n");
+    return false;
   }
-  AudioInput::terminate();
+  return true;
+}
+
+void
+AudioInputController::terminate()
+{
+  AudioStream::terminate();
 }
 
 bool
 AudioInputController::start_listening()
 {
-  if (!AudioInput::start_input())
-    return false;
-
-/*    
-  if (!SDL_CreateThread(activate_thread, this)) {
-    fprintf(stderr, "AIC::listen couldn't create new thread:\n%s\n", SDL_GetError());
-    return false;
-  }
-  //*/
+  this->m_stop = false;
   if (pthread_create(&this->m_thread, NULL, activate_thread, this) != 0) {
     fprintf(stderr, "AIC:start_listening couldn't create new thread.\n");
     return false;
@@ -45,50 +43,88 @@ AudioInputController::start_listening()
 void
 AudioInputController::stop_listening()
 {
-  AudioInput::stop_input();
   this->m_stop = true;
-}
 
+  // Wait for the thread to close. Must be called to avoid memory leaks!
+  pthread_join(this->m_thread, NULL);
+}
+//*
+void
+AudioInputController::pause_listening(bool pause)
+{
+  this->m_paused = pause;
+}
+//*/
 //private static
 void*
 AudioInputController::activate_thread(void *data)
 {
+  fprintf(stderr, "AIC: new thread started.\n");
   ((AudioInputController*)data)->do_listening();
-  // mitähän ihmettä tässä pitäisi palauttaa???
+  fprintf(stderr, "AIC: thread exited normally.\n");
   return NULL;
 }
 
+//*
 //private
 void
 AudioInputController::do_listening()
 {
-  this->m_stop = false;
-  while (!this->m_stop) {
+  msg::Message message(msg::M_AUDIO);
+  const char *audio_data;
+  unsigned long read_size, send_size;
 
-    //Käy läpi komennot
-    while (!this->m_command_queue.empty()) {
-      // Tässä pitäisi sitten käsitellä nämä komennot
-      this->m_command_queue.pop();
+  this->m_read_cursor = 0;
+
+  while (!this->m_stop) {
+//*
+    if (!this->m_paused) {
+      read_size = this->read_input();
+      read_size *= sizeof(AUDIO_FORMAT);
+      
+      // Send audio in max 1000 byte messages.
+      // Following adding is done because read_size is unsigned so we cannot
+      // check read_size < 0
+      read_size += 1000;
+      while (read_size > 1000) {
+        // Calculate the size of data of next message.
+        read_size -= 1000;
+        if (read_size > 1000)
+          send_size = 1000;
+        else
+          send_size = read_size;
+          
+        // Clear previous audio data and make message of the new data.
+        message.buf.erase(msg::header_size);
+        // Write new data.
+        audio_data = this->m_audio_data.data();
+        message.append(&audio_data[this->m_read_cursor],
+                       send_size);
+  
+        this->m_read_cursor += send_size;
+        
+        // Send message to out queue. This may block, and it's ok.
+        this->m_out_queue->queue.push_back(message); // oma lukko
+        this->m_out_queue->flush(); // tämä täältä threadista pois
+      }
     }
-    
-    // Lue AudioInputin puskurista pätkä
-    while (!this->m_stop && !AudioInput::read_block(this->m_buffer, this->m_block_size))
-      ;//SDL_Delay(1); // tähän joku idle systeemi...
-    
-    // Lähetä pätkä file outputiin
-    if (!this->m_stop)
-      this->m_file_output.write_to_files(this->m_buffer, sizeof(AUDIO_FORMAT), this->m_block_size);
+    else {
+      // Give other threads some time if this one is paused.
+      pthread_yield();
+    }
+//*/
   }
 }
+//*/
 
 unsigned long
-AudioInputController::get_sample_rate()
+AudioInputController::get_sample_rate() const
 {
   return SAMPLE_RATE;
 }
 
 unsigned int
-AudioInputController::get_bytes_per_sample()
+AudioInputController::get_bytes_per_sample() const
 {
   return sizeof(AUDIO_FORMAT);
 }

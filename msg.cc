@@ -263,12 +263,12 @@ namespace msg {
       }
 
       for (int i = 0; i < (int)select_in_queues.size(); i++) {
-	InQueue *queue = select_in_queues[i];
-	if (FD_ISSET(queue->get_fd(), &read_set)) {
-	  queue->flush();
-	  if (!queue->empty() || queue->get_eof())
-	    message_pending = true;
-	}
+        InQueue *queue = select_in_queues[i];
+        if (FD_ISSET(queue->get_fd(), &read_set)) {
+          queue->flush();
+          if (!queue->empty() || queue->get_eof())
+            message_pending = true;
+        }
       }
     }
   }

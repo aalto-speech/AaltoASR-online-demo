@@ -74,7 +74,7 @@ Process::Process()
 
 Process::~Process()
 {
-  finish();
+//  finish();
 }
 
 pid_t

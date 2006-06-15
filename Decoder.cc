@@ -8,6 +8,8 @@ Decoder::init(conf::Config &config)
   // Initialize decoder
   //
 
+  verbose = config["verbose"].specified;
+
   t.select_decoder(0);
   t.set_optional_short_silence(1);
   t.set_cross_word_triphones(1);
