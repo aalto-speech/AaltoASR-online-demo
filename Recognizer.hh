@@ -11,7 +11,7 @@ class Recognizer {
 public:
 
   struct {
-    enum { OK, FINISHING, FINISHED } status;
+    enum { OK, RESETTING, FINISHING, FINISHED } status;
 
     pthread_t t;
     int fd_pr;

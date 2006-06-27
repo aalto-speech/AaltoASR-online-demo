@@ -175,6 +175,21 @@ Recognizer::process_stdin_queue()
       }
     }
 
+    else if (message.type() == msg::M_RESET)
+    {
+      if (verbosity > 0)
+        fprintf(stderr, "rec: got reset from gui\n");
+      ac_out_queue.disable();
+      if (::close(ac_thread.fd_pw) < 0) {
+        perror("process_stdin_queue(): close() failed");
+        exit(1);
+      }
+      ac_thread.status = ac_thread.RESETTING;
+      dec_out_queue.queue.clear();
+      dec_out_queue.queue.push_back(msg::Message(msg::M_PROBS_END));
+      dec_out_queue.flush();
+    }
+
     else if (message.type() == msg::M_AUDIO)
     {
       if (verbosity > 0)
@@ -197,8 +212,11 @@ void
 Recognizer::process_ac_in_queue()
 {
   if (ac_in_queue.get_eof()) {
-    dec_out_queue.queue.push_back(msg::Message(msg::M_PROBS_END));
-    dec_out_queue.flush();
+
+    if (ac_thread.status != ac_thread.RESETTING) {
+      dec_out_queue.queue.push_back(msg::Message(msg::M_PROBS_END));
+      dec_out_queue.flush();
+    }
 
     int ret = pthread_join(ac_thread.t, NULL);
     if (ret != 0) {
@@ -222,6 +240,12 @@ Recognizer::process_ac_in_queue()
   }
 
   while (!ac_in_queue.empty()) {
+
+    if (ac_thread.status == ac_thread.RESETTING) {
+      ac_in_queue.queue.pop_front();
+      continue;
+    }
+
     msg::Message &message = ac_in_queue.queue.front();
 
     if (message.type() == msg::M_PROBS) {

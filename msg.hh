@@ -22,7 +22,7 @@ namespace msg {
   enum { 
     M_AUDIO, 		// gui -> rec
     M_AUDIO_END,	// gui -> rec
-    M_RESET, 		// gui -> rec, rec -> dec
+    M_RESET, 		// gui -> rec
 
     M_FEATURES, 	// rec <- ac
     M_PROBS, 		// rec <- ac, rec -> dec
