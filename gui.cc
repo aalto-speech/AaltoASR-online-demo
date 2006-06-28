@@ -13,6 +13,7 @@ main(int argc, char *argv[])
     config("usage: gui [OPTION...]\n")
       ('h', "help", "", "", "display help")
       ('a', "audio=FILE", "arg must", "", "audio file")
+      ('\0', "host=STR", "arg must", "", "remote host")
       ;
 
     config.default_parse(argc, argv);
@@ -23,9 +24,8 @@ main(int argc, char *argv[])
     
     Process proc;
     if (proc.create() == 0) {
-      int ret = execl("./recognizer", "./recognizer",
-//                      "--verbosity", "1",
-                      (char*)NULL);
+      int ret = execlp("ssh", "ssh", config["host"].get_c_str(), 
+                       "/home/thirsima/Work/online-demo/rec.sh", NULL);
       if (ret < 0) {
         perror("exec() failed");
         exit(1);
@@ -45,7 +45,6 @@ main(int argc, char *argv[])
     bool prompt = true;
     while (1) {
       line = "";
-      usleep(100*1000);
       if (prompt) {
         fprintf(stderr, "> ");
         if (!str::read_line(&line, stdin, true))

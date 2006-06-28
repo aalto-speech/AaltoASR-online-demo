@@ -6,7 +6,8 @@ AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
 OPT = -g
 AUX_CXXFLAGS ?= -Wall
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) -I/usr/include/SDL \
-	-I/usr/include/paragui -I/usr/include/freetype2
+	-I/usr/include/paragui -I/usr/include/freetype2 \
+	-I/share/puhe/linux/include
 LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH)
 CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT)
 
@@ -24,7 +25,7 @@ decoder: $(decoder_srcs:%.cc=%.o) $(DECODER_PATH)/libdecoder.a
 
 recognizer_srcs = recognizer.cc conf.cc msg.cc Recognizer.cc Process.cc
 recognizer_libs = -lpthread -lakumod -lfftw3 -lsndfile
-recognizer: $(recognizer_srcs:%.cc=%.o)
+recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libakumod.a
 
 gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
 gui_libs = -lakumod
