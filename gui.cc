@@ -66,6 +66,7 @@ main(int argc, char *argv[])
 	}
 	if (ret == 0) {
           fprintf(stderr, "gui: end of audio\n");
+	  rec_out_queue.queue.push_back(msg::Message(msg::M_AUDIO_END));
           send_rest = false;
 	}
         else {

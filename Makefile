@@ -59,7 +59,7 @@ cleaner: clean
 	rm -f *~ Makefile
 
 dep:
-	$(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(srcs) > dep
+	$(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(sort $(srcs)) > dep
 
 include dep
 
