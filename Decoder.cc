@@ -1,6 +1,11 @@
 #include "Decoder.hh"
 #include "str.hh"
 
+Decoder::Decoder()
+  : last_guaranteed_history(NULL)
+{
+}
+
 void
 Decoder::init(conf::Config &config)
 {
@@ -60,17 +65,42 @@ Decoder::init(conf::Config &config)
 }
 
 void
-Decoder::message_result(bool guaranteed, bool only_new)
+Decoder::message_result(bool send_all)
 {
   TokenPassSearch &tp = t.tp_search();
-  tp.get_path(hist_vec, guaranteed, only_new);
-  
+  tp.get_path(hist_vec, true, send_all ? NULL : last_guaranteed_history);
+  bool all_guaranteed = true;
+  msg::Message message(msg::M_RECOG);
+
   for (int i = hist_vec.size() - 1; i >= 0; i--) {
-    msg::Message message(msg::M_RECOG);
-    message.append(t.word(hist_vec[i]->word_id));
-    out_queue.queue.push_back(message);
-    out_queue.flush();
+    TPLexPrefixTree::WordHistory *hist = hist_vec[i];
+    assert(hist->get_num_references() > 0);
+    if (hist->get_num_references() == 1) {
+      if (all_guaranteed)
+        last_guaranteed_history = hist;
+    }
+    else {
+      if (all_guaranteed)
+        message.append("* ");
+      all_guaranteed = false;
+    }
+
+    message.append(str::fmt(256, "%d ", hist->word_start_frame) +
+                   t.word(hist->word_id) + " ");
   }
+  message.append(str::fmt(256, "%d", frame));
+  out_queue.queue.push_back(message);
+  out_queue.flush();
+}
+
+void
+Decoder::reset()
+{
+  t.reset(0);
+  frame = 0;
+  last_guaranteed_history = NULL;
+  out_queue.queue.push_back(msg::Message(msg::M_READY));
+  out_queue.flush();
 }
 
 void
@@ -81,7 +111,7 @@ Decoder::run()
 
   std::vector<float> log_probs;
   std::vector<std::string> fields;
-  int frame = 0;
+  frame = 0;
   while (1) {
 
     if (in_queue.get_eof())
@@ -112,19 +142,12 @@ Decoder::run()
       bool ret = t.run();
       if (verbose)
         fprintf(stderr, "decoder: frame %d processed\n", frame);
-      
-      {
-        msg::Message message(msg::M_MESSAGE);
-        message.append(str::fmt(256, "frame %d processed", frame));
-        out_queue.queue.push_back(message);
-        out_queue.flush();
-      }
 
       assert(ret);
       frame++;
       assert(t.frame() == frame);
 
-      message_result(true, false);
+      message_result(false);
     }
 
     // "End of acoustics" message
@@ -136,13 +159,8 @@ Decoder::run()
       bool ret = t.run();
       assert(!ret);
 
-      message_result(false, false);
-
-      t.reset(0);
-      frame = 0;
-      
-      out_queue.queue.push_back(msg::Message(msg::M_READY));
-      out_queue.flush();
+      message_result(false);
+      reset();
     }
 
     in_queue.queue.pop_front();
