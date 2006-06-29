@@ -154,12 +154,17 @@ Decoder::run()
     //
 
     else if (message.type() == msg::M_PROBS_END) {
-      log_probs.clear();
-      t.set_one_frame(frame, log_probs);
-      bool ret = t.run();
-      assert(!ret);
 
-      message_result(false);
+      // NOTE: the decoder seems to crash if audio ends right away, so
+      // we avoid running the decoder with empty audio.
+      if (frame > 0) {
+        log_probs.clear();
+        t.set_one_frame(frame, log_probs);
+        bool ret = t.run();
+        assert(!ret);
+
+        message_result(false);
+      }
       reset();
     }
 
