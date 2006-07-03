@@ -25,7 +25,9 @@ public:
 
   unsigned long write_output(const AUDIO_FORMAT *from, unsigned long size);
   // TODO: tämä funktio on itseasiassa turha.. poista!
-  unsigned long write_output(const char *from, unsigned long size);
+//  unsigned long write_output(const char *from, unsigned long size);
+  
+  void reset();
 
 protected:
 

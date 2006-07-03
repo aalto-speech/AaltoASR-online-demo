@@ -17,6 +17,8 @@ public:
 
   /** Finish the process. */
   void finish();
+  
+  inline bool is_created() const { return this->pid > 0; }
 
   pid_t pid; //!< pid of the child
   int read_fd; //!< File descriptor for getting output of the child

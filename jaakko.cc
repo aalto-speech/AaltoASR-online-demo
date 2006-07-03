@@ -1,11 +1,42 @@
 
 #include <stdio.h>
+#include "Application.hh"
+
+int main()
+{
+  Application app;
+  int ret_val = EXIT_SUCCESS;
+
+  if (app.initialize()) {
+    app.run();
+  }
+  else {
+    fprintf(stderr, "Application initialization failed.\n");
+    ret_val = EXIT_FAILURE;
+  }
+  app.clean();
+  fprintf(stderr, "Clean exit.\n");
+  return ret_val;
+}
+
+
+
+
+
+
+
+
+
+/*
+
+
 #include <SDL.h>
 #include <sndfile.h>
 #include "AudioLineInputController.hh"
 #include "AudioFileInputController.hh"
 #include "Process.hh"
 #include "msg.hh"
+#include "OutQueueController.hh"
 
 void start_recognizer(Process *proc);
 bool initialize_sdl();
@@ -15,7 +46,7 @@ void put_little(FILE *file, unsigned int size, unsigned long value);
 FILE *open_wav(const char *file_name, unsigned long sample_rate, unsigned int bytes_per_sample);
 void close_wav(FILE *file);
 
-int main()
+int main2()
 {
   Process *proc = new Process();
 //  AudioInputController *aic;
@@ -30,11 +61,12 @@ int main()
   if (!initialize_sdl()) {
     return EXIT_FAILURE;
   }
-//*  
+// 
   // Starts a new process
   start_recognizer(proc);
   msg::InQueue in_queue(proc->read_fd);
-  msg::OutQueue out_queue(proc->write_fd);
+  OutQueueController out_queue(proc->write_fd);
+//  msg::OutQueue out_queue(proc->write_fd);
 
   // Wait for ready message
   while (in_queue.empty())
@@ -48,15 +80,16 @@ int main()
     assert(false);
   }
   in_queue.queue.pop_front();
-//*/  
+///  
   // Initialize audio input
-  aic = new AudioLineInputController(&out_queue);//, NULL);//&out_queue_mutex);
-//  aic = new AudioFileInputController("chunk.wav", &out_queue);// NULL);//&out_queue_mutex);
+//  aic = new AudioLineInputController(&out_queue);//, NULL);//&out_queue_mutex);
+  aic = new AudioFileInputController("chunk.wav", &out_queue);// NULL);//&out_queue_mutex);
   if (!aic->initialize()) {
     return EXIT_FAILURE;
   }
   
   fprintf(stderr, "Start recording.. Press Enter to stop.\n");
+  out_queue.start_flushing();
   aic->start_listening();
   
   // Main loop.
@@ -70,7 +103,7 @@ int main()
       if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_RIGHT)
         aic->pause_listening(false);
     }
-//*    
+//     
     in_queue.flush();
     while (!in_queue.empty()) {
 //      fprintf(stderr, "Jaakko got message from recognizer.\n");
@@ -87,13 +120,14 @@ int main()
       in_queue.queue.pop_front();
 //      in_queue.flush();
     }
-//*/
+///
   }
   
   aic->stop_listening();
   fprintf(stderr, "Stopped recording.\n");
   
   // Finish recognizer process.
+  out_queue.stop_flushing();
   proc->finish();
   delete proc;
 
@@ -136,7 +170,7 @@ void start_recognizer(Process *proc)//, msg::InQueue *in_queue, msg::OutQueue *o
 //  out_queue->fd = proc->write_fd;
 
 }
-
+//*
 bool
 initialize_sdl()
 {
@@ -150,7 +184,7 @@ initialize_sdl()
   }
   return true;
 }
-
+//*/
 /*
 char* get_wav_audio_data(const char *file_name)
 {

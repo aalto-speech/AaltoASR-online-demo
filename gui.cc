@@ -25,7 +25,7 @@ main(int argc, char *argv[])
     Process proc;
     if (proc.create() == 0) {
       int ret = execlp("ssh", "ssh", config["host"].get_c_str(), 
-                       "/home/thirsima/Work/online-demo/rec.sh", NULL);
+                       "/home/jluttine/workspace/online-demo/rec.sh", NULL);
       if (ret < 0) {
         perror("exec() failed");
         exit(1);

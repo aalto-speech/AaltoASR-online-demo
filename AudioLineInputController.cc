@@ -1,7 +1,7 @@
 
 #include "AudioLineInputController.hh"
 
-AudioLineInputController::AudioLineInputController(msg::OutQueue *out_queue)
+AudioLineInputController::AudioLineInputController(OutQueueController *out_queue)
   : AudioInputController(out_queue), m_audio_input(160000)
 {
 //  this->m_read_cursor = 0;
@@ -21,6 +21,11 @@ AudioLineInputController::initialize()
     fprintf(stderr, "ALIC initialization failed: Couldn't initialize audio input.\n");
     return false;
   }
+  if (!this->m_audio_input.start()) {
+    fprintf(stderr, "ALIC.start_listening failed to start audio input.\n");
+    return false;
+  }
+
   return true;
 }
 
@@ -34,11 +39,6 @@ AudioLineInputController::terminate()
 bool
 AudioLineInputController::start_listening()
 {
-  if (!this->m_audio_input.start()) {
-    fprintf(stderr, "ALIC.start_listening failed to start audio input.\n");
-    return false;
-  }
-
   return AudioInputController::start_listening();
 }
 
@@ -60,5 +60,13 @@ AudioLineInputController::pause_listening(bool pause)
 unsigned long
 AudioLineInputController::read_input()
 {
-  return this->m_audio_input.read_input(this->m_audio_data);
+  unsigned long ret_val = 0;
+  if (this->lock_audio_writing()) {
+    ret_val = this->m_audio_input.read_input(this->m_audio_data);
+    this->unlock_audio_writing();
+  }
+  else {
+    fprintf(stderr, "ALIC:read_input failed locking.\n");
+  }
+  return ret_val;
 }

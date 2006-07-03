@@ -4,6 +4,7 @@
 
 #include <portaudio.h>
 #include <string>
+//#include "ErrorHandler.hh"
 
 typedef short AUDIO_FORMAT;
 #define audio_read_function sf_read_short
@@ -15,28 +16,31 @@ namespace audio
   bool audio::read_wav_data(const char *filename, std::string *to);
 };
 
-class AudioStream
+class AudioStream//  :  public ErrorHandler
 {
   
 public:
 
-  // Call this before opening any streams.
+  // debuggauksessa aikoinaan käytetty. voi poistaa!
+  static unsigned long luku;
+
+  /** Initializes audio device. Call this before opening any streams. 
+   * \return True for successful initialization. */
   static bool initialize();
-  // Call this after you don't need any streams.
+  /** Terminates audio device. Call this after you don't need any streams. */
   static void terminate();
 
   AudioStream();
   virtual ~AudioStream();
 
+  /** Opens the audio stream. */
   virtual bool open() = 0;
   virtual void close();
-  // Starts the audio stream.
+  
+  /** Starts the audio stream, that is, starts a new thread for listening
+   * audio device and calling the callback function. */
   virtual bool start();
-//  void stop();
-//  void abort();
-//  inline void pause(bool paused) { this->m_paused = paused; }
-
-
+  
 protected:
 
   bool open_stream(unsigned int input_channels, unsigned int output_channels);
@@ -50,17 +54,12 @@ protected:
                       const PaStreamCallbackTimeInfo *time_info,
                       PaStreamCallbackFlags status_flags, void* instance);
 
-  static void print_error(const char *message, const PaError *error);
+  static void print_error(const std::string &message, const PaError *error = NULL);
 
 private:
 
-//  bool m_paused;
   PaStream *m_stream;
-//  bool (*m_callback_function)(const AUDIO_FORMAT *inputBuffer,
-//                              AUDIO_FORMAT *outputBuffer,
-//                              unsigned long frameCount, void *userData);
-//  void *m_callback_data;
-
+  
 };
 
 #endif /*AUDIOSTREAM_HH_*/

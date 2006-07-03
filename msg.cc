@@ -129,13 +129,13 @@ namespace msg {
     this->fd = fd; 
   }
 
-  void
+  bool
   OutQueue::prepare_next()
   {
     if (buffer.empty()) {
       assert(bytes_sent == 0);
       if (queue.empty())
-        return;
+        return false;
       msg::Message &message = queue.front();
       buffer = message.buf;
 
@@ -144,7 +144,7 @@ namespace msg {
       else {
         int length = endian::get4<int>(&buffer[0]);
         if (length != (int)buffer.size()) {
-          fprintf(stderr, "OutQueue::flush() buffer size is %d bytes, "
+          fprintf(stderr, "OutQueue::prepare_next() buffer size is %d bytes, "
                   "but header says %d bytes\n", (int)buffer.size(), length);
           exit(1);
         }
@@ -152,6 +152,7 @@ namespace msg {
 
       queue.pop_front();
     }
+    return true;
   }
 
   bool

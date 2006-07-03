@@ -15,7 +15,7 @@ class AudioLineInputController  :  public AudioInputController
   
 public:
   
-  AudioLineInputController(msg::OutQueue *out_queue);
+  AudioLineInputController(OutQueueController *out_queue);
   virtual ~AudioLineInputController();
   
   virtual bool initialize();
@@ -26,19 +26,15 @@ public:
   virtual void stop_listening();
   virtual void pause_listening(bool pause);
   
-//  unsigned long get_sample_rate() const;
-//  unsigned int get_bytes_per_sample() const;
-//  inline const std::string* get_audio_data() const { return &this->m_audio_data; };
-  
+  //  !!!!! virtual void reset();
+
 protected:
 
-//  virtual void do_listening();
   virtual unsigned long read_input();
 
 private:
 
   AudioInputStream m_audio_input;
-//  unsigned long m_read_cursor;
   bool m_paused;
 };
 

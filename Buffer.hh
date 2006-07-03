@@ -19,7 +19,7 @@ public:
   unsigned long read(std::string &buffer, unsigned long frames) const;
   // Writes the parameter data to this->m_buffer.
   unsigned long write(const T *buffer, unsigned long frames);
-  unsigned long write(const char *buffer, unsigned long frames);
+//  unsigned long write(const char *buffer, unsigned long frames);
 
   // Writes all data from buffer to file.
 //  unsigned long flush(FILE *file);
@@ -32,10 +32,9 @@ public:
 //  inline unsigned long get_write_pos() const { return this->m_write_index; }
   void move_read_pos(unsigned long add);
   void move_write_pos(unsigned long add);
-  
-//  bool resize(unsigned long size);
-  //void move_start(); // moves reader to the beginning
-  //void clear();
+
+  /** Moves read and write cursors to beginning. */  
+  void clear();
 
 protected:
   

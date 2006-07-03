@@ -101,6 +101,15 @@ AudioInputStream::read_input(std::string &to)
   return read_size;
 }
 
+void
+AudioInputStream::reset()
+{
+  if (pthread_mutex_lock(&this->m_lock) == 0) {
+    this->m_audio_buffer->clear();
+    pthread_mutex_unlock(&this->m_lock);
+  }
+}
+
 bool
 AudioInputStream::stream_callback(const AUDIO_FORMAT *input_buffer,
                                   AUDIO_FORMAT *output_buffer,

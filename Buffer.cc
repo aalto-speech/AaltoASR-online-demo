@@ -83,27 +83,31 @@ template <class T>
 unsigned long
 Buffer<T>::write(const T *buffer, unsigned long frames)
 {
-  return this->write((char*)buffer, frames);
-  /*
-  assert(frames < this->m_size);
+//  return this->write((char*)buffer, frames);
   unsigned long halfing_size = 0;
 
+  if (frames >= this->m_size) {
+    frames = this->m_size - 1;
+    assert(false);
+  }
+  
   // Check for end of buffer (need for two-part-copying)
   if (frames > this->m_size - this->m_write_index)
     halfing_size = this->m_size - this->m_write_index;
-
+    
   // Write the buffer (in two parts if necessary)
-  if (halfing_size && frames > halfing_size) {
+  if (halfing_size) {
     memcpy(this->m_buffer + this->m_write_index, buffer, sizeof(T) * halfing_size);
     memcpy(this->m_buffer, buffer + halfing_size, sizeof(T) * (frames - halfing_size));
   }
   else {
     memcpy(this->m_buffer + this->m_write_index, buffer, sizeof(T) * frames);
   }
-  //*/
+  return frames;
 }
 
 /** frames mean T-frames, not char-frames! */
+/*
 template <class T>
 unsigned long
 Buffer<T>::write(const char *buffer, unsigned long frames)
@@ -128,6 +132,15 @@ Buffer<T>::write(const char *buffer, unsigned long frames)
     memcpy(this->m_buffer + this->m_write_index, buffer, sizeof(T) * frames);
   }
   return frames;
+}
+//*/
+
+template <class T>
+void
+Buffer<T>::clear()
+{
+  this->m_read_index = 0;
+  this->m_write_index = 0;
 }
 
 template <class T>

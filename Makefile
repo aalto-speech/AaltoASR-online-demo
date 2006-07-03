@@ -7,13 +7,14 @@ OPT = -g
 AUX_CXXFLAGS ?= -Wall
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) -I/usr/include/SDL \
 	-I/usr/include/paragui -I/usr/include/freetype2 \
+	-I/opt/gnome/lib/sigc++-1.2/include -I/opt/gnome/include/sigc++-1.2 \
 	-I/share/puhe/linux/include
 LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH)
 CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT)
 
 ##################################################
 
-progs = recognizer gui decoder jaakko
+progs = jaakko gui ## decoder recognizer
 
 default: $(progs)
 
@@ -33,8 +34,12 @@ gui: $(gui_srcs:%.cc=%.o)
 
 jaakko_srcs = jaakko.cc AudioStream.cc AudioInputStream.cc Buffer.cc \
 	Process.cc msg.cc endian.cc AudioFileInputController.cc \
-	AudioOutputStream.cc AudioInputController.cc AudioLineInputController.cc
-jaakko_libs = -lSDL -lportaudio -lsndfile
+	AudioOutputStream.cc AudioInputController.cc AudioLineInputController.cc \
+	OutQueueController.cc Application.cc Window.cc WindowInit.cc \
+	WindowMain.cc WindowFileRecognizer.cc WidgetSpectrum.cc \
+	WindowReset.cc WindowRecognizer.cc WindowMicrophoneRecognizer.cc \
+	WidgetScrollArea.cc
+jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype
 jaakko: $(jaakko_srcs:%.cc=%.o)
 
 srcs = $(decoder_srcs) $(recognizer_srcs) $(gui_srcs) $(jaakko_srcs)

@@ -62,9 +62,29 @@ AudioOutputStream::pause_output(bool pause)
 unsigned long
 AudioOutputStream::write_output(const AUDIO_FORMAT *from, unsigned long size)
 {
-  return this->write_output((char*)from, size);
+//  return this->write_output((char*)from, size);
+//  assert(this->m_audio_stream && this->m_audio_buffer);
+  unsigned long write_size;
+  
+  // Lock read/write-cursors before determining read size.
+  pthread_mutex_lock(&this->m_lock);
+  write_size = this->m_audio_buffer->get_write_size();
+  pthread_mutex_unlock(&this->m_lock);
+  
+  if (write_size > size)
+    write_size = size;
+  
+  // We can write without locking, because reading is done to different part
+  write_size = this->m_audio_buffer->write(from, write_size);
+  
+  // Move read cursor
+  pthread_mutex_lock(&this->m_lock);
+  this->m_audio_buffer->move_write_pos(write_size);
+  pthread_mutex_unlock(&this->m_lock);
+  
+  return write_size;
 }
-
+/*
 unsigned long
 AudioOutputStream::write_output(const char *from, unsigned long size)
 {
@@ -88,6 +108,17 @@ AudioOutputStream::write_output(const char *from, unsigned long size)
   pthread_mutex_unlock(&this->m_lock);
   
   return write_size;
+}
+//*/
+//*
+void
+AudioOutputStream::reset()
+{
+  if (pthread_mutex_lock(&this->m_lock) == 0) {
+    this->m_audio_buffer->clear();
+    this->m_frames_played = 0;
+    pthread_mutex_unlock(&this->m_lock);
+  }
 }
 
 bool

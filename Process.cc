@@ -147,6 +147,7 @@ Process::finish()
 
   kill(pid, SIGTERM);
   wait(&finish_result);
+  //this->pid = 0; // Esim. tällainen rivi, jotta prosessi todella "siivoutuu"
 
   if (close(read_fd) < 0) {
     perror("close(read_fd) failed");

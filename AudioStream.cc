@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "AudioStream.hh"
   
+  
 //*  
 bool
 audio::read_wav_data(const char *filename, std::string *to)
@@ -21,7 +22,6 @@ audio::read_wav_data(const char *filename, std::string *to)
     
   data = new char[sizeof(AUDIO_FORMAT)*info.frames+1];
   read_size = audio_read_function(file, (AUDIO_FORMAT*)data, info.frames);
-  fprintf(stderr, "read: %d, frames: %d\n", read_size, info.frames);
   //datassa saattaa piillä lopetusmerkki, joten ei käytetä =-operaattoria.
   to->append(data, read_size * sizeof(AUDIO_FORMAT));
 
@@ -69,9 +69,9 @@ bool
 AudioStream::open_stream(unsigned int input_channels, unsigned int output_channels)
 {
   // Open audio stream.
-  PaError error = Pa_OpenDefaultStream(&this->m_stream, //passes back stream pointer
-                                       input_channels, // input channels
-                                       output_channels, // output channels
+  PaError error = Pa_OpenDefaultStream(&this->m_stream,
+                                       input_channels,
+                                       output_channels,
                                        PA_AUDIO_FORMAT,
                                        SAMPLE_RATE,
                                        paFramesPerBufferUnspecified,
@@ -102,42 +102,19 @@ bool
 AudioStream::start()
 {
   if (!this->m_stream) {
-    print_error("Couldn't start audio stream:\nStream not opened.\n", NULL);
+    print_error("Couldn't start audio stream:\nStream not opened.\n");
     return false;
   }
 
   //Start stream
-//  this->m_paused = false;
   PaError error = Pa_StartStream(this->m_stream);
   if ( error != paNoError ) {
-    print_error("Couldn't start audio stream:\n", &error);
+    this->print_error("Couldn't start audio stream:\n", &error);
     return false;
   }
   return true;
 }
-/*
-void
-AudioStream::stop() {
-  PaError error;
-  if (this->m_stream) {
-    error = Pa_StopStream(this->m_stream);
-    if (error != paNoError) {
-      print_error("Couldn't stop audio stream.\n", &error);
-    }
-  }
-}
 
-void
-AudioStream::abort() {
-  PaError error;
-  if (this->m_stream) {
-    error = Pa_AbortStream(this->m_stream);
-    if (error != paNoError) {
-      print_error("Couldn't stop audio stream.\n", &error);
-    }
-  }
-}
-//*/
 //Static callback function.
 int
 AudioStream::callback(const void* input_buffer, void* output_buffer,
@@ -146,22 +123,24 @@ AudioStream::callback(const void* input_buffer, void* output_buffer,
                       PaStreamCallbackFlags status_flags, void* instance)
 {
   AudioStream *object = (AudioStream*)instance;
-//  if (!object->m_paused) {
-    if (!object->stream_callback((AUDIO_FORMAT*)input_buffer,
-                                 (AUDIO_FORMAT*)output_buffer,
-                                 frame_count)) {
-      return paComplete;
-    }
-//  }
+  if (!object->stream_callback((AUDIO_FORMAT*)input_buffer,
+                               (AUDIO_FORMAT*)output_buffer,
+                               frame_count)) {
+    return paComplete;
+  }
+  luku = frame_count;
+//  pthread_yield();
   return paContinue;
 }
 
 //static
 void
-AudioStream::print_error(const char *message, const PaError *error)
+AudioStream::print_error(const std::string &message, const PaError *error)
 {
-  if (message) 
-    fprintf(stderr, message);
-  if (error)
-    fprintf(stderr, "PortAudio error: %s\n", Pa_GetErrorText(*error));
+  fprintf(stderr, message.data());
+  if (error) {
+    fprintf(stderr, Pa_GetErrorText(*error));
+  }
+//  ErrorHandler::print_error(message);
+//  ErrorHandler::print_error(Pa_GetErrorText(error));
 }

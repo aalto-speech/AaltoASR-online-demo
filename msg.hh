@@ -56,6 +56,17 @@ namespace msg {
     {
       buf.at(4) = type;
     }
+    
+    void set_urgent(bool urgent)
+    {
+      buf.at(5) = urgent;
+    }
+    
+    void clear_data()
+    {
+      buf.erase(msg::header_size);
+      endian::put4((int)buf.size(), &buf[0]);
+    }
 
     void append(const std::string &str)
     {
@@ -80,19 +91,19 @@ namespace msg {
       buf.append(str);
     }
 
-    int type()
+    int type() const
     {
       assert((int)buf.length() >= header_size);
       return buf[4];
     }
 
-    bool urgent() 
+    bool urgent() const
     { 
       assert((int)buf.length() >= header_size);
       return buf[5] != 0;
     }
 
-    int data_length()
+    int data_length() const
     {
       assert((int)buf.length() >= header_size);
       return buf.size() - header_size;
@@ -149,7 +160,7 @@ namespace msg {
     void disable();
 
     /** Move first message from the queue to internal send buffer */
-    void prepare_next();
+    bool prepare_next();
 
     /** Send data from the internal send buffer. \note If the file
      * descriptor is in non-blocking state, some of the data may be unsent. 

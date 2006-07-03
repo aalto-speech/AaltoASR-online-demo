@@ -9,6 +9,9 @@
 // NOTICE THIS DEFINITION!
 typedef Buffer<AUDIO_FORMAT> AudioBuffer;
 
+/**
+ * Buffered audio input stream.
+ */
 class AudioInputStream  :  public AudioStream
 {
 
@@ -19,11 +22,12 @@ public:
 
   virtual bool open();
   virtual void close();
-//  virtual bool start();
   void pause_input(bool pause);
 
   unsigned long read_input(AUDIO_FORMAT *to);
   unsigned long read_input(std::string &to);
+  
+  void reset();
 
 private:
 

@@ -169,9 +169,9 @@ Recognizer::process_stdin_queue()
         ac_out_queue.disable();
         if (::close(ac_thread.fd_pw) < 0) {
           perror("process_stdin_queue(): close() failed");
-	  exit(1);
-	}
-	ac_thread.status = ac_thread.FINISHING;
+          exit(1);
+        }
+        ac_thread.status = ac_thread.FINISHING;
       }
     }
 
