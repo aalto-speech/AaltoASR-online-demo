@@ -201,7 +201,6 @@ Recognizer::process_stdin_queue()
 
       if (verbosity > 0)
         fprintf(stderr, "rec: sending audio to ac\n");
-      ac_out_queue.flush();
     }
 
     stdin_queue.queue.pop_front();
