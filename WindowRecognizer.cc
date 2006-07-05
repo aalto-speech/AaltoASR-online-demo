@@ -1,6 +1,8 @@
 
+#include "Recognition.hh"
 #include "WindowRecognizer.hh"
 #include "WindowReset.hh"
+#include "str.hh"
 
 WindowRecognizer::WindowRecognizer(msg::InQueue *in_queue, OutQueueController *out_queue)
 //    m_spectrum(this, PG_Rect(100, 300, 500, 200))
@@ -10,7 +12,7 @@ WindowRecognizer::WindowRecognizer(msg::InQueue *in_queue, OutQueueController *o
   this->m_reset_button = NULL;
 //  this->m_open_button = NULL;
   
-  this->m_spectrum = NULL;
+//  this->m_spectrum = NULL;
   this->m_recognition_area = NULL;
   
 //  this->m_audio_input = NULL;
@@ -19,6 +21,8 @@ WindowRecognizer::WindowRecognizer(msg::InQueue *in_queue, OutQueueController *o
   
   this->m_thread_created = false;
   this->m_reset = false;
+  this->m_paused = false;
+//  this->m_status = LISTENING;
 }
 
 WindowRecognizer::~WindowRecognizer()
@@ -34,7 +38,7 @@ WindowRecognizer::~WindowRecognizer()
   delete this->m_reset_button;
 //  delete this->m_open_button;
   
-  delete this->m_spectrum;
+//  delete this->m_spectrum;
   delete this->m_recognition_area;
 //  delete this->m_audio_input;
 }
@@ -60,6 +64,46 @@ WindowRecognizer::initialize()
 //  this->m_open_button->sigClick.connect(slot(*this, &WindowFileRecognizer::button_pressed));
 }
 
+void
+WindowRecognizer::parse_recognition(const std::string &message)
+{
+  std::vector<std::string> split_vector;
+  std::string recognition_string;
+  std::string hypothesis_string;
+//  std::string data;
+//  std::string time_string;
+  
+  str::split(&message, "*", true, &split_vector, 2);
+  if (split_vector.size() >= 1)
+    recognition_string = split_vector.at(0);
+  if (split_vector.size() >= 2)
+    hypothesis_string = split_vector.at(1);
+  
+  split_vector.clear();
+  str::split(&recognition_string, " ", true, &split_vector);
+
+  if (split_vector.size() >= 2) {
+    Morpheme morph;
+    long next_time;
+    bool ok = true;
+    unsigned int ind = 0;
+    morph.time = str::str2long(&split_vector.at(2*ind), &ok);
+    morph.data = split_vector.at(2*ind+1);
+    for (ind = 1; ind < split_vector.size() / 2; ind++) {
+      next_time = str::str2long(&split_vector.at(2*ind), &ok);
+      morph.duration = next_time - morph.time;
+      this->m_recognition.add_morpheme(morph);
+      fprintf(stderr, "PARSED: Morpheme: %s, Time: %d, Duration: %d\n", morph.data.data(), morph.time, morph.duration);
+      morph.time = next_time;
+      morph.data = split_vector.at(2*ind+1);
+    }
+    next_time = str::str2long(&hypothesis_string, &ok);
+    morph.duration = next_time - morph.time;
+    this->m_recognition.add_morpheme(morph);
+    fprintf(stderr, "PARSED: Morpheme: %s, Time: %d, Duration: %d\n", morph.data.data(), morph.time, morph.duration);
+  }
+}
+
 void*
 WindowRecognizer::in_queue_listener(void *user_data)
 {
@@ -67,15 +111,14 @@ WindowRecognizer::in_queue_listener(void *user_data)
   msg::Message message;
   WindowRecognizer *object = (WindowRecognizer*)user_data;
   while (!object->m_end_thread) {
+    // Read input from recognizer.
     if (object->m_in_queue) {
       object->m_in_queue->flush();
       if (!object->m_in_queue->empty()) {
         message = object->m_in_queue->queue.front();
         if (message.type() == msg::M_RECOG) {
           fprintf(stderr, "RECOGNITION: %s\n", message.data_ptr());
-        }
-        if (message.type() == msg::M_FRAME) {
-          fprintf(stderr, "FRAME: %s\n", message.data_ptr());
+          object->parse_recognition(message.buf.substr(msg::header_size));
         }
         if (message.type() == msg::M_MESSAGE) {
           fprintf(stderr, "MESSAGE: %s\n", message.data_ptr());
@@ -86,6 +129,7 @@ WindowRecognizer::in_queue_listener(void *user_data)
         pthread_yield();
       }
     }
+    // Flush output to recognizer.
     if (object->m_out_queue) {
       object->m_out_queue->flush();
     }
@@ -97,33 +141,21 @@ WindowRecognizer::in_queue_listener(void *user_data)
 void
 WindowRecognizer::do_opening()
 {
-  /*
-  this->m_audio_input = new AudioFileInputController(this->m_out_queue);
-  if (!this->get_audio_input()->initialize()) {
-    this->error("Audio input controller initialization failed.", ERROR_CLOSE);
-    return;
-  }
-  //*/
-  /*
-  if (!this->m_audio_input->load_file("chunk.wav")) {
-    this->error("Couldn't load audio file.", ERROR_CLOSE);
-    return;
-  }
-  //*/
   this->pause_audio_input(true);
 
-//  this->m_recognition_area = new WidgetScrollArea(this->m_window,
-//                                                  PG_Rect(0, 400, this->m_window->Width(), 200));
-  this->m_spectrum = new WidgetSpectrum(this->m_window, PG_Rect(0, 300, this->m_window->Width(), 100),
-                                        this->get_audio_input(), 250);
+  this->m_recognition_area = new WidgetRecognitionArea(this->m_window,
+                                                       PG_Rect(0, 400, this->m_window->Width(), 200),
+                                                       this->get_audio_input(),
+                                                       &this->m_recognition,
+                                                       250);
   this->m_window->AddChild(this->m_recognition_area);
-  this->m_window->AddChild(this->m_spectrum);
 
-  this->get_audio_input()->start_listening();
+//  this->get_audio_input()->start_listening();
   
   this->start_inqueue_thread();
 
   this->m_reset = true;
+  this->set_status(LISTENING);
 }
 
 void
@@ -131,34 +163,16 @@ WindowRecognizer::do_running()
 {
   msg::Message message;
   
-  this->get_audio_input()->listen();
-  this->m_spectrum->update();
+  if (!this->m_paused) {
+    this->get_audio_input()->listen();
+  }
+
+  this->m_recognition_area->update();
 
   if (this->m_reset) {
-    this->do_reseting();
+    this->reset_audio_input();
     this->m_reset = false;
   }
-//  pthread_yield();
-/*
-//  msg::Message message;
-//  WindowRecognizer *object = (WindowRecognizer*)user_data;
-    if (this->m_in_queue) {
-      this->m_in_queue->flush();
-      if (!this->m_in_queue->empty()) {
-        message = this->m_in_queue->queue.front();
-        if (message.type() == msg::M_RECOG) {
-          fprintf(stderr, "RECOGNITION: %s\n", message.data_ptr());
-        }
-        if (message.type() == msg::M_FRAME) {
-          fprintf(stderr, "FRAME: %s\n", message.data_ptr());
-        }
-        if (message.type() == msg::M_MESSAGE) {
-          fprintf(stderr, "MESSAGE: %s\n", message.data_ptr());
-        }
-        this->m_in_queue->queue.pop_front();
-      }
-  }
-  //*/
 }
 
 void
@@ -167,20 +181,9 @@ WindowRecognizer::do_closing()
   msg::Message message;
 
   this->stop_inqueue_thread();
- /*
-  if (this->m_thread_created) {
-    this->m_end_thread = true;
-    pthread_join(this->m_thread, NULL);
-    this->m_thread_created = false;
-  }
-  //*/
-  this->get_audio_input()->stop_listening();
 
-  if (this->m_out_queue) {  
-    // tähän out_queue.remove_all tms...
-    message.set_type(msg::M_AUDIO_END);
-    message.clear_data();
-    this->m_out_queue->send_message(message);
+  if (this->m_out_queue) {
+    this->m_out_queue->reset();
   }
   
   if (this->m_recognition_area) {
@@ -188,69 +191,25 @@ WindowRecognizer::do_closing()
     delete this->m_recognition_area;
     this->m_recognition_area = NULL;
   }
-  if (this->m_spectrum) {
-    this->m_window->RemoveChild(this->m_spectrum);
-    delete this->m_spectrum;
-    this->m_spectrum = NULL;
-  }
-  /*
-  if (this->m_audio_input) {
-    this->m_audio_input->terminate();
-    delete this->m_audio_input;
-    this->m_audio_input = NULL;
-  }
-  //*/
 }
 
 void
-WindowRecognizer::do_reseting()
+WindowRecognizer::reset_audio_input()
 {
   WindowReset window(this->m_in_queue, this->m_out_queue);
 
   this->pause_audio_input(true);
   this->stop_inqueue_thread();
-  this->get_audio_input()->stop_listening();
+//  this->get_audio_input()->stop_listening();
   this->get_audio_input()->reset();
-  this->m_spectrum->reset();
+  this->m_recognition.reset();
+  this->m_recognition_area->reset();
 
   window.initialize();
   this->run_child_window(&window);
   
-  this->get_audio_input()->start_listening();
+//  this->get_audio_input()->start_listening();
   this->start_inqueue_thread();
-  /*
-  msg::Message message;
-  bool ready = false;
-  PG_Window reset_window(this, PG_Rect(10,10,100,100), "Reseting..", PG_Window::MODAL);
-  this->m_window->AddChild(&reset_window);
-  
-  this->pause_audio_input(true);
-  this->stop_inqueue_thread();
-  this->m_audio_input->stop_listening();
-
-  this->m_audio_input->reset();
-  if (this->m_out_queue) {
-    this->m_out_queue->reset();
-  }
-  fprintf(stderr, "Waiting recognizer to reset...\n");
-  reset_window.Show(false);
-  if (this->m_in_queue) {
-    while (!ready) {
-      this->m_in_queue->flush();
-      if (!this->m_in_queue->empty()) {
-        message = this->m_in_queue->queue.front();
-        ready = message.type() == msg::M_READY;
-        this->m_in_queue->queue.pop_front();
-      }
-    }
-  }
-  reset_window.Hide(false);
-  this->m_window->RemoveChild(&reset_window);
-  fprintf(stderr, "Recognizer ready.\n");
-
-  this->m_audio_input->start_listening();
-  this->start_inqueue_thread();
-  //*/
 }
 
 void
@@ -263,14 +222,39 @@ WindowRecognizer::pause_audio_input(bool pause)
     }
     else {
       this->m_play_button->SetText("Pause");
-    }        
+    }
+    
+    if (this->m_recognition_area)
+      this->m_recognition_area->set_autoscroll(!pause);
+      
+    this->m_paused = pause;
 //  }
 }
 
 void
-WindowRecognizer::reset_audio_input()
+WindowRecognizer::end_of_audio()
 {
-  this->m_reset = true;
+  this->set_status(END_OF_AUDIO);
+  if (this->m_recognition_area)
+    this->m_recognition_area->set_autoscroll(false);
+  if (this->m_out_queue)
+    this->m_out_queue->send_message(msg::Message(msg::M_AUDIO_END));
+}
+
+void
+WindowRecognizer::set_status(Status status)
+{
+  this->m_status = status;
+  switch (status) {
+  case END_OF_AUDIO:
+    this->m_play_button->Hide(false);
+    break;
+  case LISTENING:
+    this->m_play_button->Show(false);
+    break;
+  default:
+    fprintf(stderr, "WindowRecognizer::set_status unknown status.\n");
+  }
 }
 
 bool
@@ -310,31 +294,11 @@ WindowRecognizer::button_pressed(PG_Button *button)
     this->close(1);
   }
   else if (button == this->m_reset_button) {
-    this->reset_audio_input();
+    this->m_reset = true;
   }
   else if (button == this->m_play_button) {
-    this->pause_audio_input(!this->get_audio_input()->is_paused());
+    this->pause_audio_input(!this->m_paused);
   }
-  /*
-  else if (button == this->m_open_button) {
-    this->pause_audio_input(true);
-    this->m_audio_input->load_file("chunk.wav");
-  }
-  //*/
 
   return true;
 }
-/*
-bool
-WindowRecognizer::eventKeyDown(const SDL_KeyboardEvent *key)
-{
-  fprintf(stderr, "WindowFileRecognizer::eventKeyDown\n");
-  this->close();
-
-  // Exit on Esc.
-  if (key->keysym.sym == SDLK_ESCAPE)
-    this->quit();
-
-  return true;
-}
-//*/

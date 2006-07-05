@@ -38,7 +38,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc AudioInputStream.cc Buffer.cc \
 	OutQueueController.cc Application.cc Window.cc WindowInit.cc \
 	WindowMain.cc WindowFileRecognizer.cc WidgetSpectrum.cc \
 	WindowReset.cc WindowRecognizer.cc WindowMicrophoneRecognizer.cc \
-	WidgetScrollArea.cc
+	WidgetRecognitionArea.cc str.cc WidgetRecognitionTexts.cc Recognition.cc
 jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype
 jaakko: $(jaakko_srcs:%.cc=%.o)
 

@@ -22,7 +22,7 @@ class AudioStream//  :  public ErrorHandler
 public:
 
   // debuggauksessa aikoinaan käytetty. voi poistaa!
-  static unsigned long luku;
+//  static unsigned long luku;
 
   /** Initializes audio device. Call this before opening any streams. 
    * \return True for successful initialization. */

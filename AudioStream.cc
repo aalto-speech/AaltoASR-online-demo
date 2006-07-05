@@ -128,7 +128,7 @@ AudioStream::callback(const void* input_buffer, void* output_buffer,
                                frame_count)) {
     return paComplete;
   }
-  luku = frame_count;
+//  luku = frame_count;
 //  pthread_yield();
   return paContinue;
 }

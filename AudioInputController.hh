@@ -22,16 +22,17 @@ public:
   virtual void terminate();
 
   // Starts a new thread which listens audio in and sends it to out queue
-  virtual bool start_listening();
+//  virtual bool start_listening();
   void listen();
-  virtual void stop_listening();
-  virtual void pause_listening(bool pause);
-  virtual inline bool is_paused() const { return this->m_paused; }
+//  virtual void stop_listening();
+  virtual void pause_listening(bool pause) = 0;
+//  virtual inline bool is_paused() const { return this->m_paused; }
   
   unsigned long get_sample_rate() const;
   unsigned int get_bytes_per_sample() const;
   /** Locks (recursively) m_audio_data for writing or writing-prevention. */
-  inline bool lock_audio_writing() { return pthread_mutex_lock(&this->m_lock) == 0; }
+  // These lock functions are for no use anymore if listening thread is not recreated.
+//  inline bool lock_audio_writing() { return pthread_mutex_lock(&this->m_lock) == 0; }
   /** No need for locking. You should stop listening before reseting! */
   virtual void reset();
   /** m_audio_data can only be modified inside the class. */
@@ -39,8 +40,8 @@ public:
   inline unsigned long get_audio_data_size() const { return this->m_audio_data.size() / sizeof(AUDIO_FORMAT); }
 //  inline const std::string* get_audio_data() const { return &this->m_audio_data; }
   /** Tells the size of data sent to the recognizer. */
-  inline unsigned long get_read_cursor() const { return this->m_read_cursor; }
-  inline void unlock_audio_writing() { pthread_mutex_unlock(&this->m_lock); }
+  inline unsigned long get_read_cursor() const { return this->m_recognizer_cursor; }
+//  inline void unlock_audio_writing() { pthread_mutex_unlock(&this->m_lock); }
   
 protected:
 
@@ -49,20 +50,20 @@ protected:
   
   std::string m_audio_data;
   OutQueueController *m_out_queue;
-  bool m_stop;
+//  bool m_stop;
   
 private:
 
-  static void* activate_thread(void *data);
+//  static void* activate_thread(void *data);
 
 //  pthread_t m_thread;
-  pthread_mutex_t m_lock;
-  pthread_mutexattr_t m_lock_attr;
-  bool m_thread_created;
+//  pthread_mutex_t m_lock;
+//  pthread_mutexattr_t m_lock_attr;
+//  bool m_thread_created;
 
   /** read cursor in bytes! */
-  unsigned long m_read_cursor;
-  bool m_paused;
+  unsigned long m_recognizer_cursor;
+//  bool m_paused;
 };
 
 #endif /*AUDIOINPUTCONTROLLER_HH_*/

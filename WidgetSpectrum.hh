@@ -2,6 +2,7 @@
 #ifndef WIDGETSPECTRUM_HH_
 #define WIDGETSPECTRUM_HH_
 
+//#include <pthread.h>
 #include <pgwidget.h>
 #include "AudioInputController.hh"
 
@@ -16,6 +17,8 @@ public:
   
   void reset();
   void update();
+  
+  inline void set_position(unsigned long pos) { this->m_left_index = pos; }
 //  inline void force_redraw() { this->m_force_redraw = true; }
   // TODO: EI FORCE, VAAN PITÄÄ MUISTISSA JOTAIN OIKEAA LAITAA JOHON ASTI
   // PIIRTÄNYT! EI OLETA ETTÄ KOKO NÄKYMÄN ALA ON PÄIVITETTY JOS ON KERRAN
@@ -34,6 +37,7 @@ protected:
   unsigned long m_left_index, m_last_left_index;
   unsigned int m_width, m_height;
   unsigned long m_last_audio_data_size;
+//  pthread_mutex_t m_leftindex_lock;
 //  bool m_force_redraw;
 
 };

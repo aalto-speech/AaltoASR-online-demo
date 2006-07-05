@@ -45,6 +45,8 @@ WindowInit::do_running()
     message = this->m_in_queue->queue.front();
     if (message.type() == msg::M_READY) {
       fprintf(stderr, "Recognizer ready.\n");
+      this->m_text->SetText("Recognizer ready.");
+      this->close(1);
     }
     else {
       fprintf(stderr, "Invalid ready message from recognizer.\n");
@@ -53,8 +55,6 @@ WindowInit::do_running()
       assert(false);
     }
     this->m_in_queue->queue.pop_front();
-    this->m_text->SetText("Recognizer ready.");
-    this->close(1);
   }
 }
 

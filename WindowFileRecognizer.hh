@@ -25,6 +25,10 @@ protected:
   
   virtual AudioInputController* get_audio_input() { return this->m_audio_input; }
   
+//  virtual void pause_audio_input(bool pause);
+  
+  void open_audio_file();
+  
 //  void do_reseting();
 
   bool button_pressed(PG_Button *button);
@@ -53,6 +57,7 @@ private:
 //  PG_Button *m_play_button;
 //  PG_Button *m_reset_button;
   PG_Button *m_open_button;
+  bool m_open_file;
 //  WidgetSpectrum *m_spectrum;
 };
 

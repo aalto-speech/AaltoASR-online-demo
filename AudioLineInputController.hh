@@ -22,11 +22,11 @@ public:
   virtual void terminate();
 
   // Starts a new thread which listens audio in and sends it to out queue
-  virtual bool start_listening();
-  virtual void stop_listening();
+//  virtual bool start_listening();
+//  virtual void stop_listening();
   virtual void pause_listening(bool pause);
   
-  //  !!!!! virtual void reset();
+  virtual void reset();
 
 protected:
 

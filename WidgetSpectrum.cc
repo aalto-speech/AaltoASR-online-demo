@@ -12,12 +12,14 @@ WidgetSpectrum::WidgetSpectrum(PG_Widget *parent, const PG_Rect &rect,
   : PG_Widget(parent, rect, true), m_pixels_per_second(pixels_per_second),
     m_frames_per_pixel(SAMPLE_RATE / pixels_per_second)
 {
+//  pthread_mutex_init(&this->m_leftindex_lock, NULL);
   this->m_audio_input = audio_input;
   this->initialize();
 }
 
 WidgetSpectrum::~WidgetSpectrum()
 {
+//  pthread_mutex_destroy(&this->m_leftindex_lock);
 //  delete this->m_audio_buffer;
 //  SDL_FreeSurface(this->m_surface_backbuffer);
   this->terminate();
@@ -61,6 +63,7 @@ WidgetSpectrum::terminate()
   this->m_surface_backbuffer = NULL;
 }
 
+
 void
 WidgetSpectrum::reset()
 {
@@ -71,18 +74,22 @@ WidgetSpectrum::reset()
 void
 WidgetSpectrum::update()
 {
-//*
+/*
   // Update left border.
   unsigned long read_cursor_px = this->m_audio_input->get_read_cursor() / this->m_frames_per_pixel;
   if (read_cursor_px > this->m_width)
     this->m_left_index = read_cursor_px - this->m_width;
   else
     this->m_left_index = 0;
+//*/
+
+  // This is for thread-safety.
+  unsigned long left_index = this->m_left_index;
 
   // Calculate the colliding view area.
   unsigned int oldview_from = 0, oldview_to = 0;
   unsigned int oldview_size;
-  int difference = this->m_left_index - this->m_last_left_index;
+  int difference = left_index - this->m_last_left_index;
 //  if (difference == 0)
 //    return;
   if (difference > 0) {
@@ -109,12 +116,12 @@ WidgetSpectrum::update()
   }
 
   // Get the new audio data to draw.
-  unsigned long newaudio_from = this->m_left_index * this->m_frames_per_pixel;
+  unsigned long newaudio_from = left_index * this->m_frames_per_pixel;
   long newaudio_size;
-  if (this->m_left_index >= this->m_last_left_index)
+  if (left_index >= this->m_last_left_index)
     newaudio_from += oldview_size * this->m_frames_per_pixel;
   newaudio_size = this->m_frames_per_pixel * (this->m_width - oldview_size);
-  this->m_audio_input->lock_audio_writing();
+//  this->m_audio_input->lock_audio_writing();
   unsigned long audio_data_size = this->m_audio_input->get_audio_data_size();
   if (newaudio_from + newaudio_size >= audio_data_size)
     newaudio_size = audio_data_size - newaudio_from;
@@ -127,10 +134,10 @@ WidgetSpectrum::update()
   else {
     newaudio_size = 0;
   }
-  this->m_audio_input->unlock_audio_writing();
+//  this->m_audio_input->unlock_audio_writing();
   
   //blit old surface
-  if (oldview_size && this->m_last_left_index != this->m_left_index) {
+  if (oldview_size && this->m_last_left_index != left_index) {
     SDL_Rect src_rect;
     SDL_Rect dest_rect;
     SDL_Surface *surface = this->GetWidgetSurface();
@@ -153,13 +160,13 @@ WidgetSpectrum::update()
   Uint32 color = SDL_MapRGB(surface->format, 255, 255, 0);
   unsigned int bfrom = 0;
   unsigned int bsize = newaudio_size / this->m_frames_per_pixel;
-  if (this->m_left_index >= this->m_last_left_index)
+  if (left_index >= this->m_last_left_index)
     bfrom = oldview_size;
   SDL_LockSurface(surface);
   char *data = (char*)surface->pixels;
   int bpp = surface->format->BytesPerPixel;
   rect.x = bfrom;
-  rect.w = bsize;
+  rect.w = left_index >= this->m_last_left_index ? (this->m_width - bfrom) : bsize;
   rect.y = 0;
   rect.h = surface->h;
   SDL_FillRect(surface, &rect, SDL_MapRGB(surface->format, 10, 100, 20));
@@ -202,7 +209,7 @@ WidgetSpectrum::update()
 
   //update
   this->m_last_audio_data_size = audio_data_size;
-  this->m_last_left_index = this->m_left_index;
+  this->m_last_left_index = left_index;
   SDL_BlitSurface(surface, NULL, this->m_surface_backbuffer, NULL);
   this->Update(true);
 
