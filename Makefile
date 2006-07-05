@@ -3,7 +3,7 @@ arch = $(shell uname -m)
 DECODER_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/decoder
 AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
 
-OPT = -g
+OPT = -g -O2
 AUX_CXXFLAGS ?= -Wall
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) -I/usr/include/SDL \
 	-I/usr/include/paragui -I/usr/include/freetype2 \
@@ -29,7 +29,7 @@ recognizer_libs = -lpthread -lakumod -lfftw3 -lsndfile
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libakumod.a
 
 gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
-gui_libs = -lakumod
+gui_libs = -lpthread -lakumod
 gui: $(gui_srcs:%.cc=%.o)
 
 jaakko_srcs = jaakko.cc AudioStream.cc AudioInputStream.cc Buffer.cc \

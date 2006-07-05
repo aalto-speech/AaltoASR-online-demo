@@ -24,15 +24,14 @@ namespace msg {
     M_AUDIO_END,	// gui -> rec
     M_RESET, 		// gui -> rec
 
-    M_FEATURES, 	// rec <- ac
     M_PROBS, 		// rec <- ac, rec -> dec
     M_PROBS_END, 	// rec -> dec
+
     M_READY, 		// gui <- rec, rec <- dec, rec <- ac
-    M_FRAME, 		// gui <- rec, rec <- dec
     M_RECOG, 		// gui <- rec, rec <- dec
+    M_RECOG_END,	// gui <- rec, rec <- dec
 
     M_MESSAGE,		// gui <- rec <- dec
-    M_ERROR, 		// gui <- rec
   };
 
   const int header_size = 6;

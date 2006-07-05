@@ -99,8 +99,6 @@ Decoder::reset()
   t.reset(0);
   frame = 0;
   last_guaranteed_history = NULL;
-  out_queue.queue.push_back(msg::Message(msg::M_READY));
-  out_queue.flush();
 }
 
 void
@@ -155,6 +153,9 @@ Decoder::run()
 
     else if (message.type() == msg::M_PROBS_END) {
 
+      if (verbose)
+        fprintf(stderr, "decoder: got PROBS_END\n");
+
       // NOTE: the decoder seems to crash if audio ends right away, so
       // we avoid running the decoder with empty audio.
       if (frame > 0) {
@@ -165,7 +166,16 @@ Decoder::run()
 
         message_result(false);
       }
+      out_queue.queue.push_back(msg::Message(msg::M_RECOG_END));
+      out_queue.flush();
+    }
+
+    else if (message.type() == msg::M_RESET) {
+      if (verbose)
+        fprintf(stderr, "decoder: got RESET\n");
       reset();
+      out_queue.queue.push_back(msg::Message(msg::M_READY));
+      out_queue.flush();
     }
 
     in_queue.queue.pop_front();
