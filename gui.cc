@@ -38,6 +38,10 @@ input_thread(void *data)
         std::string str(message.data_ptr(), message.data_length());
         fprintf(stderr, "gui: decoder says %s\n", str.c_str());
       }
+      else {
+        fprintf(stderr, "gui: got UNKNOWN message of type %d\n",
+                message.type());
+      }
 
       rec_in_queue.queue.pop_front();
     }
@@ -103,6 +107,7 @@ main(int argc, char *argv[])
     config("usage: gui [OPTION...]\n")
       ('h', "help", "", "", "display help")
       ('a', "audio=FILE", "arg must", "", "audio file")
+      ('r', "rec=FILE", "arg must", "", "rec script file")
       ('\0', "host=STR", "arg must", "", "remote host")
       ;
 
@@ -115,7 +120,7 @@ main(int argc, char *argv[])
     Process proc;
     if (proc.create() == 0) {
       int ret = execlp("ssh", "ssh", config["host"].get_c_str(), 
-                       "/home/jluttine/workspace/online-demo/rec.sh", NULL);
+                       config["rec"].get_c_str(), NULL);
       if (ret < 0) {
         perror("exec() failed");
         exit(1);
