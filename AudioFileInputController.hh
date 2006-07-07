@@ -21,7 +21,7 @@ public:
   /** No need for locking. */
   bool load_file(const char *filename);
   
-  void reset();
+  virtual void reset_cursors();
 
   // Starts a new thread which listens audio in and sends it to out queue
 //  virtual bool start_listening();

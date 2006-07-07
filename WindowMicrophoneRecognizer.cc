@@ -38,9 +38,9 @@ WindowMicrophoneRecognizer::do_running()
 }
 
 void
-WindowMicrophoneRecognizer::do_closing()
+WindowMicrophoneRecognizer::do_closing(int return_value)
 {
-  WindowRecognizer::do_closing();
+  WindowRecognizer::do_closing(return_value);
   if (this->m_audio_input) {
     this->m_audio_input->terminate();
     delete this->m_audio_input;

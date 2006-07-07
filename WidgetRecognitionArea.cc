@@ -86,13 +86,11 @@ WidgetRecognitionArea::update()
       scroll_pos = read_cursor_px - this->Width();
       
     this->m_scroll_bar->SetPosition(scroll_pos);
-    this->m_text_area->ScrollTo(scroll_pos, 0);
+    this->m_text_area->set_scroll_position(scroll_pos);
     this->m_spectrum->set_position(scroll_pos);
-  //  else
-  //    this->m_left_index = 0;
   }
   else {
-    // This will do redrawing (Update and Redraw won't work properly..)
+    // This will do redrawing for scroll bar. (Update and Redraw won't work properly..)
     this->m_scroll_bar->SetPosition(this->m_scroll_bar->GetPosition());
   }
 
@@ -122,7 +120,7 @@ WidgetRecognitionArea::handle_scroll(PG_ScrollBar *scroll_bar, long page)
     this->m_spectrum->set_position(page);
     // TODO: THREAD SAFETY!!!!!!!!!
     this->m_spectrum->update();
-    this->m_text_area->ScrollTo(page, 0);
+    this->m_text_area->set_scroll_position(page);
     pthread_mutex_unlock(&this->m_scroll_lock);
   }
   return true;

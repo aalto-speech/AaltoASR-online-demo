@@ -1,6 +1,6 @@
 
-#ifndef WIDGETSCROLLAREA_HH_
-#define WIDGETSCROLLAREA_HH_
+#ifndef WIDGETRECOGNITIONAREA_HH_
+#define WIDGETRECOGNITIONAREA_HH_
 
 #include <pgscrollbar.h>
 #include "Recognition.hh"
@@ -47,4 +47,4 @@ private:
   
 };
 
-#endif /*WIDGETSCROLLAREA_HH_*/
+#endif /*WIDGETRECOGNITIONAREA_HH_*/

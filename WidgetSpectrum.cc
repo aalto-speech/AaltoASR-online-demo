@@ -74,15 +74,6 @@ WidgetSpectrum::reset()
 void
 WidgetSpectrum::update()
 {
-/*
-  // Update left border.
-  unsigned long read_cursor_px = this->m_audio_input->get_read_cursor() / this->m_frames_per_pixel;
-  if (read_cursor_px > this->m_width)
-    this->m_left_index = read_cursor_px - this->m_width;
-  else
-    this->m_left_index = 0;
-//*/
-
   // This is for thread-safety.
   unsigned long left_index = this->m_left_index;
 
@@ -90,8 +81,7 @@ WidgetSpectrum::update()
   unsigned int oldview_from = 0, oldview_to = 0;
   unsigned int oldview_size;
   int difference = left_index - this->m_last_left_index;
-//  if (difference == 0)
-//    return;
+
   if (difference > 0) {
     oldview_from = this->m_width < abs(difference) ? this->m_width : abs(difference);
   }
@@ -99,12 +89,6 @@ WidgetSpectrum::update()
     oldview_to = this->m_width < abs(difference) ? this->m_width : abs(difference);
   }
   oldview_size = this->m_width - (oldview_from + oldview_to);
-/*  
-  if (this->m_force_redraw) {
-    oldview_size = 0;
-    this->m_force_redraw = false;
-  }
-//*/
 
   // Do colliding view corrections if colliding area hasn't been entirely drawn.
   unsigned long audio_data_pixels = this->m_last_audio_data_size / this->m_frames_per_pixel;
@@ -121,7 +105,6 @@ WidgetSpectrum::update()
   if (left_index >= this->m_last_left_index)
     newaudio_from += oldview_size * this->m_frames_per_pixel;
   newaudio_size = this->m_frames_per_pixel * (this->m_width - oldview_size);
-//  this->m_audio_input->lock_audio_writing();
   unsigned long audio_data_size = this->m_audio_input->get_audio_data_size();
   if (newaudio_from + newaudio_size >= audio_data_size)
     newaudio_size = audio_data_size - newaudio_from;
@@ -129,12 +112,10 @@ WidgetSpectrum::update()
     memcpy(this->m_audio_buffer,
            this->m_audio_input->get_audio_data() + newaudio_from,
            newaudio_size * sizeof(AUDIO_FORMAT));
-//  fprintf(stderr, "Here.\n"); fflush(stderr);
   }
   else {
     newaudio_size = 0;
   }
-//  this->m_audio_input->unlock_audio_writing();
   
   //blit old surface
   if (oldview_size && this->m_last_left_index != left_index) {

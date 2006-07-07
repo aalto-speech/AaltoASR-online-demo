@@ -10,19 +10,15 @@ WindowRecognizer::WindowRecognizer(msg::InQueue *in_queue, OutQueueController *o
   this->m_back_button = NULL;
   this->m_play_button = NULL;
   this->m_reset_button = NULL;
-//  this->m_open_button = NULL;
-  
-//  this->m_spectrum = NULL;
+
   this->m_recognition_area = NULL;
   
-//  this->m_audio_input = NULL;
   this->m_in_queue = in_queue;
   this->m_out_queue = out_queue;
   
   this->m_thread_created = false;
   this->m_reset = false;
   this->m_paused = false;
-//  this->m_status = LISTENING;
 }
 
 WindowRecognizer::~WindowRecognizer()
@@ -170,13 +166,15 @@ WindowRecognizer::do_running()
   this->m_recognition_area->update();
 
   if (this->m_reset) {
-    this->reset_audio_input();
+    this->pause_window_functionality(true);
+    this->reset(true);
     this->m_reset = false;
+    this->pause_window_functionality(false);
   }
 }
 
 void
-WindowRecognizer::do_closing()
+WindowRecognizer::do_closing(int return_value)
 {
   msg::Message message;
 
@@ -192,12 +190,10 @@ WindowRecognizer::do_closing()
     this->m_recognition_area = NULL;
   }
 }
-
-void
-WindowRecognizer::reset_audio_input()
+/*
+int
+WindowRecognizer::run_child_window(Window *child_window)
 {
-  WindowReset window(this->m_in_queue, this->m_out_queue);
-
   this->pause_audio_input(true);
   this->stop_inqueue_thread();
 //  this->get_audio_input()->stop_listening();
@@ -210,6 +206,46 @@ WindowRecognizer::reset_audio_input()
   
 //  this->get_audio_input()->start_listening();
   this->start_inqueue_thread();
+}
+//*/
+
+void
+WindowRecognizer::pause_window_functionality(bool pause)
+{
+  if (pause) {
+    this->pause_audio_input(true);
+    this->stop_inqueue_thread();
+  }
+  else {
+    this->start_inqueue_thread();
+  }
+}
+/*
+void
+WindowRecognizer::reset_window_components()
+{
+  this->m_recognition_area->reset();
+  this->m_recognition_area->update();
+}
+//*/
+void
+WindowRecognizer::reset(bool reset_audio)
+{
+  WindowReset window(this->m_in_queue, this->m_out_queue);
+
+//  this->pause_window_functionality(true);
+
+  if (reset_audio)
+    this->get_audio_input()->reset();
+    
+  this->m_recognition.reset();
+  this->m_recognition_area->reset();
+  this->m_recognition_area->update();
+
+  window.initialize();
+  this->run_child_window(&window);
+  
+//  this->pause_window_functionality(false);
 }
 
 void

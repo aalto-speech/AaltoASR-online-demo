@@ -17,13 +17,15 @@ audio::read_wav_data(const char *filename, std::string *to)
   info.format = 0;
   file = sf_open(filename, SFM_READ, &info);
   
-  if (file == NULL)
+  if (file == NULL) {
+    fprintf(stderr, "read_wav_data failed to open file \"%s\"\n", filename);
     return false;
+  }
     
   data = new char[sizeof(AUDIO_FORMAT)*info.frames+1];
   read_size = audio_read_function(file, (AUDIO_FORMAT*)data, info.frames);
-  //datassa saattaa piillä lopetusmerkki, joten ei käytetä =-operaattoria.
-  to->append(data, read_size * sizeof(AUDIO_FORMAT));
+  // Because there might be '\0' character in the data, let's not use =-operator.
+  to->assign(data, read_size * sizeof(AUDIO_FORMAT));
 
   delete [] data;
   sf_close(file);

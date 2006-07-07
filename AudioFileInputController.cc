@@ -21,12 +21,16 @@ AudioFileInputController::load_file(const char *filename)
 //  if (this->lock_audio_writing()) {
 //    this->reset();
     if (audio::read_wav_data(filename, &this->m_audio_data)) {
+      this->reset_cursors();
+//      this->m_audio_output.reset();
+//      AudioInputController::reset();
+//      this->m_output_cursor = 0;
 //      this->check_eof();
       ret_val = true;
     }
     else {
       fprintf(stderr, "AudioFileInputController::load_file failed.\n");
-      this->reset();
+//      this->reset();
       ret_val = false;
     }
 /*    this->unlock_audio_writing();
@@ -35,19 +39,11 @@ AudioFileInputController::load_file(const char *filename)
 }
 
 void
-AudioFileInputController::reset()
+AudioFileInputController::reset_cursors()
 {
-//  if (this->lock_audio_writing()) {
-    this->m_audio_output.reset();
-    AudioInputController::reset();
-    this->m_output_cursor = 0;
-//    this->check_eof();
-//    this->m_eof = true;
-/*    this->unlock_audio_writing();
-  }
-  else {
-    fprintf(stderr, "AudioFileInputController::reset failed locking.\n");
-  }//*/
+  this->m_audio_output.reset();
+  this->m_output_cursor = 0;
+  AudioInputController::reset_cursors();
 }
 
 bool
@@ -57,11 +53,11 @@ AudioFileInputController::initialize()
     return false;
     
   if (!this->m_audio_output.open()) {
-    fprintf(stderr, "WFIC initialization failed: Couldn't initialize audio output.\n");
+    fprintf(stderr, "AFIC initialization failed: Couldn't initialize audio output.\n");
     return false;
   }
   if (!this->m_audio_output.start()) {
-    fprintf(stderr, "WFIC.start_listening failed to start audio output.\n");
+    fprintf(stderr, "AFIC initialization failed to start audio output.\n");
     return false;
   }
 

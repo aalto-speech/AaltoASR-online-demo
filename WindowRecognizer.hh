@@ -25,7 +25,9 @@ protected:
 
   virtual void do_opening();
   virtual void do_running();
-  virtual void do_closing();
+  virtual void do_closing(int return_value);
+  
+//  virtual int run_child_window(Window *child_window);
   
   virtual AudioInputController* get_audio_input() = 0;
   
@@ -37,8 +39,11 @@ protected:
   inline Status get_status() const { return this->m_status; }
   
   void pause_audio_input(bool pause);
-  void reset_audio_input();
+  void reset(bool reset_audio);
   void end_of_audio();
+  
+  void pause_window_functionality(bool pause);
+//  void reset_window_components();
   
   Recognition m_recognition;
   

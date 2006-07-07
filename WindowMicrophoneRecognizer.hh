@@ -20,7 +20,7 @@ protected:
 
   virtual void do_opening();
   virtual void do_running();
-  virtual void do_closing();
+  virtual void do_closing(int return_value);
   
   virtual AudioInputController* get_audio_input() { return this->m_audio_input; }
   
@@ -31,6 +31,8 @@ protected:
 private:
 
   AudioLineInputController *m_audio_input;
+  
+  PG_Button *m_save_button;
 };
 
 

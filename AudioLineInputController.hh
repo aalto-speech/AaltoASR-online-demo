@@ -26,7 +26,7 @@ public:
 //  virtual void stop_listening();
   virtual void pause_listening(bool pause);
   
-  virtual void reset();
+  virtual void reset_cursors();
 
 protected:
 

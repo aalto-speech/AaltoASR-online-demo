@@ -6,9 +6,10 @@
 #include <pglabel.h>
 #include <pgbutton.h>
 #include <vector>
+#include "WidgetScrollArea.hh"
 #include "Recognition.hh"
 
-class WidgetRecognitionTexts  :  public PG_ScrollArea
+class WidgetRecognitionTexts  :  public WidgetScrollArea
 {
   
 public:

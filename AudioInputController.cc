@@ -170,14 +170,14 @@ AudioInputController::do_listening()
 void
 AudioInputController::reset()
 {
-//  if (this->lock_audio_writing()) {
-    this->m_audio_data.clear();
-    this->m_recognizer_cursor = 0;
-/*    this->unlock_audio_writing();
-  }
-  else {
-    fprintf(stderr, "AudioInputController::reset failed locking.\n");
-  }//*/
+  this->m_audio_data.clear();
+  this->reset_cursors();
+}
+
+void
+AudioInputController::reset_cursors()
+{
+  this->m_recognizer_cursor = 0;
 }
 
 unsigned long

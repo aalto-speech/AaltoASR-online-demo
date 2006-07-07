@@ -34,7 +34,8 @@ public:
   // These lock functions are for no use anymore if listening thread is not recreated.
 //  inline bool lock_audio_writing() { return pthread_mutex_lock(&this->m_lock) == 0; }
   /** No need for locking. You should stop listening before reseting! */
-  virtual void reset();
+  void reset();
+  virtual void reset_cursors();
   /** m_audio_data can only be modified inside the class. */
   inline const AUDIO_FORMAT* get_audio_data() const { return (AUDIO_FORMAT*)this->m_audio_data.data(); }
   inline unsigned long get_audio_data_size() const { return this->m_audio_data.size() / sizeof(AUDIO_FORMAT); }

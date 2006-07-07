@@ -1,6 +1,7 @@
 
 #include "WindowFileRecognizer.hh"
 #include "WindowReset.hh"
+#include "WindowOpenFile.hh"
 
 WindowFileRecognizer::WindowFileRecognizer(msg::InQueue *in_queue, OutQueueController *out_queue)
   : WindowRecognizer(in_queue, out_queue)
@@ -55,45 +56,44 @@ WindowFileRecognizer::do_running()
   }
     
   if (this->m_open_file) {
+    this->pause_window_functionality(true);
     this->open_audio_file();
     this->m_open_file = false;
+    this->pause_window_functionality(false);
   }
   
 }
 
 void
-WindowFileRecognizer::do_closing()
+WindowFileRecognizer::do_closing(int return_value)
 {
-  WindowRecognizer::do_closing();
+  WindowRecognizer::do_closing(return_value);
   if (this->m_audio_input) {
     this->m_audio_input->terminate();
     delete this->m_audio_input;
     this->m_audio_input = NULL;
   }
 }
-/*
-void
-WindowFileRecognizer::pause_audio_input(bool pause)
-{
-  if (this->m_audio_input)
-    WindowRecognizer::pause_audio_input(this->m_audio_input->is_eof() || pause);
-  else
-    WindowRecognizer::pause_audio_input(pause);
-}
-//*/
+
 void
 WindowFileRecognizer::open_audio_file()
 {
-  this->pause_audio_input(true);
-  this->reset_audio_input();
-  this->m_audio_input->load_file("chunk.wav");
-  if (!this->m_audio_input->is_eof()) {
-    this->set_status(LISTENING);
+  WindowOpenFile window(10, 10, this->m_audio_input);
+
+//  this->pause_window_functionality(true);
+
+  window.initialize();
+  if (this->run_child_window(&window) == 1) {
+    // Run reset window without reseting audio.
+    this->reset(false);
+
+    if (!this->m_audio_input->is_eof()) {
+      this->set_status(LISTENING);
+      fprintf(stderr, "WFR audio file opening successful.\n");
+    }
   }
-/*  else {
-    // Just in case
-    this->set_status(END_OF_AUDIO);
-  }//*/
+  
+//  this->pause_window_functionality(false);
 }
 
 //*/

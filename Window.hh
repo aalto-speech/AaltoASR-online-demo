@@ -17,7 +17,7 @@ public:
 
   /** Call this once before using the window. */
   virtual void initialize();
-  /** Call this before run. */  
+  /** Call this every time before run. */  
   void open();
   /** This function returns when the window closes. 
    * \return Zero means quitting, other values are window specific. */
@@ -40,12 +40,12 @@ protected:
 
   virtual void do_opening() { };
   virtual void do_running() = 0;
-  virtual void do_closing() { };
+  virtual void do_closing(int return_value) { };
   
   inline virtual PG_Widget* create_window() { return new PG_Widget(NULL, PG_Rect(0, 0, PG_Application::GetScreenWidth(), PG_Application::GetScreenHeight()), false); }
   /** Opens and runs child window. Disables this window for that time.
    * Function returns after child window's run function returns. */
-  bool run_child_window(Window *child_window);
+  virtual int run_child_window(Window *child_window);
   
   PG_Widget *m_window;
   

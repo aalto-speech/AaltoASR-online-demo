@@ -19,7 +19,7 @@ protected:
   
   virtual void do_opening();
   virtual void do_running();
-  virtual void do_closing();
+  virtual void do_closing(int return_value);
   virtual bool eventKeyDown(const SDL_KeyboardEvent *key);
 
 private:

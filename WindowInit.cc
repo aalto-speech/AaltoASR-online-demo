@@ -59,7 +59,7 @@ WindowInit::do_running()
 }
 
 void
-WindowInit::do_closing()
+WindowInit::do_closing(int return_value)
 {
   // Nothing to do...
 }

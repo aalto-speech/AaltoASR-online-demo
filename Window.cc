@@ -57,7 +57,7 @@ Window::run()
     this->m_window->Hide(false);
   }
   
-  this->do_closing();
+  this->do_closing(this->m_return_value);
 
   return this->m_return_value;
 }
@@ -100,10 +100,10 @@ Window::quit()
 //  this->m_application.Quit();
 }
 
-bool
+int
 Window::run_child_window(Window *child_window)
 {
-  bool ret_val;
+  int ret_val;
 
   pthread_mutex_lock(&this->m_childwindow_lock);
   this->m_child_window = child_window;  

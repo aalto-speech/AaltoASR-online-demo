@@ -58,16 +58,10 @@ AudioLineInputController::pause_listening(bool pause)
 }
 
 void
-AudioLineInputController::reset()
+AudioLineInputController::reset_cursors()
 {
-//  if (this->lock_audio_writing()) {
-    this->m_audio_input.reset();
-    AudioInputController::reset();
-/*    this->unlock_audio_writing();
-  }
-  else {
-    fprintf(stderr, "AudioLineInputController::reset failed locking.\n");
-  }//*/
+  this->m_audio_input.reset();
+  AudioInputController::reset_cursors();
 }
 
 unsigned long
