@@ -6,7 +6,8 @@
 #include "Recognition.hh"
 #include "AudioInputController.hh"
 #include "WidgetRecognitionTexts.hh"
-#include "WidgetSpectrum.hh"
+#include "WidgetWave.hh"
+#include "WidgetSpectrogram.hh"
 
 class WidgetRecognitionArea  :  public PG_Widget
 {
@@ -36,7 +37,10 @@ protected:
   
 private:
 
-  WidgetSpectrum *m_spectrum;
+  void set_scroll_position(unsigned long page);
+
+  WidgetWave *m_wave;
+  WidgetSpectrogram *m_spectrogram;
   WidgetRecognitionTexts *m_text_area;
   PG_ScrollBar *m_scroll_bar;
   AudioInputController *m_audio_input;

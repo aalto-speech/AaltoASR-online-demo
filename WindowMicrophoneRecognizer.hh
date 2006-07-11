@@ -15,7 +15,7 @@ public:
   virtual ~WindowMicrophoneRecognizer();
   
   virtual void initialize();
-  
+
 protected:
 
   virtual void do_opening();
@@ -23,6 +23,12 @@ protected:
   virtual void do_closing(int return_value);
   
   virtual AudioInputController* get_audio_input() { return this->m_audio_input; }
+  
+  bool handle_button(PG_Button *button);
+  
+  virtual void reset(bool reset_audio);
+  
+  void save_audio_file();
   
 //  void do_reseting();
 
@@ -33,6 +39,7 @@ private:
   AudioLineInputController *m_audio_input;
   
   PG_Button *m_save_button;
+  bool m_save_pressed;
 };
 
 

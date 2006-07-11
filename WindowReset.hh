@@ -18,7 +18,7 @@ class WindowReset  :  public Window
 
 public:
 
-  WindowReset(msg::InQueue *in_queue, OutQueueController *out_queue);
+  WindowReset(const PG_Widget *parent, msg::InQueue *in_queue, OutQueueController *out_queue);
   virtual ~WindowReset();
 
 //  virtual void initialize();
@@ -38,6 +38,7 @@ private:
 //  PG_Button *m_ok_button;
   
 //  AudioInputController *m_audio_input;
+  const PG_Widget *m_parent;
   msg::InQueue *m_in_queue;
   OutQueueController *m_out_queue;
   

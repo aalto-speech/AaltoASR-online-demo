@@ -53,6 +53,7 @@ void
 WidgetRecognitionTexts::reset()
 {
   this->terminate();
+//  this->set_scroll_position(0);
   this->initialize();
 }
 

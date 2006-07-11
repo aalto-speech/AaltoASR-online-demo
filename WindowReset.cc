@@ -1,10 +1,12 @@
 
 #include "WindowReset.hh"
 
-WindowReset::WindowReset(msg::InQueue *in_queue, OutQueueController *out_queue)
+WindowReset::WindowReset(const PG_Widget *parent, msg::InQueue *in_queue, OutQueueController *out_queue)
+  : m_parent(parent)
 {
 //  this->m_ok_button = NULL;
 //  this->m_audio_input = audio_input;
+  this->m_parent = parent;
   this->m_in_queue = in_queue;
   this->m_out_queue = out_queue;
 }
@@ -27,7 +29,20 @@ WindowReset::initialize()
 PG_Widget*
 WindowReset::create_window()
 {
-  return new PG_Window(NULL, PG_Rect(10,10,200,100), "otsikko", PG_Window::MODAL);
+  if (this->m_parent == NULL) {
+    fprintf(stderr, "WindowReset::create_window got NULL-parent.\n");
+    assert(false);
+  }
+
+  Uint16 width = 200;
+  Uint16 height = 100;
+  Sint16 x = this->m_parent->my_xpos + (this->m_parent->my_width - width) / 2;
+  Sint16 y = this->m_parent->my_ypos + (this->m_parent->my_height - height) / 2;
+
+  return new PG_Window(NULL,
+                       PG_Rect(x, y, width, height),
+                       "Reseting..",
+                       PG_Window::MODAL);
 }
 
 void

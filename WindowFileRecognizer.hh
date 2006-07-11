@@ -2,10 +2,9 @@
 #ifndef WINDOWFILERECOGNIZER_HH_
 #define WINDOWFILERECOGNIZER_HH_
 
+#include <pgbutton.h>
 #include "AudioFileInputController.hh"
 #include "WindowRecognizer.hh"
-#include "WidgetSpectrum.hh"
-#include <pgbutton.h>
 
 class WindowFileRecognizer  :  public WindowRecognizer
 {
@@ -25,40 +24,17 @@ protected:
   
   virtual AudioInputController* get_audio_input() { return this->m_audio_input; }
   
-//  virtual void pause_audio_input(bool pause);
+  virtual void reset(bool reset_audio);
   
   void open_audio_file();
   
-//  void do_reseting();
-
-  bool button_pressed(PG_Button *button);
-  
-//  void pause_audio_input(bool pause);
-//  void reset_audio_input();
-  
-//  bool start_inqueue_thread();  
-
-//  void stop_inqueue_thread();
-  
-//  static void* in_queue_listener(void *user_data);
+  bool handle_button(PG_Button *button);
   
 private:
 
   AudioFileInputController *m_audio_input;
-//  msg::InQueue *m_in_queue;
-//  OutQueueController *m_out_queue;
-//  pthread_t m_thread;
-//  bool m_end_thread;
-//  bool m_thread_created;
-  
-//  bool m_reset;
-  
-//  PG_Button *m_back_button;
-//  PG_Button *m_play_button;
-//  PG_Button *m_reset_button;
   PG_Button *m_open_button;
   bool m_open_file;
-//  WidgetSpectrum *m_spectrum;
 };
 
 #endif /*WINDOWFILERECOGNIZER_HH_*/

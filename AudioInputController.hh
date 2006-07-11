@@ -42,6 +42,7 @@ public:
 //  inline const std::string* get_audio_data() const { return &this->m_audio_data; }
   /** Tells the size of data sent to the recognizer. */
   inline unsigned long get_read_cursor() const { return this->m_recognizer_cursor; }
+  virtual unsigned long get_audio_cursor() const = 0;
 //  inline void unlock_audio_writing() { pthread_mutex_unlock(&this->m_lock); }
   
 protected:

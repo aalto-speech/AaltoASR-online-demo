@@ -75,43 +75,64 @@ AudioInputController::listen()
   static const char *audio_data;
   static unsigned long read_size, send_size;
 
-//  if (!this->m_stop) {
-    read_size = this->read_input();
-    
-    if (this->m_out_queue) {
-      // Send audio in max 500 frame messages.
-      // Following adding is done because read_size is unsigned so we cannot
-      // check read_size < 0
-      read_size += 500;
-      while (read_size > 500) {
-        // Calculate the size of data of next message.
-        read_size -= 500;
-        if (read_size > 500)
-          send_size = 500;
-        else
-          send_size = read_size;
-          
-        // Clear previous audio data and make message of the new data.
-        message.clear_data();
-        // Write new data.
-//        if (this->lock_audio_writing()) {
-          audio_data = this->m_audio_data.data();
-          message.append(&audio_data[this->m_recognizer_cursor*sizeof(AUDIO_FORMAT)],
-                         send_size * sizeof(AUDIO_FORMAT));
+//  read_size = this->read_input();
+  this->read_input();
+  read_size = this->get_audio_cursor() - this->get_read_cursor();
 
-//          this->unlock_audio_writing();
-  
-          this->m_recognizer_cursor += send_size;
-  
-          // Send message to out queue.
-          this->m_out_queue->send_message(message);
-//        }
-      }
-    }
-    else {
+  if (this->m_out_queue) {
+    // Send audio in max 6000 frame messages.
+    if (read_size > 6000)
+      read_size = 6000;
+        
+    if (read_size) {
+      // Clear previous audio data and make message of the new data.
+      message.clear_data();
+      // Write new data.
+      audio_data = this->m_audio_data.data();
+      message.append(&audio_data[this->m_recognizer_cursor*sizeof(AUDIO_FORMAT)],
+                     read_size * sizeof(AUDIO_FORMAT));
+
       this->m_recognizer_cursor += read_size;
+
+      // Send message to out queue.
+      this->m_out_queue->send_message(message);
     }
-//  }
+  }
+  else {
+    this->m_recognizer_cursor += read_size;
+  }
+
+/*  
+  if (this->m_out_queue) {
+    // Send audio in max 500 frame messages.
+    // Following adding is done because read_size is unsigned so we cannot
+    // check read_size < 0
+    read_size += 500;
+    while (read_size > 500) {
+      // Calculate the size of data of next message.
+      read_size -= 500;
+      if (read_size > 500)
+        send_size = 500;
+      else
+        send_size = read_size;
+        
+      // Clear previous audio data and make message of the new data.
+      message.clear_data();
+      // Write new data.
+      audio_data = this->m_audio_data.data();
+      message.append(&audio_data[this->m_recognizer_cursor*sizeof(AUDIO_FORMAT)],
+                     send_size * sizeof(AUDIO_FORMAT));
+
+      this->m_recognizer_cursor += send_size;
+
+      // Send message to out queue.
+      this->m_out_queue->send_message(message);
+    }
+  }
+  else {
+    this->m_recognizer_cursor += read_size;
+  }
+  //*/
 }
 
 /*

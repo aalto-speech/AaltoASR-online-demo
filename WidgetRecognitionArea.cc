@@ -14,16 +14,31 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
   this->m_autoscroll = false;
   pthread_mutex_init(&this->m_scroll_lock, NULL);
 
+  // Create wave view.
+  this->m_wave = new WidgetWave(this,
+                                PG_Rect(0, 0, this->Width(), (int)(0.3 * this->Height())),
+                                audio_input,
+                                pixels_per_second);
+  this->m_wave->initialize();
+  this->AddChild(this->m_wave);
+  
   // Create spectrogram.
-  this->m_spectrum = new WidgetSpectrum(this,
-                                        PG_Rect(0, 0, this->Width(), (int)(0.3 * this->Height())),
-                                        audio_input,
-                                        pixels_per_second);
-  this->AddChild(this->m_spectrum);
+  this->m_spectrogram = new WidgetSpectrogram(this,
+                                              PG_Rect(0,
+                                                      (int)(0.3 * this->Height()),
+                                                      this->Width(),
+                                                      (int)(0.3 * this->Height())),
+                                              audio_input,
+                                              pixels_per_second);
+  this->m_spectrogram->initialize();
+  this->AddChild(this->m_spectrogram);
   
   // Create recognition text area.
   this->m_text_area = new WidgetRecognitionTexts(this,
-                                                 PG_Rect(0, (int)(0.4 * this->Height()), this->Width(), (int)(0.4 * this->Height())),
+                                                 PG_Rect(0,
+                                                         (int)(0.65 * this->Height()),
+                                                         this->Width(),
+                                                         (int)(0.3 * this->Height())),
                                                  recognition,
                                                  pixels_per_second);
   this->AddChild(this->m_text_area);
@@ -44,32 +59,35 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
 WidgetRecognitionArea::~WidgetRecognitionArea()
 {
   pthread_mutex_destroy(&this->m_scroll_lock);
-  delete this->m_spectrum;
+  this->m_wave->terminate();
+  this->m_spectrogram->terminate();
+  delete this->m_wave;
+  delete this->m_spectrogram;
   delete this->m_text_area;
   delete this->m_scroll_bar;
 }
-/*
-void
-WidgetRecognitionArea::initialize()
-{
-  
-}
-
-void
-WidgetRecognitionArea::terminate()
-{
-  delete this->m_spectrum;
-  delete this->m_scroll_bar;
-}
-//*/
 
 void
 WidgetRecognitionArea::reset()
 {
-  this->m_spectrum->reset();
+  pthread_mutex_lock(&this->m_scroll_lock);
+  // Scroll to zero.
+  this->set_scroll_position(0);
+  // Reset components.
+  this->m_wave->reset();
+  this->m_spectrogram->reset();
   this->m_text_area->reset();
   this->set_scroll_range();
-  this->m_scroll_bar->SetPosition(0);
+  pthread_mutex_unlock(&this->m_scroll_lock);
+}
+
+void
+WidgetRecognitionArea::set_scroll_position(unsigned long page)
+{
+  this->m_scroll_bar->SetPosition(page);
+  this->m_text_area->set_scroll_position(page);
+  this->m_wave->set_position(page);
+  this->m_spectrogram->set_position(page);
 }
 
 void
@@ -80,21 +98,21 @@ WidgetRecognitionArea::update()
 
   // Update left border.
   if (this->m_autoscroll) {
-    unsigned long read_cursor_px = this->m_audio_input->get_read_cursor() / this->m_frames_per_pixel;
+    unsigned long read_cursor_px = this->m_audio_input->get_audio_cursor() / this->m_frames_per_pixel;
     unsigned long scroll_pos = 0;
     if (read_cursor_px > this->Width())
       scroll_pos = read_cursor_px - this->Width();
-      
-    this->m_scroll_bar->SetPosition(scroll_pos);
-    this->m_text_area->set_scroll_position(scroll_pos);
-    this->m_spectrum->set_position(scroll_pos);
+
+    this->set_scroll_position(scroll_pos);      
   }
   else {
     // This will do redrawing for scroll bar. (Update and Redraw won't work properly..)
     this->m_scroll_bar->SetPosition(this->m_scroll_bar->GetPosition());
   }
 
-  this->m_spectrum->update();
+  this->m_wave->update();
+  fprintf(stderr, "WRA update()\n");
+  this->m_spectrogram->update();
   this->m_text_area->update();
   pthread_mutex_unlock(&this->m_scroll_lock);
 }
@@ -114,13 +132,11 @@ WidgetRecognitionArea::set_scroll_range()
 bool
 WidgetRecognitionArea::handle_scroll(PG_ScrollBar *scroll_bar, long page)
 {
-//  fprintf(stderr, "Scrolling event: %d\n", page);
   if (!this->m_autoscroll) {
     pthread_mutex_lock(&this->m_scroll_lock);
-    this->m_spectrum->set_position(page);
-    // TODO: THREAD SAFETY!!!!!!!!!
-    this->m_spectrum->update();
-    this->m_text_area->set_scroll_position(page);
+    this->set_scroll_position(page);
+    this->m_wave->update();
+    this->m_spectrogram->update();
     pthread_mutex_unlock(&this->m_scroll_lock);
   }
   return true;

@@ -15,12 +15,12 @@ AudioFileInputController::~AudioFileInputController()
 }
 
 bool
-AudioFileInputController::load_file(const char *filename)
+AudioFileInputController::load_file(const std::string &filename)
 {
   bool ret_val = false;
 //  if (this->lock_audio_writing()) {
 //    this->reset();
-    if (audio::read_wav_data(filename, &this->m_audio_data)) {
+    if (audio::read_wav_data(filename, this->m_audio_data)) {
       this->reset_cursors();
 //      this->m_audio_output.reset();
 //      AudioInputController::reset();

@@ -19,9 +19,11 @@ public:
   virtual void terminate();
 
   /** No need for locking. */
-  bool load_file(const char *filename);
+  bool load_file(const std::string &filename);
   
   virtual void reset_cursors();
+
+  virtual unsigned long get_audio_cursor() const { return this->m_audio_output.get_frames_played(); }
 
   // Starts a new thread which listens audio in and sends it to out queue
 //  virtual bool start_listening();

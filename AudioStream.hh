@@ -7,13 +7,16 @@
 //#include "ErrorHandler.hh"
 
 typedef short AUDIO_FORMAT;
+//typedef SF_FORMAT_PCM_16 SNDFILE_FORMAT;
 #define audio_read_function sf_read_short
+#define audio_write_function sf_write_short
 #define PA_AUDIO_FORMAT paInt16
 const unsigned long SAMPLE_RATE = 16000;
 
 namespace audio
 {
-  bool audio::read_wav_data(const char *filename, std::string *to);
+  bool read_wav_data(const std::string &filename, std::string &to);
+  bool write_wav_data(const std::string &filename, const AUDIO_FORMAT *from, unsigned long frames);
 };
 
 class AudioStream//  :  public ErrorHandler

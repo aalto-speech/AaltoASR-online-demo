@@ -25,6 +25,8 @@ public:
 //  virtual bool start_listening();
 //  virtual void stop_listening();
   virtual void pause_listening(bool pause);
+
+  virtual unsigned long get_audio_cursor() const { return this->get_audio_data_size(); }
   
   virtual void reset_cursors();
 

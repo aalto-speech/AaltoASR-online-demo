@@ -32,7 +32,7 @@ WindowFileRecognizer::initialize()
   
   this->m_open_button = new PG_Button(this->m_window, PG_Rect(10,200,150,50), "Open file");
   this->m_window->AddChild(this->m_open_button);
-  this->m_open_button->sigClick.connect(slot(*this, &WindowFileRecognizer::button_pressed));
+  this->m_open_button->sigClick.connect(slot(*this, &WindowFileRecognizer::handle_button));
 }
 
 void
@@ -44,6 +44,7 @@ WindowFileRecognizer::do_opening()
     return;
   }
   WindowRecognizer::do_opening();
+  this->set_status(END_OF_AUDIO);
 }
 
 void
@@ -51,9 +52,16 @@ WindowFileRecognizer::do_running()
 {
   WindowRecognizer::do_running();
 
-  if (this->get_status() != END_OF_AUDIO && this->m_audio_input->is_eof()) {
-    this->end_of_audio();
+  if (this->get_status() != END_OF_AUDIO) {
+    if (this->m_audio_input->is_eof())
+      this->end_of_audio();
   }
+  /*
+  else {
+    if (!this->m_audio_input->is_eof())
+      this->set_status(LISTENING);
+  }
+  //*/
     
   if (this->m_open_file) {
     this->pause_window_functionality(true);
@@ -76,29 +84,42 @@ WindowFileRecognizer::do_closing(int return_value)
 }
 
 void
+WindowFileRecognizer::reset(bool reset_audio)
+{
+  WindowRecognizer::reset(reset_audio);
+  
+  if (this->m_audio_input->is_eof()) {
+    this->set_status(END_OF_AUDIO);
+  }
+  else {
+    this->set_status(LISTENING);
+  }
+}
+
+void
 WindowFileRecognizer::open_audio_file()
 {
-  WindowOpenFile window(10, 10, this->m_audio_input);
-
-//  this->pause_window_functionality(true);
+  WindowOpenFile window(this->m_window, this->m_audio_input);
 
   window.initialize();
+  fprintf(stderr, "before run child\n");
   if (this->run_child_window(&window) == 1) {
+    fprintf(stderr, "before reset\n");
     // Run reset window without reseting audio.
     this->reset(false);
+
+    fprintf(stderr, "after reset\n");
 
     if (!this->m_audio_input->is_eof()) {
       this->set_status(LISTENING);
       fprintf(stderr, "WFR audio file opening successful.\n");
     }
   }
-  
-//  this->pause_window_functionality(false);
 }
 
 //*/
 bool
-WindowFileRecognizer::button_pressed(PG_Button *button)
+WindowFileRecognizer::handle_button(PG_Button *button)
 {
   if (button == this->m_open_button) {
     this->m_open_file = true;

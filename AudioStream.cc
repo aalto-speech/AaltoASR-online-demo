@@ -7,7 +7,7 @@
   
 //*  
 bool
-audio::read_wav_data(const char *filename, std::string *to)
+audio::read_wav_data(const std::string &filename, std::string &to)
 {
   SF_INFO info;
   SNDFILE *file;
@@ -15,22 +15,48 @@ audio::read_wav_data(const char *filename, std::string *to)
   unsigned long read_size = 0;
 
   info.format = 0;
-  file = sf_open(filename, SFM_READ, &info);
+  file = sf_open(filename.data(), SFM_READ, &info);
   
   if (file == NULL) {
-    fprintf(stderr, "read_wav_data failed to open file \"%s\"\n", filename);
+    fprintf(stderr, "read_wav_data failed to open file \"%s\"\n", filename.data());
     return false;
   }
     
   data = new char[sizeof(AUDIO_FORMAT)*info.frames+1];
   read_size = audio_read_function(file, (AUDIO_FORMAT*)data, info.frames);
   // Because there might be '\0' character in the data, let's not use =-operator.
-  to->assign(data, read_size * sizeof(AUDIO_FORMAT));
+  to.assign(data, read_size * sizeof(AUDIO_FORMAT));
 
   delete [] data;
   sf_close(file);
   return true;
 }
+
+bool
+audio::write_wav_data(const std::string &filename, const AUDIO_FORMAT *from, unsigned long frames)
+{
+  SF_INFO info;
+  SNDFILE *file;
+
+  info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+  info.samplerate = SAMPLE_RATE;
+  info.channels = 1;
+  file = sf_open(filename.data(), SFM_WRITE, &info);
+  
+  if (file == NULL) {
+    fprintf(stderr, "write_wav_data failed to write file \"%s\"\n", filename.data());
+    return false;
+  }
+  
+  // Have to use const_cast because libsndfile authors haven't made proper
+  // function definition.
+  audio_write_function(file, const_cast<AUDIO_FORMAT*>(from), frames);
+    
+  sf_close(file);
+  
+  return true;
+}
+
 //*/
 AudioStream::AudioStream()
 {

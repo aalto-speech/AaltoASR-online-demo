@@ -4,7 +4,7 @@
 
 #include <pgapplication.h>
 #include <pgwindow.h>
-#include <pgmessagebox.h>
+//#include <pgmessagebox.h>
 
 
 class Window  :  public SigC::Object
@@ -42,7 +42,7 @@ protected:
   virtual void do_running() = 0;
   virtual void do_closing(int return_value) { };
   
-  inline virtual PG_Widget* create_window() { return new PG_Widget(NULL, PG_Rect(0, 0, PG_Application::GetScreenWidth(), PG_Application::GetScreenHeight()), false); }
+  virtual PG_Widget* create_window() { return new PG_Widget(NULL, PG_Rect(0, 0, PG_Application::GetScreenWidth(), PG_Application::GetScreenHeight()), false); }
   /** Opens and runs child window. Disables this window for that time.
    * Function returns after child window's run function returns. */
   virtual int run_child_window(Window *child_window);
@@ -51,15 +51,15 @@ protected:
   
 private:
 
-  void show_error_messagebox();
+//  void show_error_messagebox();
 
   // This friendship allows using sigc++ signals although PG_Widget is derived
   // in a protected way.
 //  friend class SigC::ObjectSlotNode;
 
-  std::string m_error_message;
-  ErrorType m_error_type;
-  pthread_mutex_t m_error_lock;
+//  std::string m_error_message;
+//  ErrorType m_error_type;
+//  pthread_mutex_t m_error_lock;
   
   Window *m_child_window;
   pthread_mutex_t m_childwindow_lock;
@@ -70,16 +70,38 @@ private:
   int m_return_value;
   
 };
+/*
+class MessageBox  :  public Window
+{
+public:
+  MessageBox(const PG_Widget *parent, const std::string &message);
+  virtual ~MessageBox();
+  virtual void initialize();
+//  inline bool is_closed() const { return this->m_closed; }
+protected:
+  virtual void do_running() { }
+  virtual PG_Widget* create_window();// { return new PG_Widget(NULL, PG_Rect(0, 0, PG_Application::GetScreenWidth(), PG_Application::GetScreenHeight()), false); }
+  virtual bool handle_button(PG_Button *button);
+private:
+  const PG_Widget *m_parent;
+  const std::string &m_message;
+  PG_Button *m_first_button;
+  PG_Label *m_text_label;
+//  bool m_closed;
+};
+//*/
 
+/*
 class MessageBox  :  public PG_MessageBox
 {
 public:
-  MessageBox(const std::string &message);
+  MessageBox(const PG_Widget *parent, const std::string &message);
   inline bool is_closed() const { return this->m_closed; }
 protected:
   virtual bool handleButton(PG_Button *button);
 private:
   bool m_closed;
 };
+//*/
 
 #endif /*WINDOW_HH_*/

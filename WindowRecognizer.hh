@@ -5,7 +5,6 @@
 #include "Recognition.hh"
 #include "AudioFileInputController.hh"
 #include "Window.hh"
-#include "WidgetSpectrum.hh"
 #include "WidgetRecognitionArea.hh"
 #include <pgbutton.h>
 
@@ -33,13 +32,14 @@ protected:
   
   void parse_recognition(const std::string &message);
 
-  bool button_pressed(PG_Button *button);
+  bool handle_button(PG_Button *button);
   
   void set_status(Status status);
   inline Status get_status() const { return this->m_status; }
   
   void pause_audio_input(bool pause);
-  void reset(bool reset_audio);
+  virtual void reset(bool reset_audio);
+//  virtual void reset_recognizer();
   void end_of_audio();
   
   void pause_window_functionality(bool pause);
@@ -64,12 +64,22 @@ private:
   // --> ja p‰‰ttyen t‰nne
   
   Status m_status;
-  bool m_reset;
+  enum ButtonPressed { NONE, RESET, RESET_RECOG, SETTINGS, ENABLE_RECOG, END_AUDIO };
+  ButtonPressed m_button_event;
+//  bool m_reset_pressed;
+  
   bool m_paused;
+  bool m_recognizer_enabled;
   
   PG_Button *m_back_button;
   PG_Button *m_play_button;
   PG_Button *m_reset_button;
+  PG_Button *m_resetrecog_button;
+  PG_Button *m_enablerecog_button;
+  PG_Button *m_endaudio_button;
+  PG_Button *m_settings_button;
+  
+//  PG_Button *m_settings_button;
 //  PG_Button *m_open_button;
 //  WidgetSpectrum *m_spectrum;
   WidgetRecognitionArea *m_recognition_area;

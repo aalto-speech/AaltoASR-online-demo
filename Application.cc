@@ -120,7 +120,8 @@ Application::start_recognizer()
                     (char*)NULL);
     if (ret < 0) {
       perror("Application::start_recognizer exec() failed");
-      return false;
+      return false;                                    //*/
+      
     }
     assert(false);
   }
@@ -157,7 +158,7 @@ bool
 Application::initialize()
 {
   // Initialize PG_Application.
-  if(!this->InitScreen(1024, 800)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
+  if(!this->InitScreen(1024, 900)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
     fprintf(stderr, "Resolution not supported\n");
     return false;
   }
@@ -165,7 +166,7 @@ Application::initialize()
   this->SetCaption("Online-demo", NULL);
 
   // Initialize and start recognizer process.
-//* Commenting these lines out will disable recognizer.
+/* Commenting these lines out will disable recognizer.
   this->m_recognizer = new Process();
   if (!this->start_recognizer()) {
     fprintf(stderr, "Application::initialize couldn't start recognizer process.\n");

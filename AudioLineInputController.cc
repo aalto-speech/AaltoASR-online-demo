@@ -67,13 +67,11 @@ AudioLineInputController::reset_cursors()
 unsigned long
 AudioLineInputController::read_input()
 {
+  this->m_audio_input.read_input(this->m_audio_data);
+  return this->get_audio_data_size() - this->get_read_cursor();
+  /*
   unsigned long ret_val = 0;
-//  if (this->lock_audio_writing()) {
-    ret_val = this->m_audio_input.read_input(this->m_audio_data);
-/*    this->unlock_audio_writing();
-  }
-  else {
-    fprintf(stderr, "ALIC:read_input failed locking.\n");
-  }//*/
+  ret_val = this->m_audio_input.read_input(this->m_audio_data);
   return ret_val;
+  //*/
 }
