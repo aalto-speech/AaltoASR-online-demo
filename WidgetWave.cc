@@ -197,11 +197,12 @@ WidgetWave::update()
   unsigned long newaudio_size = this->calculate_new(left_index, oldview_size);
 
   // Draw the new parts of the view.
-  this->draw_new(left_index, oldview_size, newaudio_size);
+  if (newaudio_size)
+    this->draw_new(left_index, oldview_size, newaudio_size);
 
   // Update variables and screen.
   this->m_last_left_index = left_index;
   this->m_force_redraw = false;
   SDL_BlitSurface(this->GetWidgetSurface(), NULL, this->m_surface_backbuffer, NULL);
-  this->Update(true);
+//  this->Update(true);
 }

@@ -2,30 +2,35 @@
 #include <assert.h>
 #include "WindowFile.hh"
 
+// This is to fasten debugging..
 std::string WindowFile::last_file = "chunk.wav";
 
-WindowFile::WindowFile(const PG_Widget *parent)
-  : m_parent(parent)
+WindowFile::WindowFile(const PG_Widget *parent, const std::string &title)
+  : WindowChild(parent, title, 400, 200, true, "OK", "Cancel")
 {
   this->m_filename_textbox = NULL;
   this->m_text_label = NULL;
+  /*
   this->m_ok_button = NULL;
   this->m_cancel_button = NULL;
   this->m_ok_pressed = false;
+  //*/
 }
 
 WindowFile::~WindowFile()
 {
   delete this->m_filename_textbox;
   delete this->m_text_label;
+  /*
   delete this->m_ok_button;
   delete this->m_cancel_button;
+  //*/
 }
 
 void
 WindowFile::initialize()
 {
-  Window::initialize();
+  WindowChild::initialize();
   
   this->m_text_label = new PG_Label(this->m_window,
                                     PG_Rect(10, 40, 150, 30),
@@ -35,6 +40,7 @@ WindowFile::initialize()
                                                      80,
                                                      this->m_window->my_width - 20,
                                                      25));
+/*
   this->m_ok_button = new PG_Button(this->m_window,
                                     PG_Rect(this->m_window->my_width / 2 - 70,
                                             this->m_window->my_height - 40,
@@ -47,19 +53,17 @@ WindowFile::initialize()
                                                 60,
                                                 30),
                                         "Cancel");
-  
-  this->m_window->AddChild(this->m_text_label);
-  this->m_window->AddChild(this->m_filename_textbox);
   this->m_window->AddChild(this->m_ok_button);
   this->m_window->AddChild(this->m_cancel_button);
-  
   this->m_ok_button->sigClick.connect(slot(*this, &WindowFile::handle_button));
   this->m_cancel_button->sigClick.connect(slot(*this, &WindowFile::handle_button));
+//*/  
+  this->m_window->AddChild(this->m_text_label);
+  this->m_window->AddChild(this->m_filename_textbox);
   
-  // This is to fasten debugging..
   this->m_filename_textbox->SetText(WindowFile::last_file.data());
 }
-
+/*
 void
 WindowFile::do_running()
 {
@@ -68,7 +72,7 @@ WindowFile::do_running()
     this->m_ok_pressed = false;
   }
 }
-
+//*/
 void
 WindowFile::do_closing(int return_value)
 {
@@ -77,7 +81,7 @@ WindowFile::do_closing(int return_value)
   }
 }
 
-
+/*
 PG_Widget*
 WindowFile::create_window()
 {
@@ -101,7 +105,8 @@ WindowFile::create_window()
   return window;
   
 }
-
+//*/
+/*
 bool
 WindowFile::handle_button(PG_Button *button)
 {
@@ -113,10 +118,12 @@ WindowFile::handle_button(PG_Button *button)
   }
   return true;
 }
-
+//*/
+/*
 bool
 WindowFile::handle_close()
 {
   this->close(-1);
   return true;
 }
+//*/

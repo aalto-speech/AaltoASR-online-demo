@@ -1,4 +1,5 @@
 
+#include <algorithm>
 #include "WidgetSpectrogram.hh"
 
 WidgetSpectrogram::WidgetSpectrogram(PG_Widget *parent,
@@ -7,7 +8,8 @@ WidgetSpectrogram::WidgetSpectrogram(PG_Widget *parent,
                                      unsigned int pixels_per_second)
   : WidgetWave(parent, rect, audio_input, pixels_per_second)
 {
-  this->m_window_width = 2 * SAMPLE_RATE / 125;
+//  this->m_window_width = SAMPLE_RATE / pixels_per_second;
+  this->m_window_width = 2 * this->my_height;
   this->m_data_in = new double[this->m_window_width];
   this->m_data_out = new double[this->m_window_width+1];
   this->m_data_out[this->m_window_width] = 0;
@@ -30,6 +32,7 @@ void
 WidgetSpectrogram::initialize()
 {
   WidgetWave::initialize();
+  SDL_FillRect(this->GetWidgetSurface(), NULL, 0);
 }
 
 void
@@ -43,42 +46,64 @@ WidgetSpectrogram::draw_new(unsigned long left_index,
                             unsigned int oldview_size,
                             unsigned int audio_size)
 {
-  fprintf(stderr, "WS update before\n");
-  SDL_Rect line_rect;
-  SDL_Rect rect;
   SDL_Surface *surface = this->GetWidgetSurface();
   unsigned int audio_pixels = audio_size / this->m_frames_per_pixel;
   unsigned int x = (left_index >= this->m_last_left_index ? oldview_size : 0);
 
-  rect.x = x;
-  rect.w = left_index >= this->m_last_left_index ? (this->m_width - x) : audio_pixels;
-  rect.y = 0;
-  rect.h = surface->h;
-  
   SDL_LockSurface(surface);
 
-  for (unsigned int ind = 0;
-       ind < audio_pixels;
-       ind++)
+  for (unsigned int ind = 0; ind < audio_pixels; ind++)
   {
-//    this->m_audio_input->get_audio_data()
-/*
-    AUDIO_FORMAT *first = this->m_audio_buffer + ind * this->m_frames_per_pixel;
-    AUDIO_FORMAT max = *std::max_element(first, first + this->m_frames_per_pixel - 1);
-    AUDIO_FORMAT min = *std::min_element(first, first + this->m_frames_per_pixel - 1);
-
-    int y1 = (int)((double)(max / pow(256, sizeof(AUDIO_FORMAT)) * surface->h + 0.5f * (double)surface->h));
-    int y2 = (int)((double)(min / pow(256, sizeof(AUDIO_FORMAT)) * surface->h + 0.5f * (double)surface->h));
-
-    line_rect.x = x + ind;
-    line_rect.w = 1;
-    line_rect.y = y2;
-    line_rect.h = y1 - y2 + 1;
-
-    SDL_FillRect(surface, &line_rect, color);
+    //*
+    unsigned int audio_window_size = this->m_window_width;
+    if (ind * this->m_frames_per_pixel + this->m_window_width > audio_size) {
+      memset(this->m_data_in, 0, sizeof(double) * this->m_window_width);
+      audio_window_size = audio_size - ind * this->m_frames_per_pixel;
+    }
+    for (unsigned jnd = 0; jnd < audio_window_size; jnd++) {
+      this->m_data_in[jnd] = this->m_audio_buffer[jnd+ind*this->m_frames_per_pixel];
+    }
     //*/
+    /*
+    for (unsigned jnd = 0; jnd < this->m_window_width; jnd++) {
+      this->m_data_in[jnd] = this->m_audio_buffer[jnd+ind*this->m_frames_per_pixel];
+    }
+    //*/
+
+    fftw_execute(this->m_coeffs);
+
+    // Calculate values.
+    double *values = new double[this->my_height];
+    for (unsigned int jnd = 0; jnd < this->my_height; jnd++) {
+      unsigned int index = this->m_window_width / 2 * jnd / this->my_height;
+      values[jnd] = this->m_data_out[index] * this->m_data_out[index];
+      if (index != this->m_window_width - index) {
+        index = this->m_window_width - index;
+        values[jnd] += this->m_data_out[index] * this->m_data_out[index];
+      }
+//      values[jnd] = jnd;
+    }
+
+    double min = *std::min_element(values, values + this->my_height);
+    double max = *std::max_element(values, values + this->my_height);
+    
+    for (unsigned int jnd = 0; jnd < this->my_height; jnd++) {
+      double value = (values[this->my_height-jnd-1] - min) / max;
+      /*
+      value *= (exp(1) - 1);
+      value += 1;
+      value = log(value);
+      value = pow(value, 0.4);
+      //*/
+      value = pow(value, 0.3);
+      Uint32 color = SDL_MapRGB(surface->format, (char)(value * 255), (char)(value * 255), 0);
+      unsigned int bpp = surface->format->BytesPerPixel;
+      for (unsigned int knd = 0; knd < bpp; knd++) {
+        unsigned int index = knd + (x + ind + this->my_width * jnd) * bpp;
+        ((char*)surface->pixels)[index] = ((char*)&color)[knd];
+      }
+    }
   }
-//*/
+
   SDL_UnlockSurface(surface);
-  fprintf(stderr, "WS update after\n");
 }

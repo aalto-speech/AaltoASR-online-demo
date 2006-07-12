@@ -2,30 +2,13 @@
 #include "WindowReset.hh"
 
 WindowReset::WindowReset(const PG_Widget *parent, msg::InQueue *in_queue, OutQueueController *out_queue)
-  : m_parent(parent)
+  : WindowChild(parent, "Reseting", 200, 100, false) //m_parent(parent)
 {
-//  this->m_ok_button = NULL;
-//  this->m_audio_input = audio_input;
-  this->m_parent = parent;
+//  this->m_parent = parent;
   this->m_in_queue = in_queue;
   this->m_out_queue = out_queue;
 }
-
-WindowReset::~WindowReset()
-{
-//  delete this->m_ok_button;
-}
 /*
-void
-WindowReset::initialize()
-{
-  Window::initialize();
-  
-  this->m_ok_button = new PG_Button(this->m_window, PG_Rect(10,10,50,50), "OK");
-  this->m_window->AddChild(this->m_ok_button);
-  this->m_ok_button->sigClick.connect(slot(*this, &WindowReset::button_pressed));
-}
-//*/
 PG_Widget*
 WindowReset::create_window()
 {
@@ -44,7 +27,7 @@ WindowReset::create_window()
                        "Reseting..",
                        PG_Window::MODAL);
 }
-
+//*/
 void
 WindowReset::do_opening()
 {
@@ -75,13 +58,3 @@ WindowReset::do_running()
   }
 }
 
-/*
-bool
-WindowReset::button_pressed(PG_Button *button)
-{
-  if (button == this->m_ok_button) {
-    this->close();
-  }
-  return true;
-}
-//*/

@@ -38,6 +38,7 @@ protected:
 private:
 
   void set_scroll_position(unsigned long page);
+  void update_screen(bool new_data);
 
   WidgetWave *m_wave;
   WidgetSpectrogram *m_spectrogram;

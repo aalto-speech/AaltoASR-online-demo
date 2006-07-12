@@ -11,20 +11,21 @@ class WindowOpenFile  :  public WindowFile
 public:
 
   WindowOpenFile(const PG_Widget *parent, AudioFileInputController *audio_input)
-    : WindowFile(parent), m_audio_input(audio_input) { }
+    : WindowFile(parent, "Open Audio File"), m_audio_input(audio_input) { }
   
 protected:
 
-  virtual std::string get_title() const { return "Open Audio File"; }
+//  virtual std::string get_title() const { return "Open Audio File"; }
 
-  virtual void handle_ok_pressed()
+  virtual bool do_ok()
   {
     // Try to load audio file.
     if (this->m_audio_input->load_file(this->get_filename())) {
-      this->close(1);
+      return true;
     }
     else {
       this->error("Could not open audio file.", ERROR_NORMAL);
+      return false;
     }
   }
 

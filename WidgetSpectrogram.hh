@@ -20,7 +20,7 @@ public:
 
 protected:
 
-  virtual void draw_new(unsigned long left_index, unsigned int oldview_size, unsigned int new_size);
+  virtual void draw_new(unsigned long left_index, unsigned int oldview_size, unsigned int audio_size);
   
 private:
 

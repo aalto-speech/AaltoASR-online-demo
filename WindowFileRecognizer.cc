@@ -56,12 +56,6 @@ WindowFileRecognizer::do_running()
     if (this->m_audio_input->is_eof())
       this->end_of_audio();
   }
-  /*
-  else {
-    if (!this->m_audio_input->is_eof())
-      this->set_status(LISTENING);
-  }
-  //*/
     
   if (this->m_open_file) {
     this->pause_window_functionality(true);
@@ -102,17 +96,12 @@ WindowFileRecognizer::open_audio_file()
   WindowOpenFile window(this->m_window, this->m_audio_input);
 
   window.initialize();
-  fprintf(stderr, "before run child\n");
   if (this->run_child_window(&window) == 1) {
-    fprintf(stderr, "before reset\n");
     // Run reset window without reseting audio.
     this->reset(false);
 
-    fprintf(stderr, "after reset\n");
-
     if (!this->m_audio_input->is_eof()) {
       this->set_status(LISTENING);
-      fprintf(stderr, "WFR audio file opening successful.\n");
     }
   }
 }

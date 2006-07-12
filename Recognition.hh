@@ -7,7 +7,7 @@
 
 struct Morpheme
 {
-  unsigned long time;
+  long time;
   unsigned long duration;
   std::string data;
 };

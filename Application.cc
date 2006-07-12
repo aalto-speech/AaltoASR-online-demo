@@ -1,5 +1,6 @@
 
 #include "Application.hh"
+#include "Settings.hh"
 
 Application::Application()
 {
@@ -113,7 +114,7 @@ Application::start_recognizer()
 {
   if (this->m_recognizer->create() == 0) {
     int ret = execlp(//"./rec.sh", "script",
-    "ssh", "ssh", "itl-cl3", "/home/jluttine/workspace/online-demo/rec.sh",
+    "ssh", "ssh", "itl-cl8", "/home/jluttine/workspace/online-demo/rec.sh",
 //                    "./recognizer",
     //./recognizer", "./recognizer",
 //                    "--config", "mfcc_p_dd.feaconf",
@@ -164,6 +165,9 @@ Application::initialize()
   }
   this->LoadTheme("default");
   this->SetCaption("Online-demo", NULL);
+  
+  // Read settings from script file.
+  Settings::read_settings("rec.sh");
 
   // Initialize and start recognizer process.
 /* Commenting these lines out will disable recognizer.

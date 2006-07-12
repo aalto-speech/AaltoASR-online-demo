@@ -12,13 +12,13 @@ class WindowSaveFile  :  public WindowFile
 public:
 
   WindowSaveFile(const PG_Widget *parent, AudioInputController *audio_input)
-    : WindowFile(parent), m_audio_input(audio_input) { }
+    : WindowFile(parent, "Save Audio File"), m_audio_input(audio_input) { }
 
 protected:
 
-  virtual std::string get_title() const { return "Save Audio File"; }
+//  virtual std::string get_title() const { return "Save Audio File"; }
 
-  virtual void handle_ok_pressed()
+  virtual bool do_ok()
   {
     FILE *file = fopen(this->get_filename().data(), "r");
     bool overwrite = true;
@@ -39,13 +39,14 @@ protected:
                                 this->m_audio_input->get_audio_data(),
                                 this->m_audio_input->get_audio_data_size()))
       {
-        //
-        this->close(1);
+        // Audio saving successful.
+        return true;
       }
       else {
         this->error("Could not write audio file.", ERROR_NORMAL);
       }
     }
+    return false;
   }
   
 private:

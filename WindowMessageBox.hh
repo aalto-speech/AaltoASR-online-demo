@@ -5,9 +5,9 @@
 //#include <pglabel.h>
 #include <pgrichedit.h>
 #include <pgbutton.h>
-#include "Window.hh"
+#include "WindowChild.hh"
 
-class WindowMessageBox  :  public Window
+class WindowMessageBox  :  public WindowChild
 {
 public:
 
@@ -20,15 +20,19 @@ public:
 
 protected:
 
-  virtual void do_running() { }
-  virtual PG_Widget* create_window();// { return new PG_Widget(NULL, PG_Rect(0, 0, PG_Application::GetScreenWidth(), PG_Application::GetScreenHeight()), false); }
+//  virtual bool do_ok() { return true; }
 
-  virtual bool handle_button(PG_Button *button);
+//  virtual void do_running() { }
+//  virtual PG_Widget* create_window();// { return new PG_Widget(NULL, PG_Rect(0, 0, PG_Application::GetScreenWidth(), PG_Application::GetScreenHeight()), false); }
+
+//  virtual bool handle_button(PG_Button *button);
   
 private:
 
-  const PG_Widget *m_parent;
   std::string m_message;
+  PG_RichEdit *m_text_label;
+  /*
+  const PG_Widget *m_parent;
   std::string m_title;
   std::string m_button1_text;
   std::string m_button2_text;
@@ -36,7 +40,7 @@ private:
   
   PG_Button *m_button1;
   PG_Button *m_button2;
-  PG_RichEdit *m_text_label;
+  //*/
 //  bool m_closed;
 
 };

@@ -2,6 +2,7 @@
 #include "Recognition.hh"
 #include "WindowRecognizer.hh"
 #include "WindowReset.hh"
+#include "WindowSettings.hh"
 #include "str.hh"
 
 WindowRecognizer::WindowRecognizer(msg::InQueue *in_queue, OutQueueController *out_queue)
@@ -174,6 +175,7 @@ void
 WindowRecognizer::do_running()
 {
   msg::Message message;
+  WindowSettings *window;
   
   switch (this->m_button_event) {
   case ENABLE_RECOG:
@@ -194,7 +196,10 @@ WindowRecognizer::do_running()
     break;
   case SETTINGS:
     this->pause_window_functionality(true);
-    // ...
+    window = new WindowSettings(this->m_window, this->m_out_queue);
+    window->initialize();
+    this->run_child_window(window);
+    delete window;
     this->pause_window_functionality(false);
     break;
   case NONE:
@@ -244,23 +249,17 @@ WindowRecognizer::reset(bool reset_audio)
 {
   WindowReset window(this->m_window, this->m_in_queue, this->m_out_queue);
 
-  fprintf(stderr, "before audio reset\n");
   if (reset_audio)
     this->get_audio_input()->reset();
   else
     this->get_audio_input()->reset_cursors();
 
-  fprintf(stderr, "before component reset\n");
   this->m_recognition.reset();
   this->m_recognition_area->reset();
-  fprintf(stderr, "here\n");
   this->m_recognition_area->update();
-
-  fprintf(stderr, "after component reset\n");
 
   window.initialize();
   this->run_child_window(&window);
-  fprintf(stderr, "after reset window\n");
 }
 
 void
@@ -300,9 +299,11 @@ WindowRecognizer::set_status(Status status)
   switch (status) {
   case END_OF_AUDIO:
     this->m_play_button->Hide(false);
+    this->m_endaudio_button->Hide(false);
     break;
   case LISTENING:
     this->m_play_button->Show(false);
+    this->m_endaudio_button->Show(false);
     break;
   default:
     fprintf(stderr, "WindowRecognizer::set_status unknown status.\n");
