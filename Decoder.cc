@@ -68,6 +68,25 @@ void
 Decoder::message_result(bool send_all)
 {
   TokenPassSearch &tp = t.tp_search();
+
+  // Debugging guaranteed histories
+//   if (last_guaranteed_history != NULL) {
+//     fprintf(stderr, "last_guaranteed_history:");
+//     TPLexPrefixTree::WordHistory *hist = last_guaranteed_history;
+//     while (hist->word_id >= 0) {
+//       fprintf(stderr, " %d %s 0x%p ref %d\n", 
+//               hist->word_start_frame,
+//               t.word(hist->word_id).c_str(), 
+//               hist,
+//               hist->get_num_references());
+//       hist = hist->prev_word;
+//     }
+//     fprintf(stderr, "\n");
+//   }
+
+//   if (last_guaranteed_history != NULL)
+//     tp.ensure_all_paths_contain_history(last_guaranteed_history);
+
   tp.get_path(hist_vec, true, send_all ? NULL : last_guaranteed_history);
   bool all_guaranteed = true;
   msg::Message message(msg::M_RECOG);
@@ -75,7 +94,7 @@ Decoder::message_result(bool send_all)
   for (int i = hist_vec.size() - 1; i >= 0; i--) {
     TPLexPrefixTree::WordHistory *hist = hist_vec[i];
     assert(hist->get_num_references() > 0);
-    if (hist->get_num_references() == 1) {
+    if (hist->prev_word->get_num_references() == 1) {
       if (all_guaranteed)
         last_guaranteed_history = hist;
     }
