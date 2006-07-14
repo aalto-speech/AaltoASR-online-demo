@@ -1,3 +1,4 @@
+#include <sndfile.h>
 #include <pthread.h>
 #include "msg.hh"
 #include "conf.hh"
@@ -115,7 +116,15 @@ main(int argc, char *argv[])
     if (config.arguments.size() != 0)
       config.print_help(stderr, 1);
 
-    io::Stream audio_stream(config["audio"].get_str());
+    SF_INFO snd_info;
+    SNDFILE *snd_file = sf_open(config["audio"].get_c_str(), 
+                                SFM_READ, &snd_info);
+    if (snd_file == NULL) {
+      fprintf(stderr, "sf_open(%s) failed\n", 
+              config["audio"].get_c_str());
+      perror("system error:");
+      exit(1);
+    }
     
     Process proc;
     if (proc.create() == 0) {
@@ -154,8 +163,10 @@ main(int argc, char *argv[])
         prompt = false;
       }
       if (fields[0] == "o") {
-        audio_stream.close();
-        audio_stream.open(config["audio"].get_str());
+        if (sf_seek(snd_file, 0, SEEK_SET) < 0) {
+          fprintf(stderr, "sf_seek(0) failed: %s\n", sf_strerror(snd_file));
+          exit(1);
+        }
         continue;
       }
       if (fields[0] == "e")
@@ -174,9 +185,10 @@ main(int argc, char *argv[])
         const int buf_size = 128 * 2; // 128 samples
         std::string buf(buf_size, ' ');
         for (int i = 0; i < frames; i++) {
-          size_t ret = fread(&buf[0], buf_size, 1, audio_stream);
-          if (ferror(audio_stream)) {
-            perror("fread failed");
+          sf_count_t ret = sf_read_short(snd_file, (short int*)&buf[0], 128);
+          if (sf_error(snd_file) != SF_ERR_NO_ERROR) {
+            fprintf(stderr, "ERROR: sf_read_short failed: %s\n",
+                    sf_strerror(snd_file));
             exit(1);
           }
           if (ret == 0) {
@@ -185,6 +197,7 @@ main(int argc, char *argv[])
             prompt = true;
           }
           else {
+            buf.resize(ret * 2);
             msg::Message message(msg::M_AUDIO);
             message.append(buf);
             enqueue(message);
