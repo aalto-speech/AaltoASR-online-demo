@@ -30,7 +30,7 @@ protected:
 
   const unsigned int m_pixels_per_second;
   Recognition *m_recognition;
-  std::vector<PG_Label*> m_morpheme_buttons;
+  std::vector<PG_Widget*> m_morpheme_buttons;
   unsigned int m_last_morpheme_count;
 };
 

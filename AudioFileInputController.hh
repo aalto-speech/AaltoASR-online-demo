@@ -23,10 +23,9 @@ public:
   
   virtual void reset_cursors();
 
-  virtual unsigned long get_audio_cursor() const { return this->m_audio_output.get_frames_played(); }
+  virtual unsigned long get_audio_cursor() const { return this->m_output_buffer.get_frames_read(); }
 
   // Starts a new thread which listens audio in and sends it to out queue
-//  virtual bool start_listening();
   virtual void pause_listening(bool pause);
   
   inline bool is_eof() const
@@ -38,14 +37,11 @@ protected:
 
   virtual unsigned long read_input();
   
-//  void check_eof() { this->m_eof = this->get_read_cursor() >= this->get_audio_data_size(); }
-
 private:
 
-  AudioOutputStream m_audio_output;
+//  AudioOutputStream m_audio_output;
+  AudioBuffer m_output_buffer;
   unsigned long m_output_cursor;
-//  bool m_sent_eof;
-//  bool m_eof;
 };
 //*/
 #endif /*AUDIOFILEINPUTCONTROLLER_HH_*/

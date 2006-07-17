@@ -53,9 +53,9 @@ WindowSettings::initialize()
   this->m_window->AddChild(this->m_beam_edit);
   this->m_window->AddChild(this->m_lmscale_edit);
   
-  sprintf(buffer, "%d", Settings::get_beam());
+  sprintf(buffer, "%d", Settings::beam);
   this->m_beam_edit->SetText(buffer);
-  sprintf(buffer, "%d", Settings::get_lmscale());
+  sprintf(buffer, "%d", Settings::lmscale);
   this->m_lmscale_edit->SetText(buffer);
 }
 
@@ -78,8 +78,10 @@ WindowSettings::do_ok()
     return false;
   }
 
-  Settings::set_beam(beam);
-  Settings::set_lmscale(lmscale);
+  Settings::beam = beam;
+  Settings::lmscale = lmscale;
+//  Settings::set_beam(beam);
+//  Settings::set_lmscale(lmscale);
   
   if (this->m_out_queue) {
     // Send parameter change messages to recognizer.

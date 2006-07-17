@@ -14,6 +14,8 @@ class WidgetRecognitionArea  :  public PG_Widget
   
 public:
 
+  enum Autoscroll { DISABLE, RECOGNITION, HYPOTHESIS, AUDIO, PLAYBACK };
+
   WidgetRecognitionArea(PG_Widget *parent,
                         const PG_Rect &rect,
                         AudioInputController *audio_input,
@@ -25,6 +27,7 @@ public:
   void update();
   
   void set_autoscroll(bool autoscroll) { this->m_autoscroll = autoscroll; };
+//  void set_autoscroll(Autoscroll autoscroll) { this->m_autoscroll = autoscroll; };
   
 protected:
   
@@ -47,7 +50,9 @@ private:
   AudioInputController *m_audio_input;
   const unsigned int m_pixels_per_second;
   const unsigned int m_frames_per_pixel;
+//  Autoscroll m_autoscroll;
   bool m_autoscroll;
+//  bool m_autoscroll;
   pthread_mutex_t m_scroll_lock;
   
 };

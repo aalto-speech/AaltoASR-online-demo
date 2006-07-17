@@ -70,6 +70,7 @@ WindowRecognizer::initialize()
   this->m_settings_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
   this->m_back_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
   
+  this->m_play_button->SetToggle(true);
   this->m_enablerecog_button->SetToggle(true);
 }
 
@@ -106,7 +107,12 @@ WindowRecognizer::parse_recognition(const std::string &message)
       morph.time = next_time;
       morph.data = split_vector.at(2*ind+1);
     }
-    next_time = str::str2long(&hypothesis_string, &ok);
+    if (2 * ind < split_vector.size()) {
+      next_time = str::str2long(&split_vector.at(2*ind), &ok);
+    }
+    else {
+      next_time = str::str2long(&hypothesis_string, &ok);
+    }
     morph.duration = next_time - morph.time;
     this->m_recognition.add_morpheme(morph);
     fprintf(stderr, "PARSED: Morpheme: %s, Time: %d, Duration: %d\n", morph.data.data(), morph.time, morph.duration);
@@ -150,6 +156,7 @@ WindowRecognizer::in_queue_listener(void *user_data)
 void
 WindowRecognizer::do_opening()
 {
+  fprintf(stderr, "WR:do_op start\n");
   this->pause_audio_input(true);
   
   // Enable recognizer.
@@ -169,6 +176,7 @@ WindowRecognizer::do_opening()
   this->m_button_event = RESET;
 //  this->m_reset_pressed = true;
   this->set_status(LISTENING);
+  fprintf(stderr, "WR:do_op end\n");
 }
 
 void
@@ -177,12 +185,26 @@ WindowRecognizer::do_running()
   msg::Message message;
   WindowSettings *window;
   
+//  fprintf(stderr, "WR:do_run start\n");
   switch (this->m_button_event) {
+  case PLAY:
+    if (this->m_status == LISTENING) {
+      this->pause_audio_input(!this->m_play_button->GetPressed());
+    }
+    break;
   case ENABLE_RECOG:
     this->m_recognizer_enabled = this->m_enablerecog_button->GetPressed();
+/*
+    if (this->m_enablerecog_button->GetPressed())
+      this->get_audio_input()->play(10 * SAMPLE_RATE, 0);
+    else
+      this->get_audio_input()->stop();
+      //*/
     break;
   case END_AUDIO:
-    this->end_of_audio();
+    if (this->m_status == LISTENING) {
+      this->end_of_audio();
+    }
     break;
   case RESET:
     this->pause_window_functionality(true);
@@ -208,10 +230,12 @@ WindowRecognizer::do_running()
   this->m_button_event = NONE;
 
 //  if (!this->m_paused) {
-    this->get_audio_input()->listen();
+    this->get_audio_input()->operate();
 //  }
 
+//  fprintf(stderr, "WR:do_run before update\n");
   this->m_recognition_area->update();
+//  fprintf(stderr, "WR:do_run end\n");
 }
 
 void
@@ -267,11 +291,12 @@ WindowRecognizer::pause_audio_input(bool pause)
 {
 //  if (this->m_audio_input) {
     this->get_audio_input()->pause_listening(pause);
+    this->m_play_button->SetPressed(!pause);
     if (pause) {
-      this->m_play_button->SetText("Play");
+//      this->m_play_button->SetText("Play");
     }
     else {
-      this->m_play_button->SetText("Pause");
+//      this->m_play_button->SetText("Pause");
     }
     
     if (this->m_recognition_area)
@@ -298,12 +323,12 @@ WindowRecognizer::set_status(Status status)
   this->m_status = status;
   switch (status) {
   case END_OF_AUDIO:
-    this->m_play_button->Hide(false);
-    this->m_endaudio_button->Hide(false);
+//    this->m_play_button->Hide(false);
+//    this->m_endaudio_button->Hide(false);
     break;
   case LISTENING:
-    this->m_play_button->Show(false);
-    this->m_endaudio_button->Show(false);
+//    this->m_play_button->Show(false);
+//    this->m_endaudio_button->Show(false);
     break;
   default:
     fprintf(stderr, "WindowRecognizer::set_status unknown status.\n");
@@ -344,7 +369,7 @@ bool
 WindowRecognizer::handle_button(PG_Button *button)
 {
   if (button == this->m_play_button) {
-    this->pause_audio_input(!this->m_paused);
+    this->m_button_event = PLAY;//this->pause_audio_input(!this->m_paused);
   }
   else if (button == this->m_enablerecog_button) {
     this->m_button_event = ENABLE_RECOG;

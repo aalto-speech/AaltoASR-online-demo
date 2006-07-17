@@ -20,7 +20,7 @@ public:
   Application();
   virtual ~Application();
 
-  bool initialize();
+  bool initialize(const std::string &ssh_to, const std::string &script_file);
   void clean();
   void run();
   

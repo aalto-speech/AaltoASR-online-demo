@@ -64,7 +64,7 @@ private:
   // --> ja p‰‰ttyen t‰nne
   
   Status m_status;
-  enum ButtonPressed { NONE, RESET, RESET_RECOG, SETTINGS, ENABLE_RECOG, END_AUDIO };
+  enum ButtonPressed { NONE, PLAY, RESET, RESET_RECOG, SETTINGS, ENABLE_RECOG, END_AUDIO };
   ButtonPressed m_button_event;
 //  bool m_reset_pressed;
   
@@ -78,6 +78,8 @@ private:
   PG_Button *m_enablerecog_button;
   PG_Button *m_endaudio_button;
   PG_Button *m_settings_button;
+  
+//  PG_Button *m_playback_button;
   
 //  PG_Button *m_settings_button;
 //  PG_Button *m_open_button;

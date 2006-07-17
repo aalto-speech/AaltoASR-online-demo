@@ -4,28 +4,30 @@
 #include <pthread.h>
 #include "AudioStream.hh"
 #include "Buffer.hh"
-
+/*
 // NOTICE THIS DEFINITION!
 typedef Buffer<AUDIO_FORMAT> AudioBuffer;
 
-class AudioOutputStream  :  public AudioStream
+class AudioOutputStream  :  public virtual AudioStream
 {
 
 public:
 
-  AudioOutputStream(unsigned long buffer_size);
+//  AudioOutputStream(unsigned long buffer_size);
+  AudioOutputStream();
   virtual ~AudioOutputStream();
 
   virtual bool open();
   virtual void close();
 //  virtual bool start();
-  void pause_output(bool pause);
+//  void pause_output(bool pause);
   
   inline unsigned long get_frames_played() const { return this->m_frames_played; }
 
-  unsigned long write_output(const AUDIO_FORMAT *from, unsigned long size);
-  // TODO: tämä funktio on itseasiassa turha.. poista!
-//  unsigned long write_output(const char *from, unsigned long size);
+//  unsigned long write_output(const AUDIO_FORMAT *from, unsigned long size);
+  
+  inline void set_output_buffer(AudioBuffer *output_buffer) { this->m_audio_buffer = output_buffer; }
+  inline const AudioBuffer* get_output_buffer() const { return this->m_audio_buffer; }
   
   void reset();
 
@@ -38,9 +40,10 @@ protected:
 private:
 
   AudioBuffer *m_audio_buffer;
-  pthread_mutex_t m_lock;
-  bool m_paused;
+//  pthread_mutex_t m_lock;
+//  bool m_paused;
   unsigned long m_frames_played;
 };
+//*/
 
 #endif /*AUDIOOUTPUTSTREAM_HH_*/

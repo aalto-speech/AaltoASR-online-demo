@@ -14,7 +14,7 @@ CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT)
 
 ##################################################
 
-progs = jaakko gui ## decoder recognizer
+progs = jaakko # gui decoder recognizer
 
 default: $(progs)
 
@@ -32,9 +32,9 @@ gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
 gui_libs = -lpthread -lakumod
 gui: $(gui_srcs:%.cc=%.o)
 
-jaakko_srcs = jaakko.cc AudioStream.cc AudioInputStream.cc Buffer.cc \
+jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	Process.cc msg.cc endian.cc AudioFileInputController.cc \
-	AudioOutputStream.cc AudioInputController.cc AudioLineInputController.cc \
+	AudioInputController.cc AudioLineInputController.cc \
 	OutQueueController.cc Application.cc Window.cc WindowInit.cc \
 	WindowMain.cc WindowFileRecognizer.cc WidgetWave.cc \
 	WindowReset.cc WindowRecognizer.cc WindowMicrophoneRecognizer.cc \

@@ -32,11 +32,14 @@ public:
 
 protected:
 
+  virtual bool open_stream(bool input_stream) { return AudioInputController::open_stream(true); }
+
   virtual unsigned long read_input();
 
 private:
 
-  AudioInputStream m_audio_input;
+//  AudioInputStream m_audio_input;
+  AudioBuffer m_input_buffer;
   bool m_paused;
 };
 

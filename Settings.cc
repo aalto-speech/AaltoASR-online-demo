@@ -4,11 +4,14 @@
 #include "Settings.hh"
 #include "str.hh"
 
-long m_beam = 0;
-long m_lmscale = 0;
+std::string Settings::ssh_to = "itl_cl1";
+std::string Settings::script_file = "rec.sh";
+long Settings::beam = 0;
+long Settings::lmscale = 0;
 
 bool
-Settings::read_settings(const std::string &script_file)
+//Settings::read_settings(const std::string &script_file)
+Settings::read_settings()
 {
   FILE *file;
   std::string line;
@@ -28,10 +31,10 @@ Settings::read_settings(const std::string &script_file)
       str::split(&line, " \"", true, &fields);
       for (unsigned int ind = 0; ind < fields.size() - 1; ind++) {
         if (fields[ind] == "--lm-scale") {
-          m_lmscale = str::str2long(&fields[ind+1], &ok);
+          lmscale = str::str2long(&fields[ind+1], &ok);
         }
         if (fields[ind] == "--beam") {
-          m_beam = str::str2long(&fields[ind+1], &ok);
+          beam = str::str2long(&fields[ind+1], &ok);
         }
       }
       read_settings = true;
@@ -39,7 +42,7 @@ Settings::read_settings(const std::string &script_file)
   }
   
   if (read_settings && ok) {
-    fprintf(stderr, "Read settings. Beam: %d, LM-scale: %d\n", m_beam, m_lmscale);
+    fprintf(stderr, "Read settings. Beam: %d, LM-scale: %d\n", beam, lmscale);
   }
   else {
     read_settings = false;
@@ -49,7 +52,7 @@ Settings::read_settings(const std::string &script_file)
   fclose(file);
   return read_settings;
 }
-
+/*
 unsigned int
 Settings::get_beam()
 {
@@ -73,3 +76,4 @@ Settings::set_lmscale(unsigned int lmscale)
 {
   m_lmscale = lmscale;
 }
+//*/

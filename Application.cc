@@ -42,9 +42,6 @@ Application::run()
   // Start GUI thread.
   pthread_create(&thread, NULL, Application::start_gui, this);
   
-//  if (this->m_out_queue)
-//    this->m_out_queue->start_flushing();
-  
   // "Main loop"
   while (this->m_current_window) {
     // Open call should be made before the actual run call.
@@ -85,9 +82,6 @@ Application::run()
   }
   pthread_mutex_unlock(&this->m_lock);
 
-//  if (this->m_out_queue)
-//    this->m_out_queue->stop_flushing();
-
   fprintf(stderr, "Wait for GUI to finish..\n");
   this->m_thread_finished = true;
   this->Quit();
@@ -113,11 +107,10 @@ bool
 Application::start_recognizer()
 {
   if (this->m_recognizer->create() == 0) {
-    int ret = execlp(//"./rec.sh", "script",
-    "ssh", "ssh", "itl-cl8", "/home/jluttine/workspace/online-demo/rec.sh",
-//                    "./recognizer",
-    //./recognizer", "./recognizer",
-//                    "--config", "mfcc_p_dd.feaconf",
+    int ret = execlp("ssh",
+                     "ssh",
+                     Settings::ssh_to.data(),
+                     Settings::script_file.data(),//"/home/jluttine/workspace/online-demo/rec.sh",
                     (char*)NULL);
     if (ret < 0) {
       perror("Application::start_recognizer exec() failed");
@@ -156,7 +149,7 @@ Application::eventQuit(int id, PG_MessageObject *widget, unsigned long data)
 }
 
 bool
-Application::initialize()
+Application::initialize(const std::string &ssh_to, const std::string &script_file)
 {
   // Initialize PG_Application.
   if(!this->InitScreen(1024, 900)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
@@ -167,10 +160,12 @@ Application::initialize()
   this->SetCaption("Online-demo", NULL);
   
   // Read settings from script file.
-  Settings::read_settings("rec.sh");
+  Settings::ssh_to = ssh_to;
+  Settings::script_file = script_file;
+  Settings::read_settings();
 
   // Initialize and start recognizer process.
-/* Commenting these lines out will disable recognizer.
+//* Commenting these lines out will disable recognizer.
   this->m_recognizer = new Process();
   if (!this->start_recognizer()) {
     fprintf(stderr, "Application::initialize couldn't start recognizer process.\n");

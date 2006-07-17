@@ -5,29 +5,30 @@
 #include <pthread.h>
 #include "AudioStream.hh"
 #include "Buffer.hh"
-
+/*
 // NOTICE THIS DEFINITION!
 typedef Buffer<AUDIO_FORMAT> AudioBuffer;
 
-/**
- * Buffered audio input stream.
- */
-class AudioInputStream  :  public AudioStream
+class AudioInputStream  :  public virtual AudioStream
 {
 
 public:
 
-  AudioInputStream(unsigned long buffer_size);
+//  AudioInputStream(unsigned long buffer_size);
+  AudioInputStream();
   ~AudioInputStream();
 
   virtual bool open();
   virtual void close();
-  void pause_input(bool pause);
+//  void pause_input(bool pause);
 
-  unsigned long read_input(AUDIO_FORMAT *to);
-  unsigned long read_input(std::string &to);
+//  unsigned long read_input(AUDIO_FORMAT *to);
+//  unsigned long read_input(std::string &to);
   
-  void reset();
+  inline void set_input_buffer(AudioBuffer *input_buffer) { this->m_audio_buffer = input_buffer; }
+  inline const AudioBuffer* get_input_buffer() const { return this->m_audio_buffer; }
+  
+//  void reset();
 
 private:
 
@@ -36,8 +37,8 @@ private:
                                unsigned long frame_count);
 
   AudioBuffer *m_audio_buffer;
-  pthread_mutex_t m_lock;
-  bool m_paused;
+//  pthread_mutex_t m_lock;
+//  bool m_paused;
 };
-
+//*/
 #endif

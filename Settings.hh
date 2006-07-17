@@ -4,13 +4,24 @@
 
 #include <string>
 
-namespace Settings
+class Settings
 {
-  bool read_settings(const std::string &script_file);
-  unsigned int get_beam();
-  unsigned int get_lmscale();
-  void set_beam(unsigned int beam);
-  void set_lmscale(unsigned int lmscale);
+
+public:
+
+//  static void set_script_file(const std::string script_file);
+//  static bool read_settings(const std::string &script_file)
+  static bool read_settings();
+
+  static std::string ssh_to;
+  static std::string script_file;
+  static long beam;
+  static long lmscale;
+  
+//  static unsigned int get_beam();
+//  unsigned int get_lmscale();
+//  void set_beam(unsigned int beam);
+//  void set_lmscale(unsigned int lmscale);
 };
 
 #endif /*SETTINGS_HH_*/

@@ -60,15 +60,37 @@ WidgetRecognitionTexts::reset()
 void
 WidgetRecognitionTexts::add_morpheme_button(const Morpheme *morpheme)
 {
-//  this->SetAreaWidth(20000);
   double multiplier = this->m_pixels_per_second / (double)Recognition::frames_per_second;
   Sint32 x = (Sint32)(morpheme->time * multiplier);
   unsigned int w = (int)(morpheme->duration * multiplier);
-  PG_Rect rect(0, 0, w, 30);
-  PG_Label *button = new PG_Label(this, rect, morpheme->data.data());
-  fprintf(stderr, "morpheme button x: %d, data: %s\n", x, morpheme->data.data());
-  this->add_child(button, x);
-  button->SetAlignment(PG_Label::CENTER);
+  PG_Rect rect;
+  PG_Widget *button;
+
+  if (morpheme->data == "<w>") {
+    rect.SetRect(0, 0, w > 1 ? w : 1, 30);
+    button = new PG_Widget(this, rect, true);
+    this->add_child(button, x);
+    SDL_FillRect(button->GetWidgetSurface(),
+                 NULL,
+                 button->GetFontColor().MapRGB(button->GetWidgetSurface()->format));
+/*    
+    rect.SetRect(0, 0, 1, 30);
+    button = new PG_Widget(this, rect, true);
+    this->add_child(button, x + w / 2);
+    SDL_FillRect(button->GetWidgetSurface(),
+                 NULL,
+                 button->GetFontColor().MapRGB(button->GetWidgetSurface()->format));
+//*/
+    //button->DrawVLine(0, 0, 30, PG_Color(255, 255, 255));
+  }
+  else {
+    rect.SetRect(0, 0, w, 30);
+    button = new PG_Label(this, rect, morpheme->data.data());
+    ((PG_Label*)button)->SetAlignment(PG_Label::CENTER);
+//    button = new PG_Button(this, rect, morpheme->data.data());
+    this->add_child(button, x);
+  }
+
+//  fprintf(stderr, "morpheme button x: %d, data: %s\n", x, morpheme->data.data());
   this->m_morpheme_buttons.push_back(button);
-//  this->SetAreaWidth(20000);
 }

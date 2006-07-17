@@ -12,6 +12,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
 {
   this->m_audio_input = audio_input;
   this->m_autoscroll = false;
+//  this->m_autoscroll = DISABLE;
   pthread_mutex_init(&this->m_scroll_lock, NULL);
 
   // Create wave view.
@@ -93,19 +94,25 @@ WidgetRecognitionArea::set_scroll_position(unsigned long page)
 void
 WidgetRecognitionArea::update_screen(bool new_data)
 {
+//  fprintf(stderr, "WRA:update_screen start\n");
   this->m_wave->update();
   this->m_spectrogram->update();
   if (new_data)
     this->m_text_area->update();
+//  fprintf(stderr, "WRA:update_screen before\n");
   this->Update(true);
+//  fprintf(stderr, "WRA:update_screen after\n");
+//  fprintf(stderr, "WRA:update_screen end\n");
 }
 
 void
 WidgetRecognitionArea::update()
 {
+//  fprintf(stderr, "WRA:update start\n");
   pthread_mutex_lock(&this->m_scroll_lock);
   this->set_scroll_range();
 
+//  fprintf(stderr, "WRA:update before\n");
   // Update left border.
   if (this->m_autoscroll) {
     unsigned long read_cursor_px = this->m_audio_input->get_audio_cursor() / this->m_frames_per_pixel;
@@ -119,9 +126,11 @@ WidgetRecognitionArea::update()
     // This will do redrawing for scroll bar. (Update and Redraw won't work properly..)
     this->m_scroll_bar->SetPosition(this->m_scroll_bar->GetPosition());
   }
+//  fprintf(stderr, "WRA:update after\n");
 
   this->update_screen(true);
   pthread_mutex_unlock(&this->m_scroll_lock);
+//  fprintf(stderr, "WRA:update end\n");
 }
 
 void
