@@ -9,57 +9,156 @@ Application::Application()
   this->m_in_queue = NULL;
   
   this->m_current_window = NULL;
-  this->m_init_window = NULL;
+//  this->m_init_window = NULL;
+  this->m_startprocess_window = NULL;
   this->m_main_window = NULL;
   this->m_recognizer_window = NULL;
   this->m_microphone_window = NULL;
   
-  pthread_mutex_init(&this->m_lock, NULL);
+  this->m_app = NULL;
+  
+//  pthread_mutex_init(&this->m_lock, NULL);
 }
 
 Application::~Application()
 {
-  pthread_mutex_destroy(&this->m_lock);
+//  pthread_mutex_destroy(&this->m_lock);
   this->clean();
 }
+
 
 void
 Application::run()
 {
-  int ret_val;
-  Window *next_window;
-  pthread_t thread;
-
-  // This flag tells when this function is waiting for gui thread.
-  this->m_thread_finished = false;
-  
   // Program starts in initialization window.
-  this->m_current_window = this->m_init_window;
+  this->m_current_window = this->m_startprocess_window;//this->m_init_window;
   
-  // This lock prevents gui thread from sending quit signal at unwanted time.
-  pthread_mutex_lock(&this->m_lock);
+  try {
+    while (this->m_current_window) {
+      int ret_val = this->m_current_window->run_modal();
+      this->next_window(ret_val);
+    }
+  }
+//  catch (ExceptionChildProcess process) {
+//    this->start_recognizer();
+//  }
+  catch (msg::ExceptionBrokenPipe exception) {
+    fprintf(stderr, "Warning: Unhandled broken pipe exception. Program exits.\n");
+  }
+}
 
-  // Start GUI thread.
-  pthread_create(&thread, NULL, Application::start_gui, this);
+/*
+void
+Application::start_recognizer()
+{
+  // This catch is only for the child process! All audio streams must be
+  // closed
+  AudioStream::close_all_streams();
+//  this->clean();
+  Settings::read_settings();
+  int ret = execlp("ssh",
+                   "ssh",
+                   Settings::ssh_to.data(),
+                   Settings::script_file.data(),
+                   (char*)NULL);
+                  
+  if (ret < 0) {
+    perror("Application::run exec() failed");
+    exit(1);                                    
+  }
+  assert(false);
+}
+//*/
+
+bool
+Application::initialize(const std::string &ssh_to, const std::string &script_file)
+{
+  this->m_app = new PG_Application;
   
-  // "Main loop"
-  while (this->m_current_window) {
-    // Open call should be made before the actual run call.
-    this->m_current_window->open();
-    // For thread-safety..
-    next_window = this->m_current_window;
-    
-    // Between these unlock and lock is the place where the gui thread
-    // may send quit signal to the window and set m_current_window to null.
-    pthread_mutex_unlock(&this->m_lock);
-    ret_val = next_window->run();
-    pthread_mutex_lock(&this->m_lock);
+  // Initialize PG_Application.
+  if(!this->m_app->InitScreen(1024, 700)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
+    fprintf(stderr, "Resolution not supported\n");
+    return false;
+  }
+  this->m_app->EnableAppIdleCalls();
+  this->m_app->LoadTheme("default");
+  this->m_app->SetCaption("Online-demo", NULL);
+  this->m_app->SetEmergencyQuit(true);
+//  this->m_app->DeleteBackground();
+  this->m_app->RedrawBackground(PG_Rect(0,0,this->m_app->GetScreenWidth(),this->m_app->GetScreenHeight()));
+  this->m_app->FlipPage();
+  
+  // Set some settings.
+  Settings::ssh_to = ssh_to;
+  Settings::script_file = script_file;
 
-    // Choose the next window.    
+  // Initialize recognizer process.
+//* Commenting these lines out will disable recognizer.
+  this->m_recognizer = new Process();
+  this->m_out_queue = new msg::OutQueue();//this->m_recognizer->write_fd);
+  this->m_in_queue = new msg::InQueue();//this->m_recognizer->read_fd);
+//*/
+
+  // Initialize windows.
+//  this->m_init_window = new WindowInit(this->m_in_queue);
+  this->m_startprocess_window = new WindowStartProcess(NULL, this->m_recognizer, this->m_in_queue, this->m_out_queue);
+  this->m_main_window = new WindowMain();
+  this->m_recognizer_window = new WindowFileRecognizer(this->m_recognizer, this->m_in_queue, this->m_out_queue);
+  this->m_microphone_window = new WindowMicrophoneRecognizer(this->m_recognizer, this->m_in_queue, this->m_out_queue);
+  
+//  this->m_init_window->initialize();
+  this->m_startprocess_window->initialize();
+  this->m_main_window->initialize();
+  this->m_recognizer_window->initialize();
+  this->m_microphone_window->initialize();
+  
+  return true;
+}
+
+void
+Application::clean()
+{
+  // Do cleaning in reverse order compared to initialization.
+  
+  // Clean windows.
+//  delete this->m_init_window;
+  delete this->m_startprocess_window;
+  delete this->m_main_window;
+  delete this->m_recognizer_window;
+  delete this->m_microphone_window;
+  this->m_startprocess_window = NULL;
+//  this->m_init_window = NULL;
+  this->m_main_window = NULL;
+  this->m_recognizer_window = NULL;
+  this->m_microphone_window = NULL;
+
+  // Finish and clean recognizer process.
+  delete this->m_out_queue;
+  delete this->m_in_queue;
+  this->m_out_queue = NULL;
+  this->m_in_queue = NULL;
+  if (this->m_recognizer) {
+    if (this->m_recognizer->is_created()) {
+      this->m_recognizer->finish();
+    }
+    delete this->m_recognizer;
+    this->m_recognizer = NULL;
+  }
+  
+  delete this->m_app;
+  this->m_app = NULL;
+
+}
+
+void
+Application::next_window(int ret_val)
+{
+//  Window *new_window = NULL;
+  if (this->m_current_window) {
     if (ret_val == 0) {
       this->m_current_window = NULL;
     }
-    else if (this->m_current_window == this->m_init_window) {
+    else if (this->m_current_window == this->m_startprocess_window) {
       this->m_current_window = this->m_main_window;
     }
     else if (this->m_current_window == this->m_main_window) {
@@ -80,141 +179,4 @@ Application::run()
       this->m_current_window = NULL;
     }
   }
-  pthread_mutex_unlock(&this->m_lock);
-
-  fprintf(stderr, "Wait for GUI to finish..\n");
-  this->m_thread_finished = true;
-  this->Quit();
-  pthread_join(thread, NULL);
-  // At this point you can be sure that also the gui thread has finished.
 }
-
-void*
-Application::start_gui(void *user_data)
-{
-  Application *app = (Application*)user_data;
-
-  // This fixes the dummy quitting behaviour!
-  app->EnableAppIdleCalls();
-  // This call returns after GUI has finished.
-  app->Run();
-
-  fprintf(stderr, "GUI main loop finished.\n");
-  return NULL;  
-}
-
-bool
-Application::start_recognizer()
-{
-  if (this->m_recognizer->create() == 0) {
-    int ret = execlp("ssh",
-                     "ssh",
-                     Settings::ssh_to.data(),
-                     Settings::script_file.data(),//"/home/jluttine/workspace/online-demo/rec.sh",
-                    (char*)NULL);
-    if (ret < 0) {
-      perror("Application::start_recognizer exec() failed");
-      return false;                                    //*/
-      
-    }
-    assert(false);
-  }
-  
-  msg::set_non_blocking(this->m_recognizer->read_fd);
-  msg::set_non_blocking(this->m_recognizer->write_fd);
-//  in_queue->fd = proc->read_fd;
-//  out_queue->fd = proc->write_fd;
-  return true;
-  
-}
-
-bool
-Application::eventQuit(int id, PG_MessageObject *widget, unsigned long data)
-{
-  // Send quitting signal to windowing thread.
-  pthread_mutex_lock(&this->m_lock);
-  if (this->m_current_window) {
-    this->m_current_window->quit();
-    this->m_current_window = NULL;
-  }
-  pthread_mutex_unlock(&this->m_lock);
-  
-  // Wait for windowing thread to finish. This is just to make quitting totally
-  // safe.
-  while (!this->m_thread_finished) {
-    pthread_yield();
-  }
-  
-  return PG_Application::eventQuit(id, widget, data);
-}
-
-bool
-Application::initialize(const std::string &ssh_to, const std::string &script_file)
-{
-  // Initialize PG_Application.
-  if(!this->InitScreen(1024, 900)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
-    fprintf(stderr, "Resolution not supported\n");
-    return false;
-  }
-  this->LoadTheme("default");
-  this->SetCaption("Online-demo", NULL);
-  
-  // Read settings from script file.
-  Settings::ssh_to = ssh_to;
-  Settings::script_file = script_file;
-  Settings::read_settings();
-
-  // Initialize and start recognizer process.
-//* Commenting these lines out will disable recognizer.
-  this->m_recognizer = new Process();
-  if (!this->start_recognizer()) {
-    fprintf(stderr, "Application::initialize couldn't start recognizer process.\n");
-    return false;
-  }
-  this->m_out_queue = new OutQueueController(this->m_recognizer->write_fd);
-  this->m_in_queue = new msg::InQueue(this->m_recognizer->read_fd);
-//*/
-
-  // Initialize windows.
-  this->m_init_window = new WindowInit(this->m_in_queue);
-  this->m_main_window = new WindowMain();
-  this->m_recognizer_window = new WindowFileRecognizer(this->m_in_queue, this->m_out_queue);
-  this->m_microphone_window = new WindowMicrophoneRecognizer(this->m_in_queue, this->m_out_queue);
-  
-  this->m_init_window->initialize();
-  this->m_main_window->initialize();
-  this->m_recognizer_window->initialize();
-  this->m_microphone_window->initialize();
-  
-  return true;
-}
-
-void
-Application::clean()
-{
-  // Do cleaning in reverse order compared to initialization.
-  
-  // Clean windows.
-  delete this->m_init_window;
-  delete this->m_main_window;
-  delete this->m_recognizer_window;
-  delete this->m_microphone_window;
-  this->m_init_window = NULL;
-  this->m_main_window = NULL;
-  this->m_recognizer_window = NULL;
-  this->m_microphone_window = NULL;
-
-  // Finish and clean recognizer process.
-  delete this->m_out_queue;
-  delete this->m_in_queue;
-  this->m_out_queue = NULL;
-  this->m_in_queue = NULL;
-  if (this->m_recognizer) {
-    if (this->m_recognizer->is_created()) {
-      this->m_recognizer->finish();
-    }
-    delete this->m_recognizer;
-    this->m_recognizer = NULL;
-  }
-}
-

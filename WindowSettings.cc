@@ -3,7 +3,7 @@
 #include "Settings.hh"
 #include "str.hh"
 
-WindowSettings::WindowSettings(const PG_Widget *parent, OutQueueController *out_queue)
+WindowSettings::WindowSettings(const PG_Widget *parent, msg::OutQueue *out_queue)
   : WindowChild(parent, "Settings", 350, 300, true, "OK", "Cancel")
 {
   this->m_text_label = NULL;
@@ -80,8 +80,6 @@ WindowSettings::do_ok()
 
   Settings::beam = beam;
   Settings::lmscale = lmscale;
-//  Settings::set_beam(beam);
-//  Settings::set_lmscale(lmscale);
   
   if (this->m_out_queue) {
     // Send parameter change messages to recognizer.

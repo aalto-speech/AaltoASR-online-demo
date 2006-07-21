@@ -40,6 +40,8 @@ namespace msg {
   { 
     assert(this->fd < 0);
     assert(!eof);
+    //if (eof)
+      //throw ExceptionBrokenPipe(fd);
     this->fd = fd; 
   }
 
@@ -47,6 +49,9 @@ namespace msg {
   InQueue::flush()
   {
     assert(!eof);
+    //if (eof)
+      //throw ExceptionBrokenPipe(fd);
+      
     if (fd < 0)
       return;
 
@@ -58,50 +63,49 @@ namespace msg {
 
       // Read buffer with restart
       while (1) {
-	ret = read(fd, &buffer[bytes_got], bytes_left);
-	if (ret < 0) {
-	  if (errno == EAGAIN) // read would block
-	    return;
-	  if (errno == EINTR) // interrupted by signal
-	    continue;
-	  perror("flush_read(): read() failed");
-	  exit(1);
-	}
-	if (ret == 0) { // end of file
-	  eof = true;
-	  return;
-	}
-	  
-	break;
+      	ret = read(fd, &buffer[bytes_got], bytes_left);
+        if (ret < 0) {
+      	  if (errno == EAGAIN) // read would block
+      	    return;
+      	  if (errno == EINTR) // interrupted by signal
+      	    continue;
+      	  perror("flush_read(): read() failed");
+          fprintf(stderr, "errno: %d\n", errno);
+      	  exit(1);
+      	}
+      	if (ret == 0) { // end of file
+      	  eof = true;
+      	  return;
+      	}
+      	break;
       }
 
       assert(ret <= bytes_left);
       bytes_got += ret;
       if (ret == bytes_left) {
 
-	if (bytes_got == header_size) {
-	  int length = endian::get4<int>(&buffer[0]);
-	  if (length < header_size) {
-	    fprintf(stderr, "InQueue::flush() got message length %d\n", 
-		    length);
-	    exit(1);
-	  }
+      	if (bytes_got == header_size) {
+      	  int length = endian::get4<int>(&buffer[0]);
+      	  if (length < header_size) {
+      	    fprintf(stderr, "InQueue::flush() got message length %d\n",  length);
+      	    exit(1);
+      	  }
 
-	  buffer.resize(length);
-	  if (bytes_got < length)
-	    continue;
-	}
+      	  buffer.resize(length);
+      	  if (bytes_got < length)
+      	    continue;
+      	}
       
-	Message message;
-	message.buf = buffer;
-	if (message.urgent())
-	  queue.push_front(message);
-	else
-	  queue.push_back(message);
+      	Message message;
+      	message.buf = buffer;
+      	if (message.urgent())
+      	  queue.push_front(message);
+      	else
+      	  queue.push_back(message);
 
-	buffer.resize(header_size);
-	bytes_got = 0;
-	break;
+      	buffer.resize(header_size);
+      	bytes_got = 0;
+      	break;
       }
     }
   }
@@ -156,7 +160,7 @@ namespace msg {
   }
 
   bool
-  OutQueue::send_next()
+  OutQueue::send_next() throw(ExceptionBrokenPipe)
   {
     assert(fd >= 0);
 
@@ -174,6 +178,8 @@ namespace msg {
           if (errno == EINTR) // interrupted by signal
             continue;
           perror("flush_send(): write() failed");
+          if (errno == EPIPE)
+            throw ExceptionBrokenPipe(fd);
           exit(1);
         }
         break;
@@ -191,13 +197,22 @@ namespace msg {
   }
 
   void
-  OutQueue::flush()
+  OutQueue::flush() throw(ExceptionBrokenPipe)
   {
     while (!queue.empty()) {
       prepare_next();
       if (!send_next())
         return;
     }
+  }
+
+  void
+  OutQueue::add_message(const Message &msg)
+  {
+    if (msg.urgent())
+      this->queue.push_front(msg);
+    else
+      this->queue.push_back(msg);
   }
 
   Mux::Mux()

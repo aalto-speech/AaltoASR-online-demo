@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "AudioStream.hh"
   
+std::set<AudioStream*> AudioStream::m_all_streams;
   
 //*  
 bool
@@ -87,6 +88,7 @@ AudioStream::initialize()
   // if initialized, nothing
   // Initialize PortAudio.
   error = Pa_Initialize();
+  fprintf(stderr, "AS initialize()\n");
   if (error != paNoError) {
     print_error("Couldn't initialize audio:\n", &error);
     return false;
@@ -100,8 +102,19 @@ AudioStream::terminate()
 {
   PaError error;
   error = Pa_Terminate();
+  fprintf(stderr, "AS terminate()\n");
   if (error != paNoError) {
     print_error("Couldn't terminate audio:\n", &error);
+  }
+}
+
+void
+AudioStream::close_all_streams()
+{
+  std::set<AudioStream*>::iterator iter = m_all_streams.begin();
+  while (iter != m_all_streams.end()) {
+    (*iter)->close();
+    iter = m_all_streams.begin();
   }
 }
 
@@ -109,6 +122,7 @@ bool
 AudioStream::open(bool input_stream, bool output_stream)
 {
 //  this->m_frames_played = 0;
+  fprintf(stderr, "Opening stream.\n");
   this->m_input_stream = input_stream;
   this->m_output_stream = output_stream;
   
@@ -116,20 +130,24 @@ AudioStream::open(bool input_stream, bool output_stream)
   PaStreamParameters *output_params = NULL;
   
   if (input_stream) {
+    const PaDeviceInfo *input_device_info;
     input_params = new PaStreamParameters;
-    input_params->device = 0;
+    input_params->device = Pa_GetDefaultInputDevice();
     input_params->channelCount = 1;
     input_params->sampleFormat = PA_AUDIO_FORMAT;
-    input_params->suggestedLatency = 0.001;
+    input_device_info = Pa_GetDeviceInfo(input_params->device);
+    input_params->suggestedLatency = input_device_info->defaultHighInputLatency;
     input_params->hostApiSpecificStreamInfo = NULL;
   }
 
   if (output_stream) {
+    const PaDeviceInfo *output_device_info;
     output_params = new PaStreamParameters;
-    output_params->device = 0;
+    output_params->device = Pa_GetDefaultOutputDevice();
     output_params->channelCount = 1;
     output_params->sampleFormat = PA_AUDIO_FORMAT;
-    output_params->suggestedLatency = 0.001;
+    output_device_info = Pa_GetDeviceInfo(output_params->device);
+    output_params->suggestedLatency = output_device_info->defaultLowOutputLatency;
     output_params->hostApiSpecificStreamInfo = NULL;
   }
 
@@ -138,7 +156,7 @@ AudioStream::open(bool input_stream, bool output_stream)
         input_params,// input params
         output_params,// output params
         SAMPLE_RATE,
-        128,//paFramesPerBufferUnspecified,
+        paFramesPerBufferUnspecified,
         paNoFlag,//PaStreamFlags streamFlags,
         AudioStream::callback,
         this); // Open audio stream.
@@ -146,23 +164,6 @@ AudioStream::open(bool input_stream, bool output_stream)
   delete input_params;
   delete output_params;
 
-/*
-  PaError error = Pa_OpenStream(&this->m_stream,
-        0,//PaDeviceID inputDevice,
-        input_stream ? 1 : 0,
-        PA_AUDIO_FORMAT,
-        NULL,//void *inputDriverInfo,
-        0,//PaDeviceID outputDevice,
-        output_stream ? 1 : 0,
-        PA_AUDIO_FORMAT,
-        NULL,//void *outputDriverInfo,
-        SAMPLE_RATE,
-        128,//paFramesPerBufferUnspecified,
-        0,//numBuffers
-        paNoFlag,//PaStreamFlags streamFlags,
-        AudioStream::callback,
-        this); // Open audio stream.
-        //*/
         /*
   PaError error = Pa_OpenDefaultStream(&this->m_stream,
                                        input_stream ? 1 : 0,
@@ -178,49 +179,25 @@ AudioStream::open(bool input_stream, bool output_stream)
     return false;
   }
   
+  fprintf(stderr, "AS open stream ok.\n");
+  AudioStream::m_all_streams.insert(this);
   return true;
 }
 
-/*
-bool
-AudioStream::open_stream(unsigned int input_channels, unsigned int output_channels)
-{
-  // Open audio stream.
-  PaError error = Pa_OpenDefaultStream(&this->m_stream,
-                                       input_channels,
-                                       output_channels,
-                                       PA_AUDIO_FORMAT,
-                                       SAMPLE_RATE,
-                                       paFramesPerBufferUnspecified,
-                                       this->callback,
-                                       this);
-
-  if (error != paNoError) {
-    print_error("Couldn't open audio stream:\n", &error);
-    return false;
-  }
-  
-  return true;
-}
-//*/
 void
 AudioStream::close()
 {
   if (this->m_stream) {
+    fprintf(stderr, "Closing stream.\n");
     PaError error = Pa_CloseStream(this->m_stream);
     if (error != paNoError) {
       print_error("Couldn't close audio stream:\n", &error);
     }
+    AudioStream::m_all_streams.erase(this);
     this->m_stream = NULL;
   }
 }
-/*
-void
-AudioStream::reset()
-{
-//  this->m_frames_played = 0;
-}
-//*/
+
 bool
 AudioStream::start()
 {
@@ -249,6 +226,10 @@ AudioStream::set_input_buffer(AudioBuffer *input_buffer)
 void
 AudioStream::set_output_buffer(AudioBuffer *output_buffer)
 {
+  if (output_buffer == NULL)
+    Pa_AbortStream(this->m_stream);
+  else
+    Pa_StartStream(this->m_stream);
   pthread_mutex_lock(&this->m_outputbuffer_lock);
   this->m_output_buffer = output_buffer;
   pthread_mutex_unlock(&this->m_outputbuffer_lock);
@@ -267,10 +248,14 @@ AudioStream::callback(const void* input_buffer, void* output_buffer,
     object->input_stream_callback((AUDIO_FORMAT*)input_buffer,
                                   frame_count);
   }
+//  memcpy(output_buffer, input_buffer, frame_count * sizeof(AUDIO_FORMAT));
+  //*
   if (object->m_output_stream) {
     object->output_stream_callback((AUDIO_FORMAT*)output_buffer,
                                    frame_count);
   }
+  //*/
+//  Pa_Sleep(1);
   return paContinue;
   /*
   AudioStream *object = (AudioStream*)instance;
@@ -333,7 +318,7 @@ AudioStream::print_error(const std::string &message, const PaError *error)
 {
   fprintf(stderr, message.data());
   if (error) {
-    fprintf(stderr, Pa_GetErrorText(*error));
+    fprintf(stderr, "%s\n", Pa_GetErrorText(*error));
   }
 //  ErrorHandler::print_error(message);
 //  ErrorHandler::print_error(Pa_GetErrorText(error));

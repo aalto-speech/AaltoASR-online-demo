@@ -17,12 +17,11 @@ public:
   
 protected:
 
-  virtual void do_running();
+//  virtual void do_running();
 
-//  virtual bool eventMouseMotion(const SDL_MouseMotionEvent *motion);
-//  virtual bool eventKeyDown(const SDL_KeyboardEvent *key);
-  
-  bool button_pressed(PG_Button *button);
+  bool handle_file_button(PG_Button *button);
+  bool handle_microphone_button(PG_Button *button);
+  bool handle_exit_button(PG_Button *button);
   
 private:
 

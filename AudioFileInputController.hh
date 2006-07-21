@@ -4,7 +4,6 @@
 
 #include <sndfile.h>
 #include "msg.hh"
-#include "AudioOutputStream.hh"
 #include "AudioInputController.hh"
 //*
 class AudioFileInputController  :  public AudioInputController
@@ -12,11 +11,11 @@ class AudioFileInputController  :  public AudioInputController
   
 public:
 
-  AudioFileInputController(OutQueueController *out_queue);
+  AudioFileInputController(msg::OutQueue *out_queue);
   virtual ~AudioFileInputController();
   
-  virtual bool initialize();
-  virtual void terminate();
+//  virtual bool initialize();
+//  virtual void terminate();
 
   /** No need for locking. */
   bool load_file(const std::string &filename);
@@ -35,7 +34,7 @@ public:
 
 protected:
 
-  virtual unsigned long read_input();
+  virtual void read_input();
   
 private:
 

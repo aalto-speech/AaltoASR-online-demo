@@ -37,6 +37,17 @@ namespace msg {
   const int header_size = 6;
 
   void set_non_blocking(int fd);
+  
+  class ExceptionBrokenPipe
+  {
+  public:
+    ExceptionBrokenPipe(int fd) : m_fd(fd), m_message("Broken pipe.") { }
+    inline int get_fd() const { return m_fd; }
+    inline const std::string& get_message() const { return m_message; }
+  private:
+    int m_fd;
+    std::string m_message;
+  };
 
   class Message {
   public:
@@ -116,6 +127,7 @@ namespace msg {
 
   class InQueue {
   public:
+    // Should this be protected/private?
     std::deque<Message> queue;
 
   public:
@@ -145,11 +157,12 @@ namespace msg {
 
   class OutQueue {
   public:
+    // Should this be protected/private?
     std::deque<Message> queue;
 
   public:
     OutQueue(int fd = -1);
-    bool empty() { return queue.empty(); }
+    inline bool empty() const { return queue.empty(); }
 
     /** Enable the queue. 
      * \param fd = file descriptor where messages are sent */
@@ -165,14 +178,19 @@ namespace msg {
      * descriptor is in non-blocking state, some of the data may be unsent. 
      * \return false if whole message was not sent
      */
-    bool send_next(); 
+    bool send_next() throw(ExceptionBrokenPipe); 
 
     /** Flush all messages in the queue.  If the file descriptor is in
      * non-blocking state, the function returns if the file would block. */
-    void flush();
+    void flush() throw(ExceptionBrokenPipe);
 
     /** File descriptor of the queue. */
-    int get_fd() { return fd; }
+    inline int get_fd() const { return fd; }
+    
+    /** Puts the message in the queue. **/
+    void add_message(const Message &msg);
+    
+    inline void clear() { this->queue.clear(); }
 
   private:
     std::string buffer; //!< The internal buffer for the next message

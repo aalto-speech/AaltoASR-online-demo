@@ -3,25 +3,18 @@
 #include "WindowReset.hh"
 #include "WindowOpenFile.hh"
 
-WindowFileRecognizer::WindowFileRecognizer(msg::InQueue *in_queue, OutQueueController *out_queue)
-  : WindowRecognizer(in_queue, out_queue)
-//    m_spectrum(this, PG_Rect(100, 300, 500, 200))
+WindowFileRecognizer::WindowFileRecognizer(Process *process,
+                                           msg::InQueue *in_queue,
+                                           msg::OutQueue *out_queue)
+  : WindowRecognizer(process, in_queue, out_queue)
 {
-/*
-  this->m_back_button = NULL;
-  this->m_play_button = NULL;
-  this->m_reset_button = NULL;
-  //*/
   this->m_open_button = NULL;
-  this->m_open_file = false;
-  
   this->m_audio_input = NULL;
 }
 
 WindowFileRecognizer::~WindowFileRecognizer()
 {
   delete this->m_open_button;
-
   delete this->m_audio_input;
 }
 
@@ -32,7 +25,7 @@ WindowFileRecognizer::initialize()
   
   this->m_open_button = new PG_Button(this->m_window, PG_Rect(10,200,150,50), "Open file");
   this->m_window->AddChild(this->m_open_button);
-  this->m_open_button->sigClick.connect(slot(*this, &WindowFileRecognizer::handle_button));
+  this->m_open_button->sigClick.connect(slot(*this, &WindowFileRecognizer::handle_open_button));
 }
 
 void
@@ -56,14 +49,6 @@ WindowFileRecognizer::do_running()
     if (this->m_audio_input->is_eof())
       this->end_of_audio();
   }
-    
-  if (this->m_open_file) {
-    this->pause_window_functionality(true);
-    this->open_audio_file();
-    this->m_open_file = false;
-    this->pause_window_functionality(false);
-  }
-  
 }
 
 void
@@ -90,13 +75,17 @@ WindowFileRecognizer::reset(bool reset_audio)
   }
 }
 
-void
-WindowFileRecognizer::open_audio_file()
+bool
+WindowFileRecognizer::handle_open_button(PG_Button *button)
 {
   WindowOpenFile window(this->m_window, this->m_audio_input);
-
+  int ret_val;
+  
+  this->pause_window_functionality(true);
   window.initialize();
-  if (this->run_child_window(&window) == 1) {
+  ret_val = this->run_child_window(&window);
+
+  if (ret_val == 1) {
     // Run reset window without reseting audio.
     this->reset(false);
 
@@ -104,15 +93,5 @@ WindowFileRecognizer::open_audio_file()
       this->set_status(LISTENING);
     }
   }
-}
-
-//*/
-bool
-WindowFileRecognizer::handle_button(PG_Button *button)
-{
-  if (button == this->m_open_button) {
-    this->m_open_file = true;
-  }
-
   return true;
 }

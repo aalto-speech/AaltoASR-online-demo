@@ -5,6 +5,7 @@
 #include <portaudio.h>
 #include <string>
 #include <pthread.h>
+#include <set>
 #include "Buffer.hh"
 
 typedef short AUDIO_FORMAT;
@@ -32,6 +33,8 @@ public:
   static bool initialize();
   /** Terminates audio device. Call this after you don't need any streams. */
   static void terminate();
+  
+  static void close_all_streams();
 
   AudioStream();
   ~AudioStream();
@@ -74,6 +77,7 @@ protected:
 private:
 
   PaStream *m_stream;
+  static std::set<AudioStream*> m_all_streams;
 
   bool m_input_stream;
   bool m_output_stream;

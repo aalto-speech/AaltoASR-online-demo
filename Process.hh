@@ -4,6 +4,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+//class ExceptionChildProcess { };
+
 class Process {
 public:
   Process();

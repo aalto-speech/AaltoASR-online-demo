@@ -5,13 +5,13 @@
 #include <pglabel.h>
 #include <pglineedit.h>
 #include "WindowChild.hh"
-#include "OutQueueController.hh"
+#include "msg.hh"
 
 class WindowSettings  :  public WindowChild
 {
 public:
 
-  WindowSettings(const PG_Widget *parent, OutQueueController *out_queue);
+  WindowSettings(const PG_Widget *parent, msg::OutQueue *out_queue);
   virtual ~WindowSettings();
 
   virtual void initialize();
@@ -24,7 +24,7 @@ protected:
 
 private:
 
-  OutQueueController *m_out_queue;
+  msg::OutQueue *m_out_queue;
 
   PG_Label *m_text_label;
   PG_Label *m_beam_label;

@@ -3,11 +3,13 @@
 
 WidgetRecognitionTexts::WidgetRecognitionTexts(PG_Widget *parent,
                                                const PG_Rect &rect,
+                                               AudioInputController *audio_input,
                                                Recognition *recognition,
                                                unsigned int pixels_per_second)
   : WidgetScrollArea(parent, rect),//PG_ScrollArea(parent, rect),
     m_pixels_per_second(pixels_per_second)
 {
+  this->m_audio_input = audio_input;
   this->m_recognition = recognition;
   this->initialize();
 }
@@ -27,11 +29,21 @@ void
 WidgetRecognitionTexts::terminate()
 {
   for (unsigned int i = 0; i < this->m_morpheme_buttons.size(); i++) {
-//    this->remove_child(this->m_morpheme_buttons.at(i));
     delete this->m_morpheme_buttons.at(i);
   }
   this->remove_all_childs();
   this->m_morpheme_buttons.clear();
+}
+
+void
+WidgetRecognitionTexts::remove_morpheme_button(unsigned int index)
+{
+  /*
+  PG_Widget *removed = this->m_morpheme_buttons.at(index);
+  this->remove_child(this->m_morpheme_buttons.at(index));
+  this->m_morpheme_buttons.erase(this->m_morpheme_buttons.at(index));
+  delete removed;
+  //*/
 }
   
 void
@@ -73,20 +85,13 @@ WidgetRecognitionTexts::add_morpheme_button(const Morpheme *morpheme)
     SDL_FillRect(button->GetWidgetSurface(),
                  NULL,
                  button->GetFontColor().MapRGB(button->GetWidgetSurface()->format));
-/*    
-    rect.SetRect(0, 0, 1, 30);
-    button = new PG_Widget(this, rect, true);
-    this->add_child(button, x + w / 2);
-    SDL_FillRect(button->GetWidgetSurface(),
-                 NULL,
-                 button->GetFontColor().MapRGB(button->GetWidgetSurface()->format));
-//*/
-    //button->DrawVLine(0, 0, 30, PG_Color(255, 255, 255));
+
   }
   else {
     rect.SetRect(0, 0, w, 30);
     button = new PG_Label(this, rect, morpheme->data.data());
     ((PG_Label*)button)->SetAlignment(PG_Label::CENTER);
+    button->sigMouseButtonUp.connect(slot(*this, &WidgetRecognitionTexts::handle_morpheme_button), NULL);
 //    button = new PG_Button(this, rect, morpheme->data.data());
     this->add_child(button, x);
   }
@@ -94,3 +99,18 @@ WidgetRecognitionTexts::add_morpheme_button(const Morpheme *morpheme)
 //  fprintf(stderr, "morpheme button x: %d, data: %s\n", x, morpheme->data.data());
   this->m_morpheme_buttons.push_back(button);
 }
+
+bool
+WidgetRecognitionTexts::handle_morpheme_button(PG_MessageObject *widget, const SDL_MouseButtonEvent *event, void *user_data)
+{
+  double multiplier = SAMPLE_RATE / this->m_pixels_per_second;
+  unsigned long x = ((PG_Widget*)widget)->my_xpos;
+  unsigned long w = ((PG_Widget*)widget)->my_width;
+  x += this->get_scroll_position();
+  x = (unsigned long)(x * multiplier);
+  w = (unsigned long)(w * multiplier);
+  fprintf(stderr, "Morpheme pressed... Playing %d, %d.\n", x, w);
+  this->m_audio_input->play(x, w);
+  return true;
+}
+

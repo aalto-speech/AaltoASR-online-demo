@@ -15,8 +15,6 @@ public:
   
 protected:
 
-//  virtual std::string get_title() const { return "Open Audio File"; }
-
   virtual bool do_ok()
   {
     // Try to load audio file.

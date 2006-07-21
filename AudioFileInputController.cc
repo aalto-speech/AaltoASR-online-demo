@@ -1,8 +1,7 @@
 
-#include "AudioInputStream.hh"
 #include "AudioFileInputController.hh"
 
-AudioFileInputController::AudioFileInputController(OutQueueController *out_queue)
+AudioFileInputController::AudioFileInputController(msg::OutQueue *out_queue)
   : AudioInputController(out_queue), m_output_buffer(48000)
 {
   this->m_output_cursor = 0;
@@ -35,40 +34,6 @@ AudioFileInputController::reset_cursors()
   AudioInputController::reset_cursors();
 }
 
-bool
-AudioFileInputController::initialize()
-{
-  if (!AudioInputController::initialize())
-    return false;
-    
-    /*
-  if (!this->m_audio_output.open()) {
-    fprintf(stderr, "AFIC initialization failed: Couldn't initialize audio output.\n");
-    return false;
-  }
-  if (!this->m_audio_output.start()) {
-    fprintf(stderr, "AFIC initialization failed to start audio output.\n");
-    return false;
-  }
-//*/
-  return true;
-}
-
-void
-AudioFileInputController::terminate()
-{
-//  this->m_audio_output.close();
-  AudioInputController::terminate();
-}
-/*
-bool
-AudioFileInputController::start_listening()
-{
-  // TODO: Tämä ennen tuota startia???
-  this->m_output_cursor = 0;
-  return AudioInputController::start_listening();
-}
-//*/
 //*
 void
 AudioFileInputController::pause_listening(bool pause)
@@ -80,7 +45,7 @@ AudioFileInputController::pause_listening(bool pause)
 }
 //*/
 
-unsigned long
+void
 AudioFileInputController::read_input()
 {
   // Send audio to output stream.
@@ -89,5 +54,5 @@ AudioFileInputController::read_input()
 
   // Return the frames that have been played (in speakers) since last read.
   // This way we will synchronize recognizer with the sound from speakers.
-  return this->m_output_buffer.get_frames_read() - this->get_read_cursor();
+//  return this->m_output_buffer.get_frames_read() - this->get_read_cursor();
 }

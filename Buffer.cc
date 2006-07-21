@@ -166,10 +166,8 @@ template <class T>
 void
 Buffer<T>::clear()
 {
-  fprintf(stderr, "Buffer clear start\n");
   this->m_read_index = this->m_write_index;
   this->m_frames_read = 0;
-  fprintf(stderr, "Buffer clear end\n");
 }
 
 template <class T>

@@ -1,7 +1,7 @@
 
 #ifndef WINDOWINIT_HH_
 #define WINDOWINIT_HH_
-
+/*
 #include "Window.hh"
 #include "msg.hh"
 
@@ -19,8 +19,8 @@ protected:
   
   virtual void do_opening();
   virtual void do_running();
-  virtual void do_closing(int return_value);
-  virtual bool eventKeyDown(const SDL_KeyboardEvent *key);
+//  virtual void do_closing(int return_value);
+//  virtual bool eventKeyDown(const SDL_KeyboardEvent *key);
 
 private:
 
@@ -29,5 +29,5 @@ private:
   PG_Label *m_text;  
   
 };
-
+//*/
 #endif /*WINDOWINIT_HH_*/

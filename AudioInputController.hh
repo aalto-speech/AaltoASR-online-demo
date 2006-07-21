@@ -5,8 +5,9 @@
 #include <iostream>
 #include <string.h>
 #include <queue>
-#include "OutQueueController.hh"
+//#include "OutQueueController.hh"
 #include "AudioStream.hh"
+#include "msg.hh"
 //#include "AudioOutputStream.hh"
 //#include "ErrorHandler.hh"
 //#include "FileOutput.hh"
@@ -16,13 +17,13 @@ class AudioInputController//  :  public ErrorHandler
   
 public:
   
-  AudioInputController(OutQueueController *out_queue);
+  AudioInputController(msg::OutQueue *out_queue);
   virtual ~AudioInputController();
   
-  virtual bool initialize();
-  virtual void terminate();
+  bool initialize();
+  void terminate();
 
-  void operate();
+  unsigned long operate();
   virtual void pause_listening(bool pause);
   
   void play(unsigned long from, unsigned long length = 0);
@@ -41,11 +42,11 @@ public:
   
 protected:
 
-  virtual unsigned long read_input() = 0;
+  virtual void read_input() = 0;
   virtual bool open_stream(bool input_stream);
   
   std::string m_audio_data;
-  OutQueueController *m_out_queue;
+  msg::OutQueue *m_out_queue;
   AudioStream m_audio_stream;
   
 private:

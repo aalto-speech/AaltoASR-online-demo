@@ -1,13 +1,16 @@
 
 #include "Recognition.hh"
+#include "WindowMessageBox.hh"
 #include "WindowRecognizer.hh"
 #include "WindowReset.hh"
 #include "WindowSettings.hh"
+#include "WindowStartProcess.hh"
 #include "str.hh"
 
-WindowRecognizer::WindowRecognizer(msg::InQueue *in_queue, OutQueueController *out_queue)
-//    m_spectrum(this, PG_Rect(100, 300, 500, 200))
+WindowRecognizer::WindowRecognizer(Process *process, msg::InQueue *in_queue, msg::OutQueue *out_queue)
+  : m_queue(in_queue, &m_recognition)
 {
+  
   this->m_back_button = NULL;
   this->m_play_button = NULL;
   this->m_reset_button = NULL;
@@ -18,14 +21,11 @@ WindowRecognizer::WindowRecognizer(msg::InQueue *in_queue, OutQueueController *o
 
   this->m_recognition_area = NULL;
   
+  this->m_process = process;
   this->m_in_queue = in_queue;
   this->m_out_queue = out_queue;
   
-  this->m_thread_created = false;
-//  this->m_reset_pressed = false;
-  this->m_button_event = NONE;
   this->m_paused = false;
-  this->m_recognizer_enabled = true;
 }
 
 WindowRecognizer::~WindowRecognizer()
@@ -62,193 +62,75 @@ WindowRecognizer::initialize()
   this->m_window->AddChild(this->m_settings_button);
   this->m_window->AddChild(this->m_back_button);
 
-  this->m_play_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
-  this->m_enablerecog_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
-  this->m_endaudio_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
-  this->m_reset_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
-  this->m_resetrecog_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
-  this->m_settings_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
-  this->m_back_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_button));
+  this->m_play_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_play_button));
+  this->m_enablerecog_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_enablerecog_button));
+  this->m_endaudio_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_endaudio_button));
+  this->m_reset_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_reset_button));
+  this->m_resetrecog_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_resetrecog_button));
+  this->m_settings_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_settings_button));
+  this->m_back_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_back_button));
   
   this->m_play_button->SetToggle(true);
   this->m_enablerecog_button->SetToggle(true);
 }
 
 void
-WindowRecognizer::parse_recognition(const std::string &message)
-{
-  std::vector<std::string> split_vector;
-  std::string recognition_string;
-  std::string hypothesis_string;
-//  std::string data;
-//  std::string time_string;
-  
-  str::split(&message, "*", true, &split_vector, 2);
-  if (split_vector.size() >= 1)
-    recognition_string = split_vector.at(0);
-  if (split_vector.size() >= 2)
-    hypothesis_string = split_vector.at(1);
-  
-  split_vector.clear();
-  str::split(&recognition_string, " ", true, &split_vector);
-
-  if (split_vector.size() >= 2) {
-    Morpheme morph;
-    long next_time;
-    bool ok = true;
-    unsigned int ind = 0;
-    morph.time = str::str2long(&split_vector.at(2*ind), &ok);
-    morph.data = split_vector.at(2*ind+1);
-    for (ind = 1; ind < split_vector.size() / 2; ind++) {
-      next_time = str::str2long(&split_vector.at(2*ind), &ok);
-      morph.duration = next_time - morph.time;
-      this->m_recognition.add_morpheme(morph);
-      fprintf(stderr, "PARSED: Morpheme: %s, Time: %d, Duration: %d\n", morph.data.data(), morph.time, morph.duration);
-      morph.time = next_time;
-      morph.data = split_vector.at(2*ind+1);
-    }
-    if (2 * ind < split_vector.size()) {
-      next_time = str::str2long(&split_vector.at(2*ind), &ok);
-    }
-    else {
-      next_time = str::str2long(&hypothesis_string, &ok);
-    }
-    morph.duration = next_time - morph.time;
-    this->m_recognition.add_morpheme(morph);
-    fprintf(stderr, "PARSED: Morpheme: %s, Time: %d, Duration: %d\n", morph.data.data(), morph.time, morph.duration);
-  }
-}
-
-void*
-WindowRecognizer::in_queue_listener(void *user_data)
-{
-  //*
-  msg::Message message;
-  WindowRecognizer *object = (WindowRecognizer*)user_data;
-  while (!object->m_end_thread) {
-    // Read input from recognizer.
-    if (object->m_in_queue && object->m_recognizer_enabled) {
-      object->m_in_queue->flush();
-      if (!object->m_in_queue->empty()) {
-        message = object->m_in_queue->queue.front();
-        if (message.type() == msg::M_RECOG) {
-          fprintf(stderr, "RECOGNITION: %s\n", message.data_ptr());
-          object->parse_recognition(message.buf.substr(msg::header_size));
-        }
-        if (message.type() == msg::M_MESSAGE) {
-          fprintf(stderr, "MESSAGE: %s\n", message.data_ptr());
-        }
-        object->m_in_queue->queue.pop_front();
-      }
-      else {
-        pthread_yield();
-      }
-    }
-    // Flush output to recognizer.
-    if (object->m_out_queue) {
-      object->m_out_queue->flush();
-    }
-  }
-  //*/
-  return NULL;
-}
-
-void
 WindowRecognizer::do_opening()
 {
-  fprintf(stderr, "WR:do_op start\n");
   this->pause_audio_input(true);
   
-  // Enable recognizer.
-  this->m_enablerecog_button->SetPressed(true);
-  this->m_recognizer_enabled = true;
-
   this->m_recognition_area = new WidgetRecognitionArea(this->m_window,
                                                        PG_Rect(0, 400, this->m_window->Width(), 200),
                                                        this->get_audio_input(),
                                                        &this->m_recognition,
                                                        250);
   this->m_window->AddChild(this->m_recognition_area);
+  this->m_recognition_area->Show(false);
 
-  this->start_inqueue_thread();
+  // Enable recognizer.
+  this->m_enablerecog_button->SetPressed(true);
+  this->m_queue.enable();
+  if (!this->m_queue.start()) {
+    this->error("Couldn't start queue in WindowRecognizer::open.", ERROR_CLOSE);
+    return;
+  }
 
   // Do reseting
-  this->m_button_event = RESET;
-//  this->m_reset_pressed = true;
+  this->reset(true);
   this->set_status(LISTENING);
-  fprintf(stderr, "WR:do_op end\n");
 }
 
 void
 WindowRecognizer::do_running()
 {
-  msg::Message message;
-  WindowSettings *window;
-  
-//  fprintf(stderr, "WR:do_run start\n");
-  switch (this->m_button_event) {
-  case PLAY:
-    if (this->m_status == LISTENING) {
-      this->pause_audio_input(!this->m_play_button->GetPressed());
-    }
-    break;
-  case ENABLE_RECOG:
-    this->m_recognizer_enabled = this->m_enablerecog_button->GetPressed();
-/*
-    if (this->m_enablerecog_button->GetPressed())
-      this->get_audio_input()->play(10 * SAMPLE_RATE, 0);
-    else
-      this->get_audio_input()->stop();
-      //*/
-    break;
-  case END_AUDIO:
-    if (this->m_status == LISTENING) {
-      this->end_of_audio();
-    }
-    break;
-  case RESET:
-    this->pause_window_functionality(true);
-    this->reset(true);
-    this->pause_window_functionality(false);
-    break;
-  case RESET_RECOG:
-    this->pause_window_functionality(true);
-    this->reset(false);
-    this->pause_window_functionality(false);
-    break;
-  case SETTINGS:
-    this->pause_window_functionality(true);
-    window = new WindowSettings(this->m_window, this->m_out_queue);
-    window->initialize();
-    this->run_child_window(window);
-    delete window;
-    this->pause_window_functionality(false);
-    break;
-  case NONE:
-    break;
+  /*
+  static unsigned long luku = 0;
+  luku++;
+  if (luku % 1000 == 0)
+    fprintf(stderr, "%d\n", luku);
+  //*/
+
+  // Check broken pipe flag from queue controller.
+  if (this->m_queue.is_broken_pipe()) {
+    this->m_queue.stop();
+    this->m_queue.disable();
+    this->m_queue.start();
+    this->handle_broken_pipe();
   }
-  this->m_button_event = NONE;
-
-//  if (!this->m_paused) {
-    this->get_audio_input()->operate();
-//  }
-
-//  fprintf(stderr, "WR:do_run before update\n");
-  this->m_recognition_area->update();
-//  fprintf(stderr, "WR:do_run end\n");
+  else {
+    unsigned long read_size = this->get_audio_input()->operate();
+    if (read_size > 0) {
+      this->flush_out_queue();
+    }
+    this->m_recognition_area->update();
+  }
 }
 
 void
 WindowRecognizer::do_closing(int return_value)
 {
-  msg::Message message;
+  this->m_queue.stop();
 
-  this->stop_inqueue_thread();
-
-  if (this->m_out_queue) {
-    this->m_out_queue->reset();
-  }
-  
   if (this->m_recognition_area) {
     this->m_window->RemoveChild(this->m_recognition_area);
     delete this->m_recognition_area;
@@ -257,14 +139,67 @@ WindowRecognizer::do_closing(int return_value)
 }
 
 void
+WindowRecognizer::handle_broken_pipe()
+{
+  int ret_val;
+  bool restart = true;
+  
+  this->pause_window_functionality(true);
+
+  this->error("Recognition process disconnected.\nPress OK to restart.", ERROR_NORMAL);
+
+  WindowStartProcess window(this->m_window, this->m_process, this->m_in_queue, this->m_out_queue);
+  window.initialize();
+  ret_val = this->run_child_window(&window);
+  if (ret_val != 0) {
+    this->reset(false);
+    this->pause_window_functionality(false);
+  }
+  /*
+  while (restart) {
+    try {
+      ret_val = this->run_child_window(&window);
+      this->reset(false);
+      this->pause_window_functionality(false);
+      restart = false;
+    }
+    catch (msg::ExceptionBrokenPipe exception) {
+      WindowMessageBox message(this->m_window,
+                               "Error",
+                               "Recognizer process couldn't be restarted.\nDo you want to retry or exit?",
+                               "Retry",
+                               "Exit");
+      message.initialize();
+      ret_val = this->run_child_window(&message);
+      restart = (ret_val == 1);
+      if (ret_val == 2)
+        this->end_running(0);
+    }
+  }
+  //*/
+}
+//*
+void
+WindowRecognizer::flush_out_queue()
+{
+  try {
+    if (this->m_out_queue)
+      this->m_out_queue->flush();
+  }
+  catch (msg::ExceptionBrokenPipe exception) {
+    this->handle_broken_pipe();
+  }
+}
+//*/
+void
 WindowRecognizer::pause_window_functionality(bool pause)
 {
   if (pause) {
     this->pause_audio_input(true);
-    this->stop_inqueue_thread();
+    this->m_queue.disable();
   }
   else {
-    this->start_inqueue_thread();
+    this->m_queue.enable();
   }
 }
 
@@ -272,6 +207,8 @@ void
 WindowRecognizer::reset(bool reset_audio)
 {
   WindowReset window(this->m_window, this->m_in_queue, this->m_out_queue);
+
+  this->pause_window_functionality(true);
 
   if (reset_audio)
     this->get_audio_input()->reset();
@@ -283,27 +220,26 @@ WindowRecognizer::reset(bool reset_audio)
   this->m_recognition_area->update();
 
   window.initialize();
-  this->run_child_window(&window);
+  try {
+    this->run_child_window(&window);
+  }
+  catch (msg::ExceptionBrokenPipe exception) {
+    this->handle_broken_pipe();
+  }
+  
+  this->pause_window_functionality(false);
 }
 
 void
 WindowRecognizer::pause_audio_input(bool pause)
 {
-//  if (this->m_audio_input) {
-    this->get_audio_input()->pause_listening(pause);
-    this->m_play_button->SetPressed(!pause);
-    if (pause) {
-//      this->m_play_button->SetText("Play");
-    }
-    else {
-//      this->m_play_button->SetText("Pause");
-    }
+  this->get_audio_input()->pause_listening(pause);
+  this->m_play_button->SetPressed(!pause);
     
-    if (this->m_recognition_area)
-      this->m_recognition_area->set_autoscroll(!pause);
+  if (this->m_recognition_area)
+    this->m_recognition_area->set_autoscroll(!pause);
       
-    this->m_paused = pause;
-//  }
+  this->m_paused = pause;
 }
 
 void
@@ -313,8 +249,10 @@ WindowRecognizer::end_of_audio()
   this->set_status(END_OF_AUDIO);
   if (this->m_recognition_area)
     this->m_recognition_area->set_autoscroll(false);
-  if (this->m_out_queue)
-    this->m_out_queue->send_message(msg::Message(msg::M_AUDIO_END));
+  if (this->m_out_queue) {
+    this->m_out_queue->add_message(msg::Message(msg::M_AUDIO_END));
+    this->flush_out_queue();
+  }
 }
 
 void
@@ -336,59 +274,66 @@ WindowRecognizer::set_status(Status status)
 }
 
 bool
-WindowRecognizer::start_inqueue_thread()
+WindowRecognizer::handle_play_button(PG_Button *button)
 {
-  if (this->m_thread_created) {
-    this->error("Can't create thread for in queue: thread already created.", ERROR_CLOSE);
-    return false;
+  if (this->m_status == LISTENING) {
+    this->pause_audio_input(!this->m_play_button->GetPressed());
   }
-  this->m_end_thread = false;
-  if (pthread_create(&this->m_thread, NULL, this->in_queue_listener, this) != 0) {
-    this->error("Couldn't create thread for in queue.", ERROR_CLOSE);
-    return false;
-  }
-  this->m_thread_created = true;
   return true;
 }
 
-void
-WindowRecognizer::stop_inqueue_thread()
+bool
+WindowRecognizer::handle_enablerecog_button(PG_Button *button)
 {
-  if (this->m_thread_created) {
-    this->m_end_thread = true;
-    pthread_join(this->m_thread, NULL);
-    this->m_thread_created = false;
-  }
-  else {
-    fprintf(stderr, "Warning: Trying to join thread that is not created "
-                    "in WFR::stop_inqueue_thread.\n");
-  }
+  if (this->m_enablerecog_button->GetPressed())
+    this->m_queue.enable();
+  else
+    this->m_queue.disable();
+  /*
+  if (this->m_enablerecog_button->GetPressed())
+    this->get_audio_input()->play(10 * SAMPLE_RATE, 0);
+  else
+    this->get_audio_input()->stop();
+  //*/
+  return true;
 }
 
 bool
-WindowRecognizer::handle_button(PG_Button *button)
+WindowRecognizer::handle_endaudio_button(PG_Button *button)
 {
-  if (button == this->m_play_button) {
-    this->m_button_event = PLAY;//this->pause_audio_input(!this->m_paused);
+  if (this->m_status == LISTENING) {
+    this->end_of_audio();
   }
-  else if (button == this->m_enablerecog_button) {
-    this->m_button_event = ENABLE_RECOG;
-  }
-  else if (button == this->m_endaudio_button) {
-    this->m_button_event = END_AUDIO;
-  }
-  else if (button == this->m_reset_button) {
-    this->m_button_event = RESET;
-  }
-  else if (button == this->m_resetrecog_button) {
-    this->m_button_event = RESET_RECOG;
-  }
-  else if (button == this->m_settings_button) {
-    this->m_button_event = SETTINGS;
-  }
-  else if (button == this->m_back_button) {
-    this->close(1);
-  }
+  return true;
+}
 
+bool
+WindowRecognizer::handle_reset_button(PG_Button *button)
+{
+  this->reset(true);
+  return true;
+}
+
+bool
+WindowRecognizer::handle_resetrecog_button(PG_Button *button)
+{
+  this->reset(false);
+  return true;
+}
+
+bool
+WindowRecognizer::handle_settings_button(PG_Button *button)
+{
+  this->pause_window_functionality(true);
+  WindowSettings window(this->m_window, this->m_out_queue);
+  window.initialize();
+  this->run_child_window(&window);
+  this->pause_window_functionality(false);
+  return true;
+}
+bool
+WindowRecognizer::handle_back_button(PG_Button *button)
+{
+  this->end_running(1);
   return true;
 }

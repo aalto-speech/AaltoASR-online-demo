@@ -2,37 +2,23 @@
 #ifndef WINDOWRESET_HH_
 #define WINDOWRESET_HH_
 
-#include <pgwindow.h>
-#include <pgbutton.h>
-#include "WindowChild.hh"
-#include "AudioInputController.hh"
-#include "msg.hh"
-#include "OutQueueController.hh"
+#include "WindowWaitRecognizer.hh"
 
-/** Opens a window and sends resetting message to recognizer.
- * Window closes when it receives ready message from recognizer.
- * This way the end-user can really see the reseting happening instead
- * of a "dead" program. */
-class WindowReset  :  public WindowChild
+class WindowReset  :  public WindowWaitRecognizer
 {
 
 public:
 
-  WindowReset(const PG_Widget *parent, msg::InQueue *in_queue, OutQueueController *out_queue);
+  WindowReset(const PG_Widget *parent,
+              msg::InQueue *in_queue,
+              msg::OutQueue *out_queue);
 
 protected:
 
-  virtual void do_opening();
-  virtual void do_running();
-
-//  virtual PG_Widget* create_window();
-
-private:
-
-//  const PG_Widget *m_parent;
-  msg::InQueue *m_in_queue;
-  OutQueueController *m_out_queue;
+  virtual void do_opening() throw(msg::ExceptionBrokenPipe);
   
+  msg::OutQueue *m_out_queue;
+
 };
 
 #endif /*WINDOWRESET_HH_*/

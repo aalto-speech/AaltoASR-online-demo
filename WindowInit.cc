@@ -1,4 +1,4 @@
-
+/*
 #include "WindowInit.hh"
 
 WindowInit::WindowInit(msg::InQueue *in_queue)
@@ -25,7 +25,7 @@ void
 WindowInit::do_opening()
 {
   if (!this->m_in_queue) {
-    this->close();
+    this->end_running(1);
     return;
   }
 
@@ -46,7 +46,7 @@ WindowInit::do_running()
     if (message.type() == msg::M_READY) {
       fprintf(stderr, "Recognizer ready.\n");
       this->m_text->SetText("Recognizer ready.");
-      this->close(1);
+      this->end_running(1);
     }
     else {
       fprintf(stderr, "Invalid ready message from recognizer.\n");
@@ -57,17 +57,4 @@ WindowInit::do_running()
     this->m_in_queue->queue.pop_front();
   }
 }
-
-void
-WindowInit::do_closing(int return_value)
-{
-  // Nothing to do...
-}
-
-bool
-WindowInit::eventKeyDown(const SDL_KeyboardEvent *key)
-{
-//  fprintf(stderr, "WindowInit::eventKeyDown\n");
-//  this->close();
-  return true;
-}
+//*/

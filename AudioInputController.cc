@@ -1,7 +1,7 @@
 
 #include "AudioInputController.hh"
 
-AudioInputController::AudioInputController(OutQueueController *out_queue)
+AudioInputController::AudioInputController(msg::OutQueue *out_queue)
   : m_out_queue(out_queue), m_output_buffer(32000)//, m_speakers(32000)
 {
   this->m_recognizer_cursor = 0;
@@ -26,7 +26,7 @@ AudioInputController::initialize()
   }
   
   if (!this->open_stream(false)) {
-    fprintf(stderr, "AIC initialization failed: Couldn't initialize audio output.\n");
+    fprintf(stderr, "AIC initialization failed: Failed opening audio stream.\n");
     return false;
   }
   if (!this->m_audio_stream.start()) {
@@ -42,17 +42,19 @@ AudioInputController::initialize()
 bool
 AudioInputController::open_stream(bool input_stream)
 {
+  fprintf(stderr, "AIC: open stream\n");
   return this->m_audio_stream.open(input_stream, true);
 }
 
 void
 AudioInputController::terminate()
 {
+  fprintf(stderr, "AIC: terminate\n");
   this->m_audio_stream.close();
   AudioStream::terminate();
 }
 
-void
+unsigned long
 AudioInputController::operate()
 {
   static msg::Message message(msg::M_AUDIO);
@@ -96,12 +98,14 @@ AudioInputController::operate()
       this->m_recognizer_cursor += read_size;
 
       // Send message to out queue.
-      this->m_out_queue->send_message(message);
+      this->m_out_queue->add_message(message);
+//      this->m_out_queue->send_message(message);
     }
   }
   else {
     this->m_recognizer_cursor += read_size;
   }
+  return read_size;
 }
 
 void
@@ -114,6 +118,7 @@ AudioInputController::pause_listening(bool pause)
     // Disconnect the buffer before clearing.
     this->m_audio_stream.set_output_buffer(NULL);
     this->m_output_buffer.clear();
+    this->stop();
   }
 }
 
@@ -154,6 +159,9 @@ void
 AudioInputController::reset()
 {
   this->m_audio_data.clear();
+  this->m_playback_length = 0;
+  this->m_playback_played = 0;
+  this->m_playback = false;
   this->reset_cursors();
 }
 

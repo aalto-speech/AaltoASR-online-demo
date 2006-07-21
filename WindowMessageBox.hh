@@ -16,32 +16,11 @@ public:
   virtual ~WindowMessageBox();
 
   virtual void initialize();
-//  inline bool is_closed() const { return this->m_closed; }
 
-protected:
-
-//  virtual bool do_ok() { return true; }
-
-//  virtual void do_running() { }
-//  virtual PG_Widget* create_window();// { return new PG_Widget(NULL, PG_Rect(0, 0, PG_Application::GetScreenWidth(), PG_Application::GetScreenHeight()), false); }
-
-//  virtual bool handle_button(PG_Button *button);
-  
 private:
 
   std::string m_message;
   PG_RichEdit *m_text_label;
-  /*
-  const PG_Widget *m_parent;
-  std::string m_title;
-  std::string m_button1_text;
-  std::string m_button2_text;
-  bool m_two_buttons;
-  
-  PG_Button *m_button1;
-  PG_Button *m_button2;
-  //*/
-//  bool m_closed;
 
 };
 

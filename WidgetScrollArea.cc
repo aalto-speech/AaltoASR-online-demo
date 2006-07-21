@@ -1,4 +1,5 @@
 
+#include <assert.h>
 #include "WidgetScrollArea.hh"
 
 WidgetScrollArea::WidgetScrollArea(PG_Widget *parent, const PG_Rect &rect)
@@ -57,7 +58,11 @@ WidgetScrollArea::add_child(PG_Widget *item, Sint32 x)
 void
 WidgetScrollArea::remove_child(const PG_Widget *item)
 {
-  
+  assert(false);
+  /*
+  this->m_items.remove(item);
+  this->RemoveChild(item);
+  //*/
 }
 
 void

@@ -32,6 +32,7 @@ public:
 protected:
   
   bool handle_scroll(PG_ScrollBar *scroll_bar, long page);
+//  bool handle_morpheme_button(PG_MessageObject *widget);
   
   void set_scroll_range();
   
@@ -53,7 +54,7 @@ private:
 //  Autoscroll m_autoscroll;
   bool m_autoscroll;
 //  bool m_autoscroll;
-  pthread_mutex_t m_scroll_lock;
+//  pthread_mutex_t m_scroll_lock;
   
 };
 

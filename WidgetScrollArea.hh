@@ -15,6 +15,7 @@ public:
   virtual ~WidgetScrollArea();
   
   void set_scroll_position(Sint32 x);
+  inline Sint32 get_scroll_position() const { return this->m_scroll_x; }
   
   // Use this instead of PG_Widget::AddChild if you want the item to be
   // scrolled ! ! !

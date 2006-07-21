@@ -13,7 +13,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
   this->m_audio_input = audio_input;
   this->m_autoscroll = false;
 //  this->m_autoscroll = DISABLE;
-  pthread_mutex_init(&this->m_scroll_lock, NULL);
+//  pthread_mutex_init(&this->m_scroll_lock, NULL);
 
   // Create wave view.
   this->m_wave = new WidgetWave(this,
@@ -40,6 +40,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                                          (int)(0.75 * this->Height()),
                                                          this->Width(),
                                                          (int)(0.2 * this->Height())),
+                                                 audio_input,
                                                  recognition,
                                                  pixels_per_second);
   this->AddChild(this->m_text_area);
@@ -59,7 +60,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
 
 WidgetRecognitionArea::~WidgetRecognitionArea()
 {
-  pthread_mutex_destroy(&this->m_scroll_lock);
+//  pthread_mutex_destroy(&this->m_scroll_lock);
   this->m_wave->terminate();
   this->m_spectrogram->terminate();
   delete this->m_wave;
@@ -71,7 +72,7 @@ WidgetRecognitionArea::~WidgetRecognitionArea()
 void
 WidgetRecognitionArea::reset()
 {
-  pthread_mutex_lock(&this->m_scroll_lock);
+//  pthread_mutex_lock(&this->m_scroll_lock);
   // Scroll to zero.
   this->set_scroll_position(0);
   // Reset components.
@@ -79,7 +80,7 @@ WidgetRecognitionArea::reset()
   this->m_spectrogram->reset();
   this->m_text_area->reset();
   this->set_scroll_range();
-  pthread_mutex_unlock(&this->m_scroll_lock);
+//  pthread_mutex_unlock(&this->m_scroll_lock);
 }
 
 void
@@ -94,22 +95,19 @@ WidgetRecognitionArea::set_scroll_position(unsigned long page)
 void
 WidgetRecognitionArea::update_screen(bool new_data)
 {
-//  fprintf(stderr, "WRA:update_screen start\n");
   this->m_wave->update();
   this->m_spectrogram->update();
   if (new_data)
     this->m_text_area->update();
-//  fprintf(stderr, "WRA:update_screen before\n");
+
   this->Update(true);
-//  fprintf(stderr, "WRA:update_screen after\n");
-//  fprintf(stderr, "WRA:update_screen end\n");
 }
 
 void
 WidgetRecognitionArea::update()
 {
 //  fprintf(stderr, "WRA:update start\n");
-  pthread_mutex_lock(&this->m_scroll_lock);
+//  pthread_mutex_lock(&this->m_scroll_lock);
   this->set_scroll_range();
 
 //  fprintf(stderr, "WRA:update before\n");
@@ -129,7 +127,7 @@ WidgetRecognitionArea::update()
 //  fprintf(stderr, "WRA:update after\n");
 
   this->update_screen(true);
-  pthread_mutex_unlock(&this->m_scroll_lock);
+//  pthread_mutex_unlock(&this->m_scroll_lock);
 //  fprintf(stderr, "WRA:update end\n");
 }
 
@@ -149,12 +147,11 @@ bool
 WidgetRecognitionArea::handle_scroll(PG_ScrollBar *scroll_bar, long page)
 {
   if (!this->m_autoscroll) {
-    pthread_mutex_lock(&this->m_scroll_lock);
+//    pthread_mutex_lock(&this->m_scroll_lock);
     this->set_scroll_position(page);
-//    this->update_screen(false);
-    pthread_mutex_unlock(&this->m_scroll_lock);
+    this->update_screen(false);
+//    pthread_mutex_unlock(&this->m_scroll_lock);
   }
   return true;
 }
-
 

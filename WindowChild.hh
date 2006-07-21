@@ -19,9 +19,10 @@ public:
   
 protected:
 
-  virtual void do_running();
+//  virtual void do_running();
 
-  bool handle_button(PG_Button *button);
+  bool handle_ok_button(PG_Button *button);
+  bool handle_cancel_button(PG_Button *button);
   bool handle_close();
 
   virtual bool do_ok() { return true; }
@@ -41,7 +42,6 @@ private:
   std::string m_cancel_text;
   PG_Button *m_ok_button;
   PG_Button *m_cancel_button;
-  bool m_ok_pressed;
 };
 
 #endif /*WINDOWCHILD_HH_*/

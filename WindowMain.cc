@@ -24,54 +24,32 @@ WindowMain::initialize()
   this->m_microphone_button = new PG_Button(this->m_window, PG_Rect(10,110,150,50), "Mic");
   this->m_exit_button = new PG_Button(this->m_window, PG_Rect(10,250,150,50), "Exit", PG_Button::CLOSE);
   
-  this->m_window->AddChild(this->m_exit_button);
-  this->m_window->AddChild(this->m_microphone_button);
   this->m_window->AddChild(this->m_file_button);
+  this->m_window->AddChild(this->m_microphone_button);
+  this->m_window->AddChild(this->m_exit_button);
 
-  this->m_exit_button->sigClick.connect(slot(*this, &WindowMain::button_pressed));
-  this->m_microphone_button->sigClick.connect(slot(*this, &WindowMain::button_pressed));
-  this->m_file_button->sigClick.connect(slot(*this, &WindowMain::button_pressed));
+  this->m_file_button->sigClick.connect(slot(*this, &WindowMain::handle_file_button));
+  this->m_microphone_button->sigClick.connect(slot(*this, &WindowMain::handle_microphone_button));
+  this->m_exit_button->sigClick.connect(slot(*this, &WindowMain::handle_exit_button));
 }
 
 bool
-WindowMain::button_pressed(PG_Button *button)
+WindowMain::handle_file_button(PG_Button *button)
 {
-  if (button == this->m_file_button) {
-    this->close(1);
-  }
-  else if (button == this->m_microphone_button) {
-    this->close(2);
-  }
-  else if (button == this->m_exit_button) {
-    this->quit();
-  }
+  this->end_running(1);
   return true;
 }
 
-//*
-void
-WindowMain::do_running()
-{
-  pthread_yield();
-}
-/*
 bool
-WindowMain::eventMouseMotion(const SDL_MouseMotionEvent *motion)
+WindowMain::handle_microphone_button(PG_Button *button)
 {
-//  fprintf(stderr, "Mouse event.\n");
-  return true;  
-}
-
-bool
-WindowMain::eventKeyDown(const SDL_KeyboardEvent *key)
-{
-  fprintf(stderr, "WindowMain::eventKeyDown\n");
-  
-  this->close();
-  // Exit on Esc.
-  if (key->keysym.sym == SDLK_ESCAPE)
-    this->quit();
-
+  this->end_running(2);
   return true;
 }
-//*/
+
+bool
+WindowMain::handle_exit_button(PG_Button *button)
+{
+  this->end_running(0);
+  return true;
+}

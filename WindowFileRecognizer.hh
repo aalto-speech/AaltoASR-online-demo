@@ -11,7 +11,7 @@ class WindowFileRecognizer  :  public WindowRecognizer
 
 public:
   
-  WindowFileRecognizer(msg::InQueue *in_queue, OutQueueController *out_queue);
+  WindowFileRecognizer(Process *process, msg::InQueue *in_queue, msg::OutQueue *out_queue);
   virtual ~WindowFileRecognizer();
   
   virtual void initialize();
@@ -28,13 +28,16 @@ protected:
   
   void open_audio_file();
   
-  bool handle_button(PG_Button *button);
+//  bool handle_button(PG_Button *button);
+  bool handle_open_button(PG_Button *button);
+//  virtual void handle_close_child_window(Window *child_window, int ret_val);
   
 private:
 
+//  Window *m_openfile_window;
   AudioFileInputController *m_audio_input;
   PG_Button *m_open_button;
-  bool m_open_file;
+//  bool m_open_file;
 };
 
 #endif /*WINDOWFILERECOGNIZER_HH_*/

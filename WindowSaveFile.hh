@@ -16,42 +16,75 @@ public:
 
 protected:
 
-//  virtual std::string get_title() const { return "Save Audio File"; }
-
   virtual bool do_ok()
   {
-    FILE *file = fopen(this->get_filename().data(), "r");
     bool overwrite = true;
-    if (file != NULL) {
-      fclose(file);
+    
+    if (this->file_exists())
+      overwrite = this->confirm_overwrite();
 
-      // Ask whether to overwrite file.
-      WindowMessageBox messagebox(this->m_window,
-                                  "Confirm overwrite",
-                                  "File exists. Do you want to overwrite?",
-                                  "Yes",
-                                  "No");
-      messagebox.initialize();
-      overwrite = (this->run_child_window(&messagebox) == 1); 
-    }
-    if (overwrite) {
-      if (audio::write_wav_data(this->get_filename(),
-                                this->m_audio_input->get_audio_data(),
-                                this->m_audio_input->get_audio_data_size()))
-      {
-        // Audio saving successful.
-        return true;
-      }
-      else {
-        this->error("Could not write audio file.", ERROR_NORMAL);
-      }
-    }
+    if (overwrite)
+      return this->write_file();
+
     return false;
   }
   
+/*
+  virtual void handle_close_child_window(Window *child_window, int ret_val)
+  {
+    Window::handle_close_child_window(child_window, ret_val);
+    
+    if (child_window == this->m_overwrite_window) {
+      if (ret_val == 1) {
+        if (this->write_file()) {
+          this->end_running(1);
+        }
+      }
+      delete this->m_overwrite_window;
+    }
+  }
+//*/
 private:
 
+  bool confirm_overwrite()
+  {
+    // Ask whether to overwrite file.
+    WindowMessageBox window(this->m_window,
+                            "Confirm overwrite",
+                            "File exists. Do you want to overwrite?",
+                            "Yes",
+                            "No");
+    window.initialize();
+    this->run_child_window(&window);
+  }
+
+  bool file_exists()
+  {
+    FILE *file = fopen(this->get_filename().data(), "r");
+    if (file != NULL) {
+      fclose(file);
+      return true;
+    }
+    return false;
+  }
+
+  bool write_file()
+  {
+    if (audio::write_wav_data(this->get_filename(),
+                              this->m_audio_input->get_audio_data(),
+                              this->m_audio_input->get_audio_data_size()))
+    {
+      // Audio saving successful.
+      return true;
+    }
+    else {
+      this->error("Could not write audio file.", ERROR_NORMAL);
+    }
+    return false;
+  }
+
   AudioInputController *m_audio_input;
+//  Window *m_overwrite_window;
   
 };
 
