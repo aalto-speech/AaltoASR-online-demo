@@ -2,7 +2,7 @@
 #include "str.hh"
 
 Decoder::Decoder()
-  : last_guaranteed_history(NULL), paused(false)
+  : paused(false), last_guaranteed_history(NULL)
 {
 }
 
@@ -147,6 +147,7 @@ Decoder::run()
       if (message.type() == msg::M_DECODER_UNPAUSE) {
         paused = false;
         in_queue.queue.pop_front();
+        continue;
       }
       else if (message.type() == msg::M_RESET)
         paused = false;

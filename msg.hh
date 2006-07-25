@@ -58,12 +58,12 @@ namespace msg {
     std::string buf;
     bool raw;
 
-    Message(int type = 0)
+    Message(int type = 0, bool urgent = false)
       : buf(header_size, 0), raw(false)
     {
       endian::put4(header_size, &buf[0]);
       buf.at(4) = type;
-      buf.at(5) = 0;
+      buf.at(5) = urgent;
     }
 
     void set_type(int type)

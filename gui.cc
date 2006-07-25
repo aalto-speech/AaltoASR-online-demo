@@ -158,16 +158,10 @@ main(int argc, char *argv[])
           continue;
       }
       
-      if (fields[0] == "pause") {
-        msg::Message message(msg::M_DECODER_PAUSE);
-        message.set_urgent(true);
-        enqueue(message);
-      }
-      if (fields[0] == "unpause") {
-        msg::Message message(msg::M_DECODER_UNPAUSE);
-        message.set_urgent(true);
-        enqueue(message);
-      }
+      if (fields[0] == "pause")
+        enqueue(msg::Message(msg::M_DECODER_PAUSE, true));
+      if (fields[0] == "unpause")
+        enqueue(msg::Message(msg::M_DECODER_UNPAUSE, true));
 
       if (fields[0] == "set") {
         std::string line;
@@ -196,8 +190,9 @@ main(int argc, char *argv[])
       }
       if (fields[0] == "e")
 	  enqueue(msg::Message(msg::M_AUDIO_END));
-      if (fields[0] == "r")
-	  enqueue(msg::Message(msg::M_RESET));
+      if (fields[0] == "r") {
+	  enqueue(msg::Message(msg::M_RESET, true));
+      }
       if (send_rest || fields[0] == "a") {
 
         int frames = 1;

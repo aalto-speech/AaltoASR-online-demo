@@ -301,7 +301,7 @@ Recognizer::process_ac_in_queue()
     else if (ac_state == A_CLOSING && dec_state == D_STALLED) {
       create_ac_thread();
       change_state(A_STARTING, D_STARTING);
-      dec_out_queue.queue.push_back(msg::Message(msg::M_RESET));
+      dec_out_queue.queue.push_back(msg::Message(msg::M_RESET, true));
       dec_out_queue.flush();
     }
     else {
@@ -409,7 +409,7 @@ Recognizer::process_dec_in_queue()
       stdout_queue.flush();
       create_ac_thread();
       change_state(A_STARTING, D_STARTING);
-      dec_out_queue.queue.push_back(msg::Message(msg::M_RESET));
+      dec_out_queue.queue.push_back(msg::Message(msg::M_RESET, true));
       dec_out_queue.flush();
     }
 

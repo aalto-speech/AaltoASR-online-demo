@@ -155,6 +155,7 @@ namespace msg {
       }
 
       queue.pop_front();
+      assert((int)buffer.size() > 0);
     }
     return true;
   }
@@ -166,9 +167,10 @@ namespace msg {
 
     assert(bytes_sent < buffer.length());
     int bytes_left = buffer.length() - bytes_sent;
-    ssize_t ret;
+    assert(bytes_left > 0);
 
     // Write buffer with restart
+    ssize_t ret;
     while (1) {
       while (1) {
         ret = write(fd, &buffer[bytes_sent], bytes_left);
