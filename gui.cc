@@ -157,6 +157,20 @@ main(int argc, char *argv[])
         if (fields.size() == 0)
           continue;
       }
+      
+      if (fields[0] == "set") {
+        std::string line;
+        for (int i = 1; i < (int)fields.size(); i++) {
+          if (i > 1)
+            line.append(" ");
+          line.append(fields[i]);
+        }
+        fprintf(stderr, "gui: sending setting \"%s\"\n", line.c_str());
+
+        msg::Message message(msg::M_DECODER_SETTING);
+        message.append(line);
+        enqueue(message);
+      }
 
       if (fields[0] == "s") {
         send_rest = true;

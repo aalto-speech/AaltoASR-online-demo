@@ -211,6 +211,28 @@ Recognizer::process_stdin_queue()
       }
     }
 
+    else if (message.type() == msg::M_AUDIO)
+    {
+      if (verbosity > 0)
+        fprintf(stderr, "rec: got AUDIO from gui\n");
+
+      if (ac_state == A_READY && dec_state == D_READY) {
+        // ac_thread wants raw audio data without header, because
+        // FeatureGenerator reads it directly from FILE* 
+        message.raw = true;
+        ac_out_queue.queue.push_back(message);
+        ac_out_queue.flush();
+
+        if (verbosity > 0)
+          fprintf(stderr, "rec: sending audio to ac (len %d)\n", 
+                  message.data_length());
+      }
+      else {
+        fprintf(stderr, "rec: ignoring AUDIO in ac_state %d dec_state %d\n",
+                ac_state, dec_state);
+      }
+    }
+
     else if (message.type() == msg::M_RESET)
     {
       if (verbosity > 0)
@@ -247,26 +269,8 @@ Recognizer::process_stdin_queue()
       }
     }
 
-    else if (message.type() == msg::M_AUDIO)
-    {
-      if (verbosity > 0)
-        fprintf(stderr, "rec: got AUDIO from gui\n");
-
-      if (ac_state == A_READY && dec_state == D_READY) {
-        // ac_thread wants raw audio data without header, because
-        // FeatureGenerator reads it directly from FILE* 
-        message.raw = true;
-        ac_out_queue.queue.push_back(message);
-        ac_out_queue.flush();
-
-        if (verbosity > 0)
-          fprintf(stderr, "rec: sending audio to ac (len %d)\n", 
-                  message.data_length());
-      }
-      else {
-        fprintf(stderr, "rec: ignoring AUDIO in ac_state %d dec_state %d\n",
-                ac_state, dec_state);
-      }
+    else if (message.type() == msg::M_DECODER_SETTING) {
+      dec_out_queue.queue.push_back(message);
     }
 
     stdin_queue.queue.pop_front();
