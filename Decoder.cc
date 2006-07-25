@@ -2,7 +2,7 @@
 #include "str.hh"
 
 Decoder::Decoder()
-  : last_guaranteed_history(NULL)
+  : last_guaranteed_history(NULL), paused(false)
 {
 }
 
@@ -117,6 +117,7 @@ Decoder::reset()
 {
   t.reset(0);
   frame = 0;
+  paused = false;
   last_guaranteed_history = NULL;
 }
 
@@ -142,6 +143,17 @@ Decoder::run()
       continue;
 
     msg::Message &message = in_queue.queue.front();
+    if (paused) {
+      if (message.type() == msg::M_DECODER_UNPAUSE) {
+        paused = false;
+        in_queue.queue.pop_front();
+      }
+      else if (message.type() == msg::M_RESET)
+        paused = false;
+      else {
+        continue;
+      }
+    }
 
     // Process new frame
     //
@@ -225,6 +237,9 @@ Decoder::run()
       out_queue.queue.push_back(msg::Message(msg::M_READY));
       out_queue.flush();
     }
+
+    else if (message.type() == msg::M_DECODER_PAUSE)
+      paused = true;
 
     in_queue.queue.pop_front();
   }

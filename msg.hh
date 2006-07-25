@@ -32,6 +32,8 @@ namespace msg {
     M_RECOG_END,	// gui <- rec, rec <- dec
 
     M_DECODER_SETTING,	// gui -> rec -> dec
+    M_DECODER_PAUSE,	// gui -> rec -> dec
+    M_DECODER_UNPAUSE,	// gui -> rec -> dec
 
     M_MESSAGE,		// gui <- rec <- dec
   };

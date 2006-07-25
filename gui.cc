@@ -158,6 +158,17 @@ main(int argc, char *argv[])
           continue;
       }
       
+      if (fields[0] == "pause") {
+        msg::Message message(msg::M_DECODER_PAUSE);
+        message.set_urgent(true);
+        enqueue(message);
+      }
+      if (fields[0] == "unpause") {
+        msg::Message message(msg::M_DECODER_UNPAUSE);
+        message.set_urgent(true);
+        enqueue(message);
+      }
+
       if (fields[0] == "set") {
         std::string line;
         for (int i = 1; i < (int)fields.size(); i++) {

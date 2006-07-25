@@ -19,6 +19,7 @@ public:
   msg::OutQueue out_queue;
   HistoryVector hist_vec;
   int frame;
+  bool paused;
 
   TPLexPrefixTree::WordHistory *last_guaranteed_history;
 };
