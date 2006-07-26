@@ -237,11 +237,13 @@ Decoder::run()
       reset();
       out_queue.queue.push_back(msg::Message(msg::M_READY));
       out_queue.flush();
+      in_queue.queue.clear();
     }
 
     else if (message.type() == msg::M_DECODER_PAUSE)
       paused = true;
 
-    in_queue.queue.pop_front();
+    if (!in_queue.queue.empty())
+      in_queue.queue.pop_front();
   }
 }
