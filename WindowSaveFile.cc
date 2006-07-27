@@ -12,14 +12,18 @@ bool
 WindowSaveFile::do_ok()
 {
   bool overwrite = true;
+  bool ret_val = false;
   
   if (this->file_exists())
     overwrite = this->confirm_overwrite();
 
   if (overwrite)
-    return this->write_file();
+    ret_val = this->write_file();
 
-  return false;
+  if (!ret_val)
+    this->focus_textbox();
+    
+  return ret_val;
 }
 
 bool
@@ -34,18 +38,8 @@ WindowSaveFile::confirm_overwrite()
                           "No");
   window.initialize();
   ret_val = this->run_child_window(&window);
+  
   return ret_val == 1;
-}
-
-bool
-WindowSaveFile::file_exists()
-{
-  FILE *file = fopen(this->get_filename().data(), "r");
-  if (file != NULL) {
-    fclose(file);
-    return true;
-  }
-  return false;
 }
 
 bool

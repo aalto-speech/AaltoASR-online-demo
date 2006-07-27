@@ -21,8 +21,7 @@ WindowFileRecognizer::initialize()
 {
   WindowRecognizer::initialize();
   
-  PG_Button *open_button =
-    this->construct_button("Open file", 0, 2, slot(*this, &WindowFileRecognizer::handle_open_button));
+  this->construct_button("Open file", 0, 2, slot(*this, &WindowFileRecognizer::handle_open_button));
 }
 
 void

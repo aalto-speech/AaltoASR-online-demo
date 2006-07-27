@@ -38,15 +38,17 @@ WidgetScrollArea::set_widget_position(PG_Widget *item) const
       x + item->my_width > this->m_scroll_x)
   {
     item->my_xpos = x - this->m_scroll_x;
+//    item->SetVisible(true);
   }
   else {
     item->my_xpos = -item->my_width;
+//    item->SetVisible(false);
   }
 }
 
 void
 WidgetScrollArea::AddChild(PG_Widget *item)
 {
-  PG_Widget::AddChild(item);
   this->set_widget_position(item);
+  PG_Widget::AddChild(item);
 }

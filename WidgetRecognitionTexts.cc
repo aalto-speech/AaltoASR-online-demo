@@ -60,13 +60,13 @@ WidgetRecognitionTexts::add_morpheme_widget(const Morpheme &morpheme,
   
   if (morpheme.data == "<w>") {
     rect.w = w > 1 ? w : 1; // Word separator at least one pixel wide.
-    item = new PG_Widget(this, rect, true);
+    item = new PG_Widget(NULL, rect, true);
     SDL_FillRect(item->GetWidgetSurface(),
                  NULL,
                  color.MapRGB(item->GetWidgetSurface()->format));
   }
   else {
-    item = new PG_Label(this, rect, morpheme.data.data());
+    item = new PG_Label(NULL, rect, morpheme.data.data());
     ((PG_Label*)item)->SetAlignment(PG_Label::CENTER);
     ((PG_Label*)item)->SetFontColor(color);
     item->sigMouseButtonUp.connect(slot(*this, &WidgetRecognitionTexts::handle_morpheme_widget), NULL);
@@ -74,6 +74,8 @@ WidgetRecognitionTexts::add_morpheme_widget(const Morpheme &morpheme,
 
   // For information about this user data, see WidgetScrollArea.hh!
   item->SetUserData(&x, sizeof(Sint32));
+  // Add child item after setting user data!
+  this->AddChild(item);
   item->SetVisible(true);
   return item;
 }

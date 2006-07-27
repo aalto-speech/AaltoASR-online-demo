@@ -20,8 +20,7 @@ WindowMicrophoneRecognizer::initialize()
 {
   WindowRecognizer::initialize();
 
-  PG_Button *save_button =
-    this->construct_button("Save", 0, 2, slot(*this, &WindowMicrophoneRecognizer::handle_save_button));
+  this->construct_button("Save", 0, 2, slot(*this, &WindowMicrophoneRecognizer::handle_save_button));
 }
 
 void

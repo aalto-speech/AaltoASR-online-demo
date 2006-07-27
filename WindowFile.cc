@@ -32,9 +32,35 @@ WindowFile::initialize()
 }
 
 void
+WindowFile::focus_textbox()
+{
+  this->m_filename_textbox->EditBegin();
+  // Have to set the cursor position, because ParaGUI "forgets" the position
+  // when input focus is lost.
+  this->m_filename_textbox->SetCursorPos(this->get_filename().size());
+}
+
+void
+WindowFile::do_opening()
+{
+  this->focus_textbox();
+}
+
+void
 WindowFile::do_closing(int return_value)
 {
   if (return_value == 1) {
     WindowFile::last_file = this->get_filename();
   }
+}
+
+bool
+WindowFile::file_exists()
+{
+  FILE *file = fopen(this->get_filename().data(), "r");
+  if (file != NULL) {
+    fclose(file);
+    return true;
+  }
+  return false;
 }

@@ -20,7 +20,6 @@ protected:
 private:
 
   bool confirm_overwrite();
-  bool file_exists();
   bool write_file();
 
   AudioInputController *m_audio_input;

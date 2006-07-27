@@ -51,9 +51,9 @@ Window::open()
 {
   this->m_end_run = false;
   this->m_return_value = 1;
+  this->m_window->SetInputFocus();
   this->do_opening();
   if (!this->m_end_run) {
-    this->m_window->SetInputFocus();
     this->m_window->Show(false);
   }
 }

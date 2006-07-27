@@ -86,8 +86,23 @@ WidgetSpectrogram::draw_new(unsigned long left_index,
       value = log(value);
       value = pow(value, 0.4);
       //*/
-      value = pow(value, 0.3);
-      Uint32 color = SDL_MapRGB(surface->format, (char)(value * 255), (char)(value * 255), 0);
+      value = pow(value, 0.1);
+//      value = log(value);
+      char r = 0;
+      char g = 0;
+      char b = 0;
+      if (value <= 0.33) {
+        b = (char)(value / 0.33 * 128);
+      }
+      else if (value > 0.33 && value <= 0.66) {
+        r = (char)((value - 0.33) / 0.33 * 255);
+        b = (char)((0.66 - value) / 0.33 * 128);
+      }
+      else if (value > 0.66 && value <= 1.0) {
+        r = 255;
+        g = (char)((value - 0.66) / 0.34 * 255);
+      }
+      Uint32 color = SDL_MapRGB(surface->format, r, g, b);
       unsigned int bpp = surface->format->BytesPerPixel;
       for (unsigned int knd = 0; knd < bpp; knd++) {
         unsigned int index = knd + (x + ind + this->my_width * jnd) * bpp;

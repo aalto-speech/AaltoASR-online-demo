@@ -232,12 +232,8 @@ WindowRecognizer::enable_recognizer(bool enable)
 {
   msg::Message message(msg::M_DECODER_PAUSE, true);
 
-  if (enable) {
-    fprintf(stderr, "Recognizer enabled\n");
+  if (enable)
     message.set_type(msg::M_DECODER_UNPAUSE);
-  }
-  else
-    fprintf(stderr, "Recognizer disabled\n");
 
   if (this->m_out_queue)
     this->m_out_queue->add_message(message);

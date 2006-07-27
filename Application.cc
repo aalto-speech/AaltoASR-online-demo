@@ -94,7 +94,7 @@ Application::initialize(const std::string &ssh_to, const std::string &script_fil
   Settings::script_file = script_file;
 
   // Initialize recognizer process.
-/* Commenting these lines out will disable recognizer.
+//* Commenting these lines out will disable recognizer.
   this->m_recognizer = new Process();
   this->m_out_queue = new msg::OutQueue();//this->m_recognizer->write_fd);
   this->m_in_queue = new msg::InQueue();//this->m_recognizer->read_fd);

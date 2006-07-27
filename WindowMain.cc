@@ -6,9 +6,12 @@ WindowMain::initialize()
 {
   Window::initialize();
   
-  const unsigned int center_x = this->m_window->my_xpos + this->m_window->my_width / 2;
-  // Use 0.9 to move buttons a bit upper so it's visually more elegant.
-  const unsigned int center_y = 0.9 * (this->m_window->my_ypos + this->m_window->my_height / 2);
+  const unsigned int center_x =
+    this->m_window->my_xpos + this->m_window->my_width / 2;
+  // Use dividor 2.5 instead of 2.0 to move buttons a bit upper so it's
+  // visually more comfortable.
+  const unsigned int center_y =
+    (unsigned int)((this->m_window->my_ypos + this->m_window->my_height / 2.5));
   const unsigned int width = 300;
   const unsigned int height = 80;
   const unsigned int space = 50;
@@ -26,8 +29,7 @@ WindowMain::initialize()
   PG_Button *exit_button =
     new PG_Button(this->m_window,
                   PG_Rect(left, top + 2 * (height + space), width, height),
-                  "Exit program",
-                  PG_Button::CLOSE);
+                  "Exit program");
   
   this->m_window->AddChild(file_button);
   this->m_window->AddChild(microphone_button);

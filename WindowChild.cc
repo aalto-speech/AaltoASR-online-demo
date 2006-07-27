@@ -80,6 +80,8 @@ WindowChild::initialize()
       this->m_window->AddChild(cancel_button);
     }
   }
+  
+  this->m_window->sigKeyUp.connect(slot(*this, &WindowChild::handle_key_pressed));
 
 }
 
@@ -136,4 +138,22 @@ WindowChild::create_window()
     window->sigClose.connect(slot(*this, &WindowChild::handle_close));
     
   return window;
+}
+
+bool
+WindowChild::handle_key_pressed(const SDL_KeyboardEvent *key)
+{
+  if (key->keysym.sym == SDLK_RETURN) {
+    if (this->m_button_count > 0) {
+      this->handle_ok_button();
+      return true;
+    }
+  }
+  if (key->keysym.sym == SDLK_ESCAPE) {
+    if (this->m_button_count > 0 || this->m_close) {
+      this->handle_close();
+      return true;
+    }
+  }
+  return false;
 }

@@ -43,7 +43,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	WidgetScrollArea.cc WindowFile.cc WindowMessageBox.cc \
 	WidgetSpectrogram.cc WindowChild.cc WindowSettings.cc Settings.cc \
 	QueueController.cc WindowStartProcess.cc WindowWaitRecognizer.cc \
-	ScrollBar.cc WindowSaveFile.cc
+	ScrollBar.cc WindowSaveFile.cc WindowOpenFile.cc
 jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype -lfftw3
 jaakko: $(jaakko_srcs:%.cc=%.o)
 

@@ -26,6 +26,8 @@ protected:
   bool handle_cancel_button();
   bool handle_close();
 
+  virtual bool handle_key_pressed(const SDL_KeyboardEvent *key);
+
   virtual bool do_ok() { return true; }
   
   virtual PG_Widget* create_window();

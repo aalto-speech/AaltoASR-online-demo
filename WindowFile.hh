@@ -21,6 +21,10 @@ public:
   
 protected:
 
+  void focus_textbox();
+
+  bool file_exists();
+  virtual void do_opening();
   virtual void do_closing(int return_value);
     
 private:
