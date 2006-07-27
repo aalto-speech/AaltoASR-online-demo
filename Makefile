@@ -55,7 +55,7 @@ objs = $(srcs:%.cc=%.o)
 default: $(progs)
 
 %.o: %.cc
-	$(CXX) -U PACKAGE $(CXXFLAGS) -c  -U PACKAGE $< 2>&1 | ./c++filter.pl
+	$(CXX) $(CXXFLAGS) -c $< 2>&1 | ./c++filter.pl
 
 $(progs): %: %.o
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) -o $@ $($@_srcs:%.cc=%.o) $($@_libs)
