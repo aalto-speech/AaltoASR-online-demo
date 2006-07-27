@@ -2,7 +2,9 @@
 #ifndef APPLICATION_HH_
 #define APPLICATION_HH_
 
+#include "undefine.hh"
 #include <paragui.h>
+#include "undefine.hh"
 #include <pgapplication.h>
 #include <pthread.h>
 #include "Process.hh"

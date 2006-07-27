@@ -7,6 +7,7 @@ AudioInputController::AudioInputController(msg::OutQueue *out_queue)
   this->m_recognizer_cursor = 0;
   this->m_audio_data.clear();
 
+  this->m_paused = true;
   this->m_playback = false;
   this->m_playback_from = 0;
   this->m_playback_length = 0;
@@ -59,9 +60,9 @@ AudioInputController::operate()
 {
   static msg::Message message(msg::M_AUDIO);
   static const char *audio_data;
-  static unsigned long read_size;
+  static unsigned long read_size = 0;
   
-  if (this->m_playback) {
+  if (this->m_playback && this->m_paused) {
     unsigned long write_size;
     unsigned long max_size = 0;
 
@@ -78,33 +79,35 @@ AudioInputController::operate()
                                                            write_size - this->m_playback_played);
   }
   
-  this->read_input();
-  read_size = this->get_audio_cursor() - this->m_recognizer_cursor;
-//  fprintf(stderr, "Listen read size: %d\n", read_size);
-
-  if (this->m_out_queue) {
-    // Send audio in max 6000 frame messages.
-    if (read_size > 6000)
-      read_size = 6000;
-        
-    if (read_size) {
-      // Clear previous audio data and make message of the new data.
-      message.clear_data();
-      // Write new data.
-      audio_data = this->m_audio_data.data();
-      message.append(&audio_data[this->m_recognizer_cursor*sizeof(AUDIO_FORMAT)],
-                     read_size * sizeof(AUDIO_FORMAT));
-
-      this->m_recognizer_cursor += read_size;
-
-      // Send message to out queue.
-      this->m_out_queue->add_message(message);
-//      this->m_out_queue->send_message(message);
+//  if (!this->m_paused) {
+    this->read_input();
+    read_size = this->get_audio_cursor() - this->m_recognizer_cursor;
+  //  fprintf(stderr, "Listen read size: %d\n", read_size);
+  
+    if (this->m_out_queue) {
+      // Send audio in max 6000 frame messages.
+      if (read_size > 6000)
+        read_size = 6000;
+          
+      if (read_size) {
+        // Clear previous audio data and make message of the new data.
+        message.clear_data();
+        // Write new data.
+        audio_data = this->m_audio_data.data();
+        message.append(&audio_data[this->m_recognizer_cursor*sizeof(AUDIO_FORMAT)],
+                       read_size * sizeof(AUDIO_FORMAT));
+  
+        this->m_recognizer_cursor += read_size;
+  
+        // Send message to out queue.
+        this->m_out_queue->add_message(message);
+  //      this->m_out_queue->send_message(message);
+      }
     }
-  }
-  else {
-    this->m_recognizer_cursor += read_size;
-  }
+    else {
+      this->m_recognizer_cursor += read_size;
+    }
+//  }
   return read_size;
 }
 
@@ -120,6 +123,7 @@ AudioInputController::pause_listening(bool pause)
     this->m_output_buffer.clear();
     this->stop();
   }
+  this->m_paused = pause;
 }
 
 void
@@ -171,17 +175,3 @@ AudioInputController::reset_cursors()
   this->m_output_buffer.clear();
   this->m_recognizer_cursor = 0;
 }
-
-/*
-unsigned long
-AudioInputController::get_sample_rate() const
-{
-  return SAMPLE_RATE;
-}
-
-unsigned int
-AudioInputController::get_bytes_per_sample() const
-{
-  return sizeof(AUDIO_FORMAT);
-}
-//*/

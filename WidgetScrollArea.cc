@@ -1,4 +1,4 @@
-
+//*
 #include <assert.h>
 #include "WidgetScrollArea.hh"
 
@@ -8,66 +8,45 @@ WidgetScrollArea::WidgetScrollArea(PG_Widget *parent, const PG_Rect &rect)
   this->m_scroll_x = 0;
 }
 
-WidgetScrollArea::~WidgetScrollArea()
-{
-  
-}
-  
 void
-WidgetScrollArea::set_scroll_position(Sint32 x)
+WidgetScrollArea::set_scroll_position(Sint32 xscroll)
 {
-  MapScroll::iterator iter;
-  PG_Widget *widget;
+  PG_RectList *child_list = this->GetChildList();
+  
+  this->m_scroll_x = xscroll;
 
-  // Ainakin alkuun k‰yd‰‰n vaan karusti kaikki l‰pi..
-  for (iter = this->m_items.begin();
-       iter != this->m_items.end();
-       iter++)
-  {
-    widget = iter->second;
-    if (iter->first < x + this->my_width &&
-        iter->first + widget->my_width > x)
+  if (child_list != NULL) {
+    PG_Widget *item = child_list->first();
+    unsigned int index;
+  
+    // Ainakin alkuun k‰yd‰‰n vaan karusti kaikki l‰pi..
+    for (index = 0; index < child_list->size(); index++)
     {
-      widget->my_xpos = iter->first - x;
-      widget->SetVisible(true);//Show(false);
-    }
-    else {
-      widget->SetVisible(false);//Hide(false);
+      this->set_widget_position(item);
+      item = item->next();
     }
   }
-  this->m_scroll_x = x;
-//  this->Update(true);
+
 }
-  
+
 void
-WidgetScrollArea::add_child(PG_Widget *item, Sint32 x)
+WidgetScrollArea::set_widget_position(PG_Widget *item) const
 {
-  this->AddChild(item);
-  this->m_items.insert(std::make_pair(x, item));
+  Sint32 x;
+  item->GetUserData(&x);
   if (x < this->m_scroll_x + this->my_width &&
       x + item->my_width > this->m_scroll_x)
   {
     item->my_xpos = x - this->m_scroll_x;
-    item->SetVisible(true);
   }
   else {
-    item->SetVisible(false);
+    item->my_xpos = -item->my_width;
   }
-}
-  
-void
-WidgetScrollArea::remove_child(const PG_Widget *item)
-{
-  assert(false);
-  /*
-  this->m_items.remove(item);
-  this->RemoveChild(item);
-  //*/
 }
 
 void
-WidgetScrollArea::remove_all_childs()
+WidgetScrollArea::AddChild(PG_Widget *item)
 {
-  this->m_items.clear();
-  this->RemoveAllChilds();
+  PG_Widget::AddChild(item);
+  this->set_widget_position(item);
 }

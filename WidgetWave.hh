@@ -2,7 +2,7 @@
 #ifndef WIDGETWAVE_HH_
 #define WIDGETWAVE_HH_
 
-//#include <pthread.h>
+#include "undefine.hh"
 #include <pgwidget.h>
 #include "AudioInputController.hh"
 
@@ -19,10 +19,6 @@ public:
   void update();
   
   inline void set_position(unsigned long pos) { this->m_left_index = pos; }
-//  inline void force_redraw() { this->m_force_redraw = true; }
-  // TODO: EI FORCE, VAAN PITÄÄ MUISTISSA JOTAIN OIKEAA LAITAA JOHON ASTI
-  // PIIRTÄNYT! EI OLETA ETTÄ KOKO NÄKYMÄN ALA ON PÄIVITETTY JOS ON KERRAN
-  // PIIRRETTY!!!!
   
   virtual void initialize();
   virtual void terminate();
@@ -31,7 +27,9 @@ protected:
 
   unsigned int blit_old(unsigned long left_index);
   unsigned long calculate_new(unsigned long left_index, unsigned long old_size);
-  virtual void draw_new(unsigned long left_index, unsigned int oldview_size, unsigned int audio_size);
+  virtual void draw_new(unsigned long left_index,
+                        unsigned int oldview_size,
+                        unsigned int audio_size);
 
   AudioInputController *m_audio_input;
   SDL_Surface *m_surface_backbuffer;

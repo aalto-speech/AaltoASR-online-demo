@@ -14,9 +14,6 @@ public:
   AudioFileInputController(msg::OutQueue *out_queue);
   virtual ~AudioFileInputController();
   
-//  virtual bool initialize();
-//  virtual void terminate();
-
   /** No need for locking. */
   bool load_file(const std::string &filename);
   

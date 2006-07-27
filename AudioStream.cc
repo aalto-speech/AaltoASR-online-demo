@@ -226,10 +226,10 @@ AudioStream::set_input_buffer(AudioBuffer *input_buffer)
 void
 AudioStream::set_output_buffer(AudioBuffer *output_buffer)
 {
-  if (output_buffer == NULL)
-    Pa_AbortStream(this->m_stream);
-  else
-    Pa_StartStream(this->m_stream);
+//  if (output_buffer == NULL)
+//    Pa_AbortStream(this->m_stream);
+//  else
+//    Pa_StartStream(this->m_stream);
   pthread_mutex_lock(&this->m_outputbuffer_lock);
   this->m_output_buffer = output_buffer;
   pthread_mutex_unlock(&this->m_outputbuffer_lock);
@@ -257,24 +257,12 @@ AudioStream::callback(const void* input_buffer, void* output_buffer,
   //*/
 //  Pa_Sleep(1);
   return paContinue;
-  /*
-  AudioStream *object = (AudioStream*)instance;
-  if (!object->stream_callback((AUDIO_FORMAT*)input_buffer,
-                               (AUDIO_FORMAT*)output_buffer,
-                               frame_count)) {
-    return paComplete;
-  }
-//  luku = frame_count;
-//  pthread_yield();
-  return paContinue;
-  //*/
 }
 
 void
 AudioStream::input_stream_callback(const AUDIO_FORMAT *input_buffer,
                                    unsigned long frame_count)
 {
-//  fprintf(stderr, "AS input callback start\n");
   unsigned long write_size;
 
   pthread_mutex_lock(&this->m_inputbuffer_lock);
@@ -285,6 +273,7 @@ AudioStream::input_stream_callback(const AUDIO_FORMAT *input_buffer,
       fprintf(stderr, "Warning: Audio input stream buffer full, losing audio.\n");
       assert(false);
     }
+    fprintf(stderr, "AS input stream callback frame_count: %d", frame_count);
   }
   pthread_mutex_unlock(&this->m_inputbuffer_lock);
 }

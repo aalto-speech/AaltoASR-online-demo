@@ -5,19 +5,16 @@
 #include "WindowReset.hh"
 #include "WindowSettings.hh"
 #include "WindowStartProcess.hh"
+#include "WindowText.hh"
 #include "str.hh"
 
 WindowRecognizer::WindowRecognizer(Process *process, msg::InQueue *in_queue, msg::OutQueue *out_queue)
   : m_queue(in_queue, &m_recognition)
 {
   
-  this->m_back_button = NULL;
   this->m_play_button = NULL;
-  this->m_reset_button = NULL;
-  this->m_resetrecog_button = NULL;
-  this->m_enablerecog_button = NULL;
   this->m_endaudio_button = NULL;
-  this->m_settings_button = NULL;
+  this->m_enablerecog_button = NULL;
 
   this->m_recognition_area = NULL;
   
@@ -25,20 +22,6 @@ WindowRecognizer::WindowRecognizer(Process *process, msg::InQueue *in_queue, msg
   this->m_in_queue = in_queue;
   this->m_out_queue = out_queue;
   
-  this->m_paused = false;
-}
-
-WindowRecognizer::~WindowRecognizer()
-{
-  delete this->m_back_button;
-  delete this->m_play_button;
-  delete this->m_reset_button;
-  delete this->m_resetrecog_button;
-  delete this->m_enablerecog_button;
-  delete this->m_endaudio_button;
-  delete this->m_settings_button;
-  
-  delete this->m_recognition_area;
 }
 
 void
@@ -46,30 +29,18 @@ WindowRecognizer::initialize()
 {
   Window::initialize();
   
-  this->m_play_button = new PG_Button(this->m_window, PG_Rect(200,100,150,50), "Play");
-  this->m_enablerecog_button = new PG_Button(this->m_window, PG_Rect(200,200,150,50), "Enable recognizer");
-  this->m_endaudio_button = new PG_Button(this->m_window, PG_Rect(200,300,150,50), "End audio");
-  this->m_reset_button = new PG_Button(this->m_window, PG_Rect(400,100,150,50), "Reset");
-  this->m_resetrecog_button = new PG_Button(this->m_window, PG_Rect(400,200,150,50), "Reset recognizer");
-  this->m_settings_button = new PG_Button(this->m_window, PG_Rect(400,300,150,50), "Settings..");
-  this->m_back_button = new PG_Button(this->m_window, PG_Rect(this->m_window->my_width - 200,this->m_window->my_height-80,150,50), "Back to Menu", PG_Button::CANCEL);
+  this->m_play_button =
+    this->construct_button("Run", 1, 0, slot(*this, &WindowRecognizer::handle_play_button));
+  this->m_endaudio_button =
+    this->construct_button("End audio", 1, 1, slot(*this, &WindowRecognizer::handle_endaudio_button));
+  this->m_enablerecog_button =
+    this->construct_button("Enable recognizer", 1, 2, slot(*this, &WindowRecognizer::handle_enablerecog_button));
+  this->construct_button("Reset", 2, 1, slot(*this, &WindowRecognizer::handle_reset_button));
+  this->construct_button("Reset recognizer", 2, 0, slot(*this, &WindowRecognizer::handle_resetrecog_button));
+  this->construct_button("Settings..", 2, 2, slot(*this, &WindowRecognizer::handle_settings_button));
+  this->construct_button("Close", 0, 0, slot(*this, &WindowRecognizer::handle_back_button));
+  this->construct_button("Show text", 3, 0, slot(*this, &WindowRecognizer::handle_showtext_button));
 
-  this->m_window->AddChild(this->m_play_button);
-  this->m_window->AddChild(this->m_enablerecog_button);
-  this->m_window->AddChild(this->m_endaudio_button);
-  this->m_window->AddChild(this->m_reset_button);
-  this->m_window->AddChild(this->m_resetrecog_button);
-  this->m_window->AddChild(this->m_settings_button);
-  this->m_window->AddChild(this->m_back_button);
-
-  this->m_play_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_play_button));
-  this->m_enablerecog_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_enablerecog_button));
-  this->m_endaudio_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_endaudio_button));
-  this->m_reset_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_reset_button));
-  this->m_resetrecog_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_resetrecog_button));
-  this->m_settings_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_settings_button));
-  this->m_back_button->sigClick.connect(slot(*this, &WindowRecognizer::handle_back_button));
-  
   this->m_play_button->SetToggle(true);
   this->m_enablerecog_button->SetToggle(true);
 }
@@ -77,15 +48,14 @@ WindowRecognizer::initialize()
 void
 WindowRecognizer::do_opening()
 {
-  this->pause_audio_input(true);
-  
-  this->m_recognition_area = new WidgetRecognitionArea(this->m_window,
-                                                       PG_Rect(0, 400, this->m_window->Width(), 200),
-                                                       this->get_audio_input(),
-                                                       &this->m_recognition,
-                                                       250);
-  this->m_window->AddChild(this->m_recognition_area);
-  this->m_recognition_area->Show(false);
+  // Create recognition area.
+  this->m_recognition_area =
+    new WidgetRecognitionArea(this->m_window,
+                              PG_Rect(0, 400, this->m_window->Width(), 400),
+                              this->get_audio_input(),
+                              &this->m_recognition,
+                              250);
+//  this->m_recognition_area->Show(false);
 
   // Enable recognizer.
   this->m_enablerecog_button->SetPressed(true);
@@ -98,6 +68,7 @@ WindowRecognizer::do_opening()
   // Do reseting
   this->reset(true);
   this->set_status(LISTENING);
+  this->pause_audio_input(true);
 }
 
 void
@@ -121,6 +92,7 @@ WindowRecognizer::do_running()
     unsigned long read_size = this->get_audio_input()->operate();
     if (read_size > 0) {
       this->flush_out_queue();
+//      fprintf(stderr, "read_size: %d\n", read_size);
     }
     this->m_recognition_area->update();
   }
@@ -142,7 +114,6 @@ void
 WindowRecognizer::handle_broken_pipe()
 {
   int ret_val;
-  bool restart = true;
   
   this->pause_window_functionality(true);
 
@@ -155,28 +126,6 @@ WindowRecognizer::handle_broken_pipe()
     this->reset(false);
     this->pause_window_functionality(false);
   }
-  /*
-  while (restart) {
-    try {
-      ret_val = this->run_child_window(&window);
-      this->reset(false);
-      this->pause_window_functionality(false);
-      restart = false;
-    }
-    catch (msg::ExceptionBrokenPipe exception) {
-      WindowMessageBox message(this->m_window,
-                               "Error",
-                               "Recognizer process couldn't be restarted.\nDo you want to retry or exit?",
-                               "Retry",
-                               "Exit");
-      message.initialize();
-      ret_val = this->run_child_window(&message);
-      restart = (ret_val == 1);
-      if (ret_val == 2)
-        this->end_running(0);
-    }
-  }
-  //*/
 }
 //*
 void
@@ -195,11 +144,14 @@ void
 WindowRecognizer::pause_window_functionality(bool pause)
 {
   if (pause) {
-    this->pause_audio_input(true);
+    this->get_audio_input()->pause_listening(true);
+    this->enable_recognizer(false);
     this->m_queue.disable();
   }
   else {
     this->m_queue.enable();
+    this->enable_recognizer(true);
+    this->get_audio_input()->pause_listening(!this->m_play_button->GetPressed());
   }
 }
 
@@ -209,6 +161,7 @@ WindowRecognizer::reset(bool reset_audio)
   WindowReset window(this->m_window, this->m_in_queue, this->m_out_queue);
 
   this->pause_window_functionality(true);
+  this->pause_audio_input(true);
 
   if (reset_audio)
     this->get_audio_input()->reset();
@@ -222,6 +175,7 @@ WindowRecognizer::reset(bool reset_audio)
   window.initialize();
   try {
     this->run_child_window(&window);
+    this->handle_enablerecog_button();
   }
   catch (msg::ExceptionBrokenPipe exception) {
     this->handle_broken_pipe();
@@ -236,10 +190,10 @@ WindowRecognizer::pause_audio_input(bool pause)
   this->get_audio_input()->pause_listening(pause);
   this->m_play_button->SetPressed(!pause);
     
-  if (this->m_recognition_area)
-    this->m_recognition_area->set_autoscroll(!pause);
+//  if (this->m_recognition_area)
+//    this->m_recognition_area->set_autoscroll(!pause);
       
-  this->m_paused = pause;
+//  this->m_paused = pause;
 }
 
 void
@@ -247,8 +201,8 @@ WindowRecognizer::end_of_audio()
 {
   this->pause_audio_input(true);
   this->set_status(END_OF_AUDIO);
-  if (this->m_recognition_area)
-    this->m_recognition_area->set_autoscroll(false);
+//  if (this->m_recognition_area)
+//    this->m_recognition_area->set_autoscroll(DISABLE);
   if (this->m_out_queue) {
     this->m_out_queue->add_message(msg::Message(msg::M_AUDIO_END));
     this->flush_out_queue();
@@ -261,20 +215,38 @@ WindowRecognizer::set_status(Status status)
   this->m_status = status;
   switch (status) {
   case END_OF_AUDIO:
-//    this->m_play_button->Hide(false);
-//    this->m_endaudio_button->Hide(false);
+    this->m_play_button->Hide(false);
+    this->m_endaudio_button->Hide(false);
     break;
   case LISTENING:
-//    this->m_play_button->Show(false);
-//    this->m_endaudio_button->Show(false);
+    this->m_play_button->Show(false);
+    this->m_endaudio_button->Show(false);
     break;
   default:
     fprintf(stderr, "WindowRecognizer::set_status unknown status.\n");
   }
 }
 
+void
+WindowRecognizer::enable_recognizer(bool enable)
+{
+  msg::Message message(msg::M_DECODER_PAUSE, true);
+
+  if (enable) {
+    fprintf(stderr, "Recognizer enabled\n");
+    message.set_type(msg::M_DECODER_UNPAUSE);
+  }
+  else
+    fprintf(stderr, "Recognizer disabled\n");
+
+  if (this->m_out_queue)
+    this->m_out_queue->add_message(message);
+
+  this->flush_out_queue();
+}
+
 bool
-WindowRecognizer::handle_play_button(PG_Button *button)
+WindowRecognizer::handle_play_button()
 {
   if (this->m_status == LISTENING) {
     this->pause_audio_input(!this->m_play_button->GetPressed());
@@ -283,23 +255,14 @@ WindowRecognizer::handle_play_button(PG_Button *button)
 }
 
 bool
-WindowRecognizer::handle_enablerecog_button(PG_Button *button)
+WindowRecognizer::handle_enablerecog_button()
 {
-  if (this->m_enablerecog_button->GetPressed())
-    this->m_queue.enable();
-  else
-    this->m_queue.disable();
-  /*
-  if (this->m_enablerecog_button->GetPressed())
-    this->get_audio_input()->play(10 * SAMPLE_RATE, 0);
-  else
-    this->get_audio_input()->stop();
-  //*/
+  this->enable_recognizer(this->m_enablerecog_button->GetPressed());
   return true;
 }
 
 bool
-WindowRecognizer::handle_endaudio_button(PG_Button *button)
+WindowRecognizer::handle_endaudio_button()
 {
   if (this->m_status == LISTENING) {
     this->end_of_audio();
@@ -308,32 +271,79 @@ WindowRecognizer::handle_endaudio_button(PG_Button *button)
 }
 
 bool
-WindowRecognizer::handle_reset_button(PG_Button *button)
+WindowRecognizer::handle_reset_button()
 {
   this->reset(true);
   return true;
 }
 
 bool
-WindowRecognizer::handle_resetrecog_button(PG_Button *button)
+WindowRecognizer::handle_resetrecog_button()
 {
   this->reset(false);
   return true;
 }
 
 bool
-WindowRecognizer::handle_settings_button(PG_Button *button)
+WindowRecognizer::handle_settings_button()
 {
   this->pause_window_functionality(true);
   WindowSettings window(this->m_window, this->m_out_queue);
+  window.initialize();
+  try {
+    this->run_child_window(&window);
+  }
+  catch (msg::ExceptionBrokenPipe) {
+    this->handle_broken_pipe();
+  }
+  this->pause_window_functionality(false);
+  return true;
+}
+
+bool
+WindowRecognizer::handle_back_button()
+{
+  this->end_running(1);
+  return true;
+}
+
+bool
+WindowRecognizer::handle_showtext_button()
+{
+  this->pause_window_functionality(true); // This disables the other thread.
+  // this->m_recognition.lock(); // No need, because other thread disabled.
+  WindowText window(this->m_window,
+                    "Recognition",
+                    this->m_recognition.get_recognition_text());
+  // this->m_recognition.unlock(); // No need, because other thread disabled.
   window.initialize();
   this->run_child_window(&window);
   this->pause_window_functionality(false);
   return true;
 }
-bool
-WindowRecognizer::handle_back_button(PG_Button *button)
+
+PG_Button*
+WindowRecognizer::construct_button(const std::string &label,
+                                   unsigned int column_index,
+                                   unsigned int row_index,
+                                   const SigC::Slot0<bool> &callback)
 {
-  this->end_running(1);
-  return true;
+  const int left_margin = 10;
+  const int top_margin = 10;
+  const int width = 160;
+  const int height = 50;
+  const int horizontal_space = 50;
+  const int vertical_space = 0;
+  
+  // Calculate rect.
+  PG_Rect rect(left_margin + column_index * (horizontal_space + width),
+               top_margin + row_index * (vertical_space + height),
+               width,
+               height);
+
+  // Create button and connect it with the window.               
+  PG_Button *button = new PG_Button(this->m_window, rect, label.data());
+  button->sigClick.connect(callback);
+
+  return button;
 }

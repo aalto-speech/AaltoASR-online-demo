@@ -2,6 +2,7 @@
 #ifndef WINDOW_HH_
 #define WINDOW_HH_
 
+#include "undefine.hh"
 #include <pgapplication.h>
 #include <pgwindow.h>
 //#include "WindowMessageBox.hh"

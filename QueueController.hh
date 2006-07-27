@@ -3,6 +3,7 @@
 #define QUEUECONTROLLER_HH_
 
 #include <pthread.h>
+//#include <list>
 //#include "OutQueueController.hh"
 #include "Recognition.hh"
 #include "msg.hh"
@@ -36,7 +37,7 @@ private:
   static void* callback(void *user_data);
   void run();
 
-  void parse_recognition(const std::string &message);
+  void parse_message(const std::string &message);
 
   Recognition *m_recognition;
   msg::InQueue *m_in_queue;

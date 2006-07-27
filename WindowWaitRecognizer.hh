@@ -16,6 +16,8 @@ public:
                        unsigned int height,
                        msg::InQueue *in_queue);
 
+  virtual ~WindowWaitRecognizer() { }
+
 protected:
 
   virtual void do_opening();

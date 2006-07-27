@@ -76,7 +76,7 @@ Application::initialize(const std::string &ssh_to, const std::string &script_fil
   this->m_app = new PG_Application;
   
   // Initialize PG_Application.
-  if(!this->m_app->InitScreen(1024, 700)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
+  if(!this->m_app->InitScreen(1024, 900)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
     fprintf(stderr, "Resolution not supported\n");
     return false;
   }
@@ -89,11 +89,12 @@ Application::initialize(const std::string &ssh_to, const std::string &script_fil
   this->m_app->FlipPage();
   
   // Set some settings.
+  Settings::read_settings();
   Settings::ssh_to = ssh_to;
   Settings::script_file = script_file;
 
   // Initialize recognizer process.
-//* Commenting these lines out will disable recognizer.
+/* Commenting these lines out will disable recognizer.
   this->m_recognizer = new Process();
   this->m_out_queue = new msg::OutQueue();//this->m_recognizer->write_fd);
   this->m_in_queue = new msg::InQueue();//this->m_recognizer->read_fd);

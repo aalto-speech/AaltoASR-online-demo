@@ -12,6 +12,7 @@ public:
   WindowReset(const PG_Widget *parent,
               msg::InQueue *in_queue,
               msg::OutQueue *out_queue);
+  virtual ~WindowReset() { }
 
 protected:
 

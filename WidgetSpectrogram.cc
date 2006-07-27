@@ -8,7 +8,6 @@ WidgetSpectrogram::WidgetSpectrogram(PG_Widget *parent,
                                      unsigned int pixels_per_second)
   : WidgetWave(parent, rect, audio_input, pixels_per_second)
 {
-//  this->m_window_width = SAMPLE_RATE / pixels_per_second;
   this->m_window_width = 2 * this->my_height;
   this->m_data_in = new double[this->m_window_width];
   this->m_data_out = new double[this->m_window_width+1];
@@ -54,7 +53,6 @@ WidgetSpectrogram::draw_new(unsigned long left_index,
 
   for (unsigned int ind = 0; ind < audio_pixels; ind++)
   {
-    //*
     unsigned int audio_window_size = this->m_window_width;
     if (ind * this->m_frames_per_pixel + this->m_window_width > audio_size) {
       memset(this->m_data_in, 0, sizeof(double) * this->m_window_width);
@@ -63,12 +61,6 @@ WidgetSpectrogram::draw_new(unsigned long left_index,
     for (unsigned jnd = 0; jnd < audio_window_size; jnd++) {
       this->m_data_in[jnd] = this->m_audio_buffer[jnd+ind*this->m_frames_per_pixel];
     }
-    //*/
-    /*
-    for (unsigned jnd = 0; jnd < this->m_window_width; jnd++) {
-      this->m_data_in[jnd] = this->m_audio_buffer[jnd+ind*this->m_frames_per_pixel];
-    }
-    //*/
 
     fftw_execute(this->m_coeffs);
 
@@ -81,7 +73,6 @@ WidgetSpectrogram::draw_new(unsigned long left_index,
         index = this->m_window_width - index;
         values[jnd] += this->m_data_out[index] * this->m_data_out[index];
       }
-//      values[jnd] = jnd;
     }
 
     double min = *std::min_element(values, values + this->my_height);

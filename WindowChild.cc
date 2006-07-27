@@ -10,8 +10,6 @@ WindowChild::WindowChild(const PG_Widget *parent,
   : m_parent(parent), m_width(width), m_height(height)
 {
   this->m_title = title;
-  this->m_ok_button = NULL;
-  this->m_cancel_button = NULL;
   this->m_close = close;
   this->m_button_count = 0;
 }
@@ -25,8 +23,6 @@ WindowChild::WindowChild(const PG_Widget *parent,
   : m_parent(parent), m_width(width), m_height(height)
 {
   this->m_title = title;
-  this->m_ok_button = NULL;
-  this->m_cancel_button = NULL;
   this->m_close = close;
   this->m_ok_text = ok_text;
   this->m_button_count = 1;
@@ -42,18 +38,10 @@ WindowChild::WindowChild(const PG_Widget *parent,
   : m_parent(parent), m_width(width), m_height(height)
 {
   this->m_title = title;
-  this->m_ok_button = NULL;
-  this->m_cancel_button = NULL;
   this->m_close = close;
   this->m_ok_text = ok_text;
   this->m_cancel_text = cancel_text;
   this->m_button_count = 2;
-}
-
-WindowChild::~WindowChild()
-{
-  delete this->m_ok_button;
-  delete this->m_cancel_button;
 }
 
 void
@@ -82,21 +70,21 @@ WindowChild::initialize()
   }
   
   if (this->m_button_count >= 1) {
-    this->m_ok_button = new PG_Button(this->m_window, rect1, this->m_ok_text.data());
-    this->m_ok_button->sigClick.connect(slot(*this, &WindowChild::handle_ok_button));
-    this->m_window->AddChild(this->m_ok_button);
+    PG_Button *ok_button = new PG_Button(this->m_window, rect1, this->m_ok_text.data());
+    ok_button->sigClick.connect(slot(*this, &WindowChild::handle_ok_button));
+    this->m_window->AddChild(ok_button);
 
     if (this->m_button_count >= 2) {
-      this->m_cancel_button = new PG_Button(this->m_window, rect2, this->m_cancel_text.data());
-      this->m_cancel_button->sigClick.connect(slot(*this, &WindowChild::handle_cancel_button));
-      this->m_window->AddChild(this->m_cancel_button);
+      PG_Button *cancel_button = new PG_Button(this->m_window, rect2, this->m_cancel_text.data());
+      cancel_button->sigClick.connect(slot(*this, &WindowChild::handle_cancel_button));
+      this->m_window->AddChild(cancel_button);
     }
   }
 
 }
 
 bool
-WindowChild::handle_ok_button(PG_Button *button)
+WindowChild::handle_ok_button()
 {
   if (this->do_ok())
     this->end_running(1);
@@ -104,7 +92,7 @@ WindowChild::handle_ok_button(PG_Button *button)
 }
 
 bool
-WindowChild::handle_cancel_button(PG_Button *button)
+WindowChild::handle_cancel_button()
 {
   this->end_running(2);
   return true;
@@ -115,6 +103,9 @@ WindowChild::handle_close()
 {
   if (this->m_button_count) {
     this->end_running(this->m_button_count);
+  }
+  else {
+    this->end_running(1);
   }
   return true;
 }

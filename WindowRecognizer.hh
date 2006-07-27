@@ -16,8 +16,10 @@ class WindowRecognizer  :  public Window
 
 public:
   
-  WindowRecognizer(Process *process, msg::InQueue *in_queue, msg::OutQueue *out_queue);
-  virtual ~WindowRecognizer();
+  WindowRecognizer(Process *process,
+                   msg::InQueue *in_queue,
+                   msg::OutQueue *out_queue);
+  virtual ~WindowRecognizer() { }
   
   virtual void initialize();
   
@@ -31,13 +33,21 @@ protected:
   
   virtual AudioInputController* get_audio_input() = 0;
   
-  bool handle_back_button(PG_Button *button);
-  bool handle_play_button(PG_Button *button);
-  bool handle_reset_button(PG_Button *button);
-  bool handle_resetrecog_button(PG_Button *button);
-  bool handle_enablerecog_button(PG_Button *button);
-  bool handle_endaudio_button(PG_Button *button);
-  bool handle_settings_button(PG_Button *button);
+  PG_Button* construct_button(const std::string &label,
+                              unsigned int column_index,
+                              unsigned int row_index,
+                              const SigC::Slot0<bool> &callback);
+  
+  void enable_recognizer(bool enable);
+  
+  bool handle_back_button();
+  bool handle_play_button();
+  bool handle_reset_button();
+  bool handle_resetrecog_button();
+  bool handle_enablerecog_button();
+  bool handle_endaudio_button();
+  bool handle_settings_button();
+  bool handle_showtext_button();
   
   void set_status(Status status);
   inline Status get_status() const { return this->m_status; }
@@ -61,17 +71,11 @@ protected:
   
 private:
 
-  PG_Button *m_back_button;
   PG_Button *m_play_button;
-  PG_Button *m_reset_button;
-  PG_Button *m_resetrecog_button;
-  PG_Button *m_enablerecog_button;
   PG_Button *m_endaudio_button;
-  PG_Button *m_settings_button;
-  
+  PG_Button *m_enablerecog_button;
+
   Status m_status;
-  
-  bool m_paused;
   
   WidgetRecognitionArea *m_recognition_area;
 };

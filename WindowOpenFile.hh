@@ -12,6 +12,7 @@ public:
 
   WindowOpenFile(const PG_Widget *parent, AudioFileInputController *audio_input)
     : WindowFile(parent, "Open Audio File"), m_audio_input(audio_input) { }
+  virtual ~WindowOpenFile() { }
   
 protected:
 

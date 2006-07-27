@@ -25,6 +25,7 @@ public:
 
   unsigned long operate();
   virtual void pause_listening(bool pause);
+  inline bool is_paused() const { return this->m_paused; }
   
   void play(unsigned long from, unsigned long length = 0);
   void stop();
@@ -61,6 +62,8 @@ private:
   unsigned long m_playback_from;
   unsigned long m_playback_length;
   unsigned long m_playback_played;
+
+  bool m_paused;
 
 };
 

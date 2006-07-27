@@ -29,6 +29,13 @@ WindowStartProcess::do_opening()
   this->start_queues();
   
   WindowWaitRecognizer::do_opening();
+  
+  try {
+    Settings::send_settings(this->m_out_queue);
+  }
+  catch (msg::ExceptionBrokenPipe) {
+    this->handle_broken_pipe();
+  }
 }
 
 void
@@ -38,19 +45,25 @@ WindowStartProcess::do_running()
     WindowWaitRecognizer::do_running();
   }
   catch (msg::ExceptionBrokenPipe) {
-    WindowMessageBox message(this->m_window,
-                             "Error",
-                             "Recognizer process couldn't be started.\nDo you want to retry or exit?",
-                             "Retry",
-                             "Exit");
-    message.initialize();
-    int ret_val = this->run_child_window(&message);
-    if (ret_val == 1) {
-      this->do_opening();
-    }
-    if (ret_val == 2)
-      this->end_running(0);
+    this->handle_broken_pipe();
   }
+}
+
+void
+WindowStartProcess::handle_broken_pipe()
+{
+  WindowMessageBox message(this->m_window,
+                           "Error",
+                           "Recognizer process couldn't be started.\nDo you want to retry or exit?",
+                           "Retry",
+                           "Exit");
+  message.initialize();
+  int ret_val = this->run_child_window(&message);
+  if (ret_val == 1) {
+    this->do_opening();
+  }
+  if (ret_val == 2)
+    this->end_running(0);
 }
 
 void
@@ -69,12 +82,10 @@ WindowStartProcess::finish_process_and_queues()
 void
 WindowStartProcess::start_process()
 {
+//  Settings::read_settings();
   if (this->m_process->create() == 0) {
-    // This catch is only for the child process! All audio streams must be
-    // closed
+    // All streams must be closed!
     AudioStream::close_all_streams();
-  //  this->clean();
-    Settings::read_settings();
     int ret = execlp("ssh",
                      "ssh",
                      Settings::ssh_to.data(),

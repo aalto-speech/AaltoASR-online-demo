@@ -99,7 +99,8 @@ WidgetWave::blit_old(unsigned long left_index)
   }
 
   //blit old surface
-  if (oldview_size && this->m_last_left_index != left_index) {
+//  if (oldview_size && this->m_last_left_index != left_index) {
+  if (oldview_size) {
     SDL_Rect src_rect;
     SDL_Rect dest_rect;
     SDL_Surface *surface = this->GetWidgetSurface();
@@ -184,7 +185,7 @@ WidgetWave::draw_new(unsigned long left_index, unsigned int oldview_size, unsign
 void
 WidgetWave::update()
 {
-  // This is for thread-safety.
+  // This is for thread-safety. TODO: NOT NECESSARY!! ONLY ONE THREAD USES!
   unsigned long left_index = this->m_left_index;
   unsigned int oldview_size = 0;
 
@@ -204,5 +205,4 @@ WidgetWave::update()
   this->m_last_left_index = left_index;
   this->m_force_redraw = false;
   SDL_BlitSurface(this->GetWidgetSurface(), NULL, this->m_surface_backbuffer, NULL);
-//  this->Update(true);
 }

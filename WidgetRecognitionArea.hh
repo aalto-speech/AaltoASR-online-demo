@@ -2,19 +2,23 @@
 #ifndef WIDGETRECOGNITIONAREA_HH_
 #define WIDGETRECOGNITIONAREA_HH_
 
-#include <pgscrollbar.h>
+//#include <pgscrollbar.h>
+#include "undefine.hh"
+#include <pgradiobutton.h>
 #include "Recognition.hh"
 #include "AudioInputController.hh"
 #include "WidgetRecognitionTexts.hh"
 #include "WidgetWave.hh"
 #include "WidgetSpectrogram.hh"
+//#include "ScrollBar.hh"
+#include <pgscrollbar.h>
 
 class WidgetRecognitionArea  :  public PG_Widget
 {
   
 public:
 
-  enum Autoscroll { DISABLE, RECOGNITION, HYPOTHESIS, AUDIO, PLAYBACK };
+  enum Autoscroll { DISABLE, RECOGNIZER, AUDIO };
 
   WidgetRecognitionArea(PG_Widget *parent,
                         const PG_Rect &rect,
@@ -26,18 +30,15 @@ public:
   void reset();
   void update();
   
-  void set_autoscroll(bool autoscroll) { this->m_autoscroll = autoscroll; };
-//  void set_autoscroll(Autoscroll autoscroll) { this->m_autoscroll = autoscroll; };
-  
 protected:
   
   bool handle_scroll(PG_ScrollBar *scroll_bar, long page);
-//  bool handle_morpheme_button(PG_MessageObject *widget);
+  bool handle_radio(PG_RadioButton *radio, bool status, void *user_data);
   
   void set_scroll_range();
   
-//  void initialize();
-//  void terminate();
+  void update_cursors();
+  void draw_cursor(long position, PG_Color color);
   
 private:
 
@@ -48,13 +49,15 @@ private:
   WidgetSpectrogram *m_spectrogram;
   WidgetRecognitionTexts *m_text_area;
   PG_ScrollBar *m_scroll_bar;
+  PG_RadioButton *m_disablescroll_radio;
+
   AudioInputController *m_audio_input;
+  Recognition *m_recognition;
+
   const unsigned int m_pixels_per_second;
   const unsigned int m_frames_per_pixel;
-//  Autoscroll m_autoscroll;
-  bool m_autoscroll;
-//  bool m_autoscroll;
-//  pthread_mutex_t m_scroll_lock;
+
+  Autoscroll m_autoscroll;
   
 };
 

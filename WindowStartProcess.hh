@@ -14,6 +14,7 @@ public:
 
   WindowStartProcess(const PG_Widget *parent, Process *process,
                      msg::InQueue *in_queue, msg::OutQueue *out_queue);
+  virtual ~WindowStartProcess() { }
 
 protected:
 
@@ -28,6 +29,7 @@ private:
   void finish_process_and_queues();
   void start_process();
   void start_queues();
+  void handle_broken_pipe();
 
 };
 

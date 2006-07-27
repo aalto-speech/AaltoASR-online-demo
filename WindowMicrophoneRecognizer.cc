@@ -7,10 +7,7 @@ WindowMicrophoneRecognizer::WindowMicrophoneRecognizer(Process *process,
                                                        msg::OutQueue *out_queue)
   : WindowRecognizer(process, in_queue, out_queue)
 {
-//  this->m_savefile_window = NULL;
   this->m_audio_input = NULL;
-  this->m_save_button = NULL;
-//  this->m_save_pressed = false;
 }
 
 WindowMicrophoneRecognizer::~WindowMicrophoneRecognizer()
@@ -22,10 +19,9 @@ void
 WindowMicrophoneRecognizer::initialize()
 {
   WindowRecognizer::initialize();
-  // ...  
-  this->m_save_button = new PG_Button(this->m_window, PG_Rect(10,200,150,50), "Save");
-  this->m_save_button->sigClick.connect(slot(*this, &WindowMicrophoneRecognizer::handle_save_button));
-  this->m_window->AddChild(this->m_save_button);
+
+  PG_Button *save_button =
+    this->construct_button("Save", 0, 2, slot(*this, &WindowMicrophoneRecognizer::handle_save_button));
 }
 
 void
@@ -33,7 +29,7 @@ WindowMicrophoneRecognizer::do_opening()
 {
   this->m_audio_input = new AudioLineInputController(this->m_out_queue);
   if (!this->m_audio_input->initialize()) {
-    this->error("Audio input controller initialization failed.", ERROR_CLOSE);
+    this->error("Audio input controller initialization failed. Try closing all other programs.", ERROR_CLOSE);
     return;
   }
   WindowRecognizer::do_opening();
@@ -56,29 +52,12 @@ WindowMicrophoneRecognizer::reset(bool reset_audio)
   WindowRecognizer::reset(reset_audio);
   this->set_status(LISTENING);
 } 
-/*
-void
-WindowMicrophoneRecognizer::save_audio_file()
-{
-}
-//*/
-/*
-void
-WindowMicrophoneRecognizer::handle_close_child_window(Window *child_window, int ret_val)
-{
-  Window::handle_close_child_window(child_window, ret_val);
-  
-  if (child_window == this->m_savefile_window) {
-    this->pause_window_functionality(false);
-    delete this->m_savefile_window;
-    this->m_savefile_window = NULL;
-  }
-}
-//*/
+
 bool
-WindowMicrophoneRecognizer::handle_save_button(PG_Button *button)
+WindowMicrophoneRecognizer::handle_save_button()
 {
   this->pause_window_functionality(true);
+  this->pause_audio_input(true);
 
   if (this->m_audio_input->get_audio_data_size()) {
     WindowSaveFile window(this->m_window, this->m_audio_input);

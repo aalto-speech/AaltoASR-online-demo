@@ -9,6 +9,6 @@ lex=$dir/morph40000.lex
 
 hmm=$dir/mfcc_cms_speecon_tri_14.6.2006_9
 
-./recognizer -b $hmm -d "./decoder --binlm $lm --lookahead $la_lm --lexicon $lex --ph $hmm.ph --dur $hmm.dur --lm-scale 35 --token-limit 30000 --beam 150"
+./recognizer -b $hmm -d "./decoder --binlm $lm --lookahead $la_lm --lexicon $lex --ph $hmm.ph --dur $hmm.dur --lm-scale 35 --token-limit 30000 --beam 200"
 
 

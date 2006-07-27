@@ -6,20 +6,9 @@
 WindowSettings::WindowSettings(const PG_Widget *parent, msg::OutQueue *out_queue)
   : WindowChild(parent, "Settings", 350, 300, true, "OK", "Cancel")
 {
-  this->m_text_label = NULL;
-  this->m_beam_label = NULL;
-  this->m_lmscale_label = NULL;
   this->m_beam_edit = NULL;
   this->m_lmscale_edit = NULL;
-}
-
-WindowSettings::~WindowSettings()
-{
-  delete this->m_text_label;
-  delete this->m_beam_label;
-  delete this->m_lmscale_label;
-  delete this->m_beam_edit;
-  delete this->m_lmscale_edit;
+  this->m_out_queue = out_queue;
 }
 
 void
@@ -27,17 +16,15 @@ WindowSettings::initialize()
 {
   WindowChild::initialize();
   
-  char buffer[100];
-  
-  this->m_text_label = new PG_Label(this->m_window,
-                                    PG_Rect(10, 50, 200, 20),
-                                    "Enter parameters.");
-  this->m_beam_label = new PG_Label(this->m_window,
-                                    PG_Rect(10, 100, 150, 20),
-                                    "Beam (1-200):");
-  this->m_lmscale_label = new PG_Label(this->m_window,
-                                       PG_Rect(10, 150, 150, 20),
-                                       "LM-scale (1-100):");
+  PG_Label *text_label = new PG_Label(this->m_window,
+                                      PG_Rect(10, 50, 200, 20),
+                                      "Enter parameters.");
+  PG_Label *beam_label = new PG_Label(this->m_window,
+                                      PG_Rect(10, 100, 150, 20),
+                                      "Beam (1-200):");
+  PG_Label *lmscale_label = new PG_Label(this->m_window,
+                                         PG_Rect(10, 150, 150, 20),
+                                         "LM-scale (1-100):");
   this->m_beam_edit = new PG_LineEdit(this->m_window,
                                       PG_Rect(170, 100, 50, 20),
                                       "LineEdit",
@@ -47,12 +34,14 @@ WindowSettings::initialize()
                                          "LineEdit",
                                          3);
   
-  this->m_window->AddChild(this->m_text_label);
-  this->m_window->AddChild(this->m_beam_label);
-  this->m_window->AddChild(this->m_lmscale_label);
+  this->m_window->AddChild(text_label);
+  this->m_window->AddChild(beam_label);
+  this->m_window->AddChild(lmscale_label);
   this->m_window->AddChild(this->m_beam_edit);
   this->m_window->AddChild(this->m_lmscale_edit);
-  
+
+  // Write current settings into line edits.  
+  char buffer[100];
   sprintf(buffer, "%d", Settings::beam);
   this->m_beam_edit->SetText(buffer);
   sprintf(buffer, "%d", Settings::lmscale);
@@ -63,8 +52,8 @@ bool
 WindowSettings::do_ok()
 {
   bool ok = true;
-  unsigned int beam;
-  unsigned int lmscale;
+  int beam;
+  int lmscale;
   
   beam = this->read_value(this->m_beam_edit, 1, 200, &ok);
   if (!ok) {
@@ -78,13 +67,10 @@ WindowSettings::do_ok()
     return false;
   }
 
+  // Send parameter change messages to recognizer.
   Settings::beam = beam;
   Settings::lmscale = lmscale;
-  
-  if (this->m_out_queue) {
-    // Send parameter change messages to recognizer.
-    // ...
-  }
+  Settings::send_settings(this->m_out_queue); // this might throw exception!
 
   return true;
 }

@@ -6,8 +6,8 @@
 
 std::string Settings::ssh_to = "itl_cl1";
 std::string Settings::script_file = "rec.sh";
-long Settings::beam = 0;
-long Settings::lmscale = 0;
+int Settings::beam = 0;
+int Settings::lmscale = 0;
 
 bool
 //Settings::read_settings(const std::string &script_file)
@@ -52,28 +52,25 @@ Settings::read_settings()
   fclose(file);
   return read_settings;
 }
-/*
-unsigned int
-Settings::get_beam()
-{
-  return m_beam;
-}
- 
-unsigned int
-Settings::get_lmscale()
-{
-  return m_lmscale;
-}
 
 void
-Settings::set_beam(unsigned int beam)
+Settings::send_settings(msg::OutQueue *out_queue) throw(msg::ExceptionBrokenPipe)
 {
-  m_beam = beam;
-}
+  if (out_queue) {
+    msg::Message message(msg::M_DECODER_SETTING);
+    char buffer[100];
+    message.set_urgent(true);
+    
+// TODO:    if (beam on validi) ...
+    sprintf(buffer, "beam %d", beam);
+    message.append(buffer);
+    out_queue->add_message(message);
 
-void
-Settings::set_lmscale(unsigned int lmscale)
-{
-  m_lmscale = lmscale;
+// TODO: if lmscale on validi....
+    sprintf(buffer, "lm_scale %d", lmscale);
+    message.clear_data();
+    message.append(buffer);
+    out_queue->add_message(message);
+    out_queue->flush();
+  }
 }
-//*/
