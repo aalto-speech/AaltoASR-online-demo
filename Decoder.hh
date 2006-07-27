@@ -11,6 +11,7 @@ public:
   void init(conf::Config &conf);
   void reset();
   void run();
+  void send_state_history();
   void message_result(bool send_all);
 
   bool verbose;
@@ -20,6 +21,7 @@ public:
   HistoryVector hist_vec;
   int frame;
   bool paused;
+  bool adaptation;
 
   TPLexPrefixTree::WordHistory *last_guaranteed_history;
 };

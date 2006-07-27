@@ -271,7 +271,9 @@ Recognizer::process_stdin_queue()
 
     else if (message.type() == msg::M_DECODER_SETTING ||
              message.type() == msg::M_DECODER_PAUSE ||
-             message.type() == msg::M_DECODER_UNPAUSE)
+             message.type() == msg::M_DECODER_UNPAUSE ||
+             message.type() == msg::M_ADAPT_ON ||
+             message.type() == msg::M_ADAPT_OFF)
     {
       dec_out_queue.queue.push_back(message);
     }

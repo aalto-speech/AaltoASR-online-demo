@@ -2,7 +2,9 @@
 #include "str.hh"
 
 Decoder::Decoder()
-  : paused(false), last_guaranteed_history(NULL)
+  : paused(false), 
+    adaptation(false),
+    last_guaranteed_history(NULL)
 {
 }
 
@@ -62,6 +64,16 @@ Decoder::init(conf::Config &config)
 
   in_queue.enable(0);
   out_queue.enable(1);
+}
+
+void
+Decoder::send_state_history()
+{
+  TokenPassSearch &tp = t.tp_search();
+  msg::Message message(msg::M_STATE_HISTORY);
+  message.append(tp.state_history_string());
+  out_queue.queue.push_back(message);
+  out_queue.flush();
 }
 
 void
@@ -143,9 +155,14 @@ Decoder::run()
       continue;
 
     msg::Message &message = in_queue.queue.front();
+    fprintf(stderr, "DEBUG: message type %d\n", message.type());
     if (paused) {
       if (message.type() == msg::M_DECODER_UNPAUSE) {
         paused = false;
+        in_queue.queue.pop_front();
+        continue;
+      }
+      else if (message.type() == msg::M_DECODER_PAUSE) {
         in_queue.queue.pop_front();
         continue;
       }
@@ -160,6 +177,7 @@ Decoder::run()
     //
 
     if (message.type() == msg::M_PROBS) {
+      fprintf(stderr, "got PROBS\n");
       int num_log_probs = message.data_length() / 4;
       log_probs.resize(num_log_probs);
 
@@ -197,9 +215,21 @@ Decoder::run()
         assert(!ret);
 
         message_result(false);
+        if (adaptation)
+          send_state_history();
       }
       out_queue.queue.push_back(msg::Message(msg::M_RECOG_END));
       out_queue.flush();
+    }
+
+    else if (message.type() == msg::M_ADAPT_ON) {
+      adaptation = true;
+      t.set_keep_state_segmentation(true);
+    }
+
+    else if (message.type() == msg::M_ADAPT_OFF) {
+      adaptation = false;
+      t.set_keep_state_segmentation(false);
     }
 
     else if (message.type() == msg::M_DECODER_SETTING) {
