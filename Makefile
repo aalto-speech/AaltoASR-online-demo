@@ -1,159 +1,11 @@
 arch = $(shell uname -m)
 
 DECODER_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/decoder
+#DECODER_PATH = /home/thirsima/share/decoder-online-demo/src
 AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
 
 OPT = -g -O2
-AUX_CXXFLAGS ?= \
-\
--Wno-redundant-decls \
--fsyntax-only \
--Wno-aggregate-return \
--Wno-cast-align \
--Wno-cast-qual \
--Wno-char-subscripts \
--Wno-comment \
--Wno-conversion \
--Wno-deprecated-declarations \
--Wno-disabled-optimization \
--Wno-error \
--Wno-float-equal \
--Wno-format \
--Wno-format=2 \
--Wno-format-nonliteral \
--Wno-format-security \
--Wno-implicit \
--Wno-import \
--Wno-inline \
--Wno-endif-labels \
--Wno-long-long \
--Wno-missing-braces \
--Wno-missing-format-attribute \
--Wno-missing-noreturn \
--Wno-multichar \
--Wno-format-extra-args \
--Wno-format-y2k \
--Wno-import \
--Wno-packed \
--Wno-padded \
--Wno-parentheses \
--Wno-pointer-arith \
--Wno-return-type \
--Wno-shadow \
--Wno-sign-compare \
--Wno-strict-aliasing \
--Wno-switch \
--Wno-switch-default \
--Wno-switch-enum \
--Wno-system-headers \
--Wno-trigraphs \
--Wno-undef \
--Wno-uninitialized \
--Wno-unknown-pragmas \
--Wno-unreachable-code \
--Wno-unused \
--Wno-unused-function \
--Wno-unused-label \
--Wno-unused-parameter \
--Wno-unused-value \
--Wno-unused-variable \
--Wno-write-strings \
-\
-\
--Wno-aggregate-return \
--Wno-cast-align \
--Wno-cast-qual \
--Wno-char-subscripts \
--Wno-comment \
--Wno-conversion \
--Wno-deprecated-declarations \
--Wdisabled-optimization \
--Wno-float-equal \
--Wno-format \
--Wno-format=2 \
--Wno-format-nonliteral \
--Wno-format-security \
--Wno-implicit \
--Wno-import \
--Wno-inline \
--Wno-endif-labels \
--Wno-missing-braces  \
--Wno-missing-noreturn \
--Wno-multichar \
--Wno-format-extra-args \
--Wno-format-y2k \
--Wno-import \
--Wno-packed \
--Wno-padded \
--Wno-parentheses \
--Wno-pointer-arith   \
--Wno-redundant-decls \
--Wno-return-type \
--Wno-shadow \
--Wno-sign-compare \
--Wno-strict-aliasing \
--Wno-switch \
--Wno-switch-default \
--Wno-switch-enum \
--Wno-system-headers \
--Wno-trigraphs \
--Wno-undef \
--Wno-uninitialized \
--Wno-unknown-pragmas \
--Wno-unreachable-code \
--Wno-unused \
--Wno-unused-function \
--Wno-unused-label \
--Wno-unused-parameter \
--Wno-unused-value \
--Wno-unused-variable \
--Wno-write-strings \
-\
--Wno-char-subscripts \
--Wno-comment \
--Wno-format \
--Wno-implicit \
--Wno-missing-braces \
--Wno-parentheses \
--Wno-return-type \
--Wno-switch \
--Wno-switch-default \
--Wno-switch-enum \
--Wno-trigraphs \
--Wno-unused-function \
--Wno-unused-label \
--Wno-unused-parameter \
--Wno-unused-variable \
--Wno-unused-value \
--Wno-unused \
--Wno-uninitialized \
--Wno-unknown-pragmas \
--Wno-strict-aliasing \
--Wno-system-headers \
--Wno-float-equal \
--Wno-undef \
--Wno-endif-labels \
--Wno-shadow \
--Wno-pointer-arith \
--Wno-cast-qual \
--Wno-cast-align \
--Wno-write-strings \
--Wno-conversion \
--Wno-sign-compare \
--Wno-aggregate-return \
--Wno-missing-prototypes \
--Wno-missing-noreturn \
--Wno-missing-format-attribute \
--Wno-deprecated-declarations \
--Wno-packed \
--Wno-padded \
--Wno-redundant-decls \
--Wno-unreachable-code \
--Wno-inline \
--Wno-long-long
-
-
-#-Wall -Wno-system-headers #-Wno-redundant-decls
+AUX_CXXFLAGS ?= -Wall
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) -I/usr/include/SDL \
 	-I/usr/include/paragui -I/usr/include/freetype2 \
 	-I/opt/gnome/lib/sigc++-1.2/include -I/opt/gnome/include/sigc++-1.2 \
@@ -178,7 +30,7 @@ recognizer_libs = -lpthread -lakumod -lfftw3 -lsndfile
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libakumod.a
 
 gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
-gui_libs = -lpthread -lakumod
+gui_libs = -lpthread -lakumod -lsndfile
 gui: $(gui_srcs:%.cc=%.o)
 
 jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
@@ -203,7 +55,7 @@ objs = $(srcs:%.cc=%.o)
 default: $(progs)
 
 %.o: %.cc
-	$(CXX) -U PACKAGE $(CXXFLAGS) -c  -U PACKAGE $<
+	$(CXX) -U PACKAGE $(CXXFLAGS) -c  -U PACKAGE $< 2>&1 | ./c++filter.pl
 
 $(progs): %: %.o
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) -o $@ $($@_srcs:%.cc=%.o) $($@_libs)
