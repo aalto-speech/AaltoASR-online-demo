@@ -3,6 +3,7 @@
 #include "conf.hh"
 #include "msg.hh"
 #include "str.hh"
+#include "Adapter.hh"
 
 static const char *ac_state_str[] = {
   "A_STARTING",
@@ -37,7 +38,7 @@ acoustic_thread(void *data)
     perror("ERROR: acoustic_thread(): fdopen() failed");
     exit(1);
   }
-  rec->gen.open(file, true);
+  rec->gen.open(file, true, true);
 
   msg::OutQueue out_queue(rec->ac_thread.fd_tw);
   
@@ -59,11 +60,18 @@ acoustic_thread(void *data)
     //
     bool got_reset = false;
     pthread_mutex_lock(&rec->ac_thread.lock);
+
+    if (frame == 0)
+      rec->feature_vectors.clear();
+    rec->feature_vectors.push_back(std::vector<float>());
+    vec.get(rec->feature_vectors.back());
+
     if (rec->ac_thread.reset_flag) {
       fprintf(stderr, "acoustic_thread: got RESET in frame %d\n", frame);
       got_reset = true;
       rec->ac_thread.reset_flag = false;
     }
+
     pthread_mutex_unlock(&rec->ac_thread.lock);
 
     if (got_reset || rec->gen.eof()) {
@@ -109,6 +117,7 @@ Recognizer::Recognizer()
 {
   ac_state = A_CLOSED;
   dec_state = D_CLOSED;
+  adaptation = false;
 }
 
 void // private
@@ -269,11 +278,19 @@ Recognizer::process_stdin_queue()
       }
     }
 
+    else if (message.type() == msg::M_ADAPT_ON) {
+      adaptation = true;
+      dec_out_queue.queue.push_back(message);
+    }
+
+    else if (message.type() == msg::M_ADAPT_OFF) {
+      adaptation = false;
+      dec_out_queue.queue.push_back(message);
+    }
+
     else if (message.type() == msg::M_DECODER_SETTING ||
              message.type() == msg::M_DECODER_PAUSE ||
-             message.type() == msg::M_DECODER_UNPAUSE ||
-             message.type() == msg::M_ADAPT_ON ||
-             message.type() == msg::M_ADAPT_OFF)
+             message.type() == msg::M_DECODER_UNPAUSE)
     {
       dec_out_queue.queue.push_back(message);
     }
@@ -418,6 +435,26 @@ Recognizer::process_dec_in_queue()
     else if (message.type() == msg::M_MESSAGE) {
       stdout_queue.queue.push_back(message);
       stdout_queue.flush();
+    }
+
+    else if (message.type() == msg::M_STATE_HISTORY) {
+      pthread_mutex_lock(&ac_thread.lock);
+
+      if (!adaptation) {
+        fprintf(stderr, "rec: ignoring STATE_HISTORY when adaptation off\n");
+      }
+
+      Adapter adapter(hmms, gen);
+      LinTransformModule *mllr_mod = 
+        dynamic_cast<LinTransformModule*>(gen.module("mllr"));
+
+      fprintf(stderr, "rec: adapting\n");
+      adapter.adapt(message.data_str(), feature_vectors, mllr_mod);
+      fprintf(stderr, "rec: adapting finished\n");
+
+      gen.write_configuration(stderr);
+
+      pthread_mutex_unlock(&ac_thread.lock);
     }
 
     else if (message.type() == msg::M_READY) {

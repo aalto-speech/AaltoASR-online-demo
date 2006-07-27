@@ -157,6 +157,11 @@ main(int argc, char *argv[])
         if (fields.size() == 0)
           continue;
       }
+
+      if (fields[0] == "adapt") 
+        enqueue(msg::Message(msg::M_ADAPT_ON));
+      if (fields[0] == "unadapt") 
+        enqueue(msg::Message(msg::M_ADAPT_OFF));
       
       if (fields[0] == "pause")
         enqueue(msg::Message(msg::M_DECODER_PAUSE, true));

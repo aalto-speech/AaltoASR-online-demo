@@ -155,7 +155,6 @@ Decoder::run()
       continue;
 
     msg::Message &message = in_queue.queue.front();
-    fprintf(stderr, "DEBUG: message type %d\n", message.type());
     if (paused) {
       if (message.type() == msg::M_DECODER_UNPAUSE) {
         paused = false;
@@ -177,7 +176,6 @@ Decoder::run()
     //
 
     if (message.type() == msg::M_PROBS) {
-      fprintf(stderr, "got PROBS\n");
       int num_log_probs = message.data_length() / 4;
       log_probs.resize(num_log_probs);
 

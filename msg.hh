@@ -133,6 +133,16 @@ namespace msg {
     {
       return &buf[header_size];
     }
+
+    const char *data_ptr() const
+    {
+      return &buf[header_size];
+    }
+
+    std::string data_str() const 
+    {
+      return std::string(data_ptr(), data_length());
+    }
   };
 
   class InQueue {

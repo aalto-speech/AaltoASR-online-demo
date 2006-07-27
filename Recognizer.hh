@@ -54,6 +54,12 @@ public:
   msg::InQueue ac_in_queue;
   msg::OutQueue ac_out_queue;
 
+  /** Speaker adaptation mode. */
+  bool adaptation;
+
+  /** Feature vectors of the previous utterance. */
+  std::vector<std::vector<float> > feature_vectors;
+
 public:
   Recognizer();
   void run();

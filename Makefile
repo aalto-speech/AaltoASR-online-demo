@@ -3,13 +3,15 @@ arch = $(shell uname -m)
 DECODER_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/decoder
 #DECODER_PATH = /home/thirsima/share/decoder-online-demo/src
 AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
+#AKU_PATH = /home/thirsima/Work/akumod
 
 OPT = -g -O2
 AUX_CXXFLAGS ?= -Wall
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) -I/usr/include/SDL \
 	-I/usr/include/paragui -I/usr/include/freetype2 \
 	-I/opt/gnome/lib/sigc++-1.2/include -I/opt/gnome/include/sigc++-1.2 \
-	-I/share/puhe/linux/include
+	-I/share/puhe/linux/include \
+	-I/share/puhe/linux/include/lapackpp
 LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH)
 CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT)
 
@@ -25,8 +27,10 @@ decoder_srcs = decoder.cc Decoder.cc conf.cc msg.cc endian.cc
 decoder_libs = -ldecoder
 decoder: $(decoder_srcs:%.cc=%.o) $(DECODER_PATH)/libdecoder.a
 
-recognizer_srcs = recognizer.cc conf.cc msg.cc Recognizer.cc Process.cc
-recognizer_libs = -lpthread -lakumod -lfftw3 -lsndfile
+recognizer_srcs = recognizer.cc conf.cc msg.cc \
+	Recognizer.cc Process.cc Adapter.cc
+recognizer_libs = -L/share/puhe/x86_64/lib/ \
+	-lpthread -lakumod -lfftw3 -lsndfile -llapackpp -llapack
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libakumod.a
 
 gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
