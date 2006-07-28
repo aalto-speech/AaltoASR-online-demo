@@ -101,6 +101,18 @@ enqueue(const msg::Message &msg)
   pthread_mutex_unlock(&cond_mutex);
 }
 
+SNDFILE*
+open_audio(std::string file)
+{
+  SF_INFO snd_info;
+  SNDFILE *snd_file = sf_open(file.c_str(), SFM_READ, &snd_info);
+  if (snd_file == NULL) {
+    fprintf(stderr, "sf_open(%s) failed\n", file.c_str());
+    perror("system error:");
+  }
+  return snd_file;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -116,15 +128,7 @@ main(int argc, char *argv[])
     if (config.arguments.size() != 0)
       config.print_help(stderr, 1);
 
-    SF_INFO snd_info;
-    SNDFILE *snd_file = sf_open(config["audio"].get_c_str(), 
-                                SFM_READ, &snd_info);
-    if (snd_file == NULL) {
-      fprintf(stderr, "sf_open(%s) failed\n", 
-              config["audio"].get_c_str());
-      perror("system error:");
-      exit(1);
-    }
+    SNDFILE *snd_file = open_audio(config["audio"].get_str());
     
     Process proc;
     if (proc.create() == 0) {
@@ -158,10 +162,18 @@ main(int argc, char *argv[])
           continue;
       }
 
-      if (fields[0] == "adapt") 
-        enqueue(msg::Message(msg::M_ADAPT_ON));
-      if (fields[0] == "unadapt") 
-        enqueue(msg::Message(msg::M_ADAPT_OFF));
+      if (fields[0] == "adapt") {
+        if (fields.size() != 2) {
+          fprintf(stderr, "invalid adapt command\n");
+          continue;
+        }
+        if (fields[1] == "on")
+          enqueue(msg::Message(msg::M_ADAPT_ON));
+        if (fields[1] == "off") 
+          enqueue(msg::Message(msg::M_ADAPT_OFF));
+        if (fields[1] == "reset") 
+          enqueue(msg::Message(msg::M_ADAPT_RESET));
+      }
       
       if (fields[0] == "pause")
         enqueue(msg::Message(msg::M_DECODER_PAUSE, true));
@@ -182,14 +194,34 @@ main(int argc, char *argv[])
         enqueue(message);
       }
 
+      if (fields[0] == "debug") {
+        std::string line;
+        for (int i = 1; i < (int)fields.size(); i++) {
+          if (i > 1)
+            line.append(" ");
+          line.append(fields[i]);
+        }
+        fprintf(stderr, "gui: sending debug \"%s\"\n", line.c_str());
+
+        msg::Message message(msg::M_DEBUG);
+        message.append(line);
+        enqueue(message);
+      }
+
       if (fields[0] == "s") {
         send_rest = true;
         prompt = false;
       }
       if (fields[0] == "o") {
-        if (sf_seek(snd_file, 0, SEEK_SET) < 0) {
-          fprintf(stderr, "sf_seek(0) failed: %s\n", sf_strerror(snd_file));
-          exit(1);
+
+        if (fields.size() > 1)
+          snd_file = open_audio(fields[1]);
+
+        if (snd_file != NULL) {
+          if (sf_seek(snd_file, 0, SEEK_SET) < 0) {
+            fprintf(stderr, "sf_seek(0) failed: %s\n", sf_strerror(snd_file));
+            exit(1);
+          }
         }
         continue;
       }

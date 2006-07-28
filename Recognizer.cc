@@ -288,11 +288,26 @@ Recognizer::process_stdin_queue()
       dec_out_queue.queue.push_back(message);
     }
 
+    else if (message.type() == msg::M_ADAPT_RESET) {
+      Adapter adapter(hmms, gen);
+      LinTransformModule *mllr_mod = 
+        dynamic_cast<LinTransformModule*>(gen.module("mllr"));
+      MllrTrainer::restore_identity(mllr_mod);
+      fprintf(stderr, "rec: adaptation reset\n");
+    }
+
     else if (message.type() == msg::M_DECODER_SETTING ||
              message.type() == msg::M_DECODER_PAUSE ||
              message.type() == msg::M_DECODER_UNPAUSE)
     {
       dec_out_queue.queue.push_back(message);
+    }
+
+    else if (message.type() == msg::M_DEBUG) {
+      std::string str = message.data_str();
+      if (str == "conf") {
+        gen.write_configuration(stderr);
+      }
     }
 
     stdin_queue.queue.pop_front();
@@ -451,8 +466,6 @@ Recognizer::process_dec_in_queue()
       fprintf(stderr, "rec: adapting\n");
       adapter.adapt(message.data_str(), feature_vectors, mllr_mod);
       fprintf(stderr, "rec: adapting finished\n");
-
-      gen.write_configuration(stderr);
 
       pthread_mutex_unlock(&ac_thread.lock);
     }

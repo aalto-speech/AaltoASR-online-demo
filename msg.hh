@@ -39,8 +39,10 @@ namespace msg {
 
     M_ADAPT_ON,		// gui -> rec -> dec
     M_ADAPT_OFF,	// gui -> rec -> dec
+    M_ADAPT_RESET,	// gui -> rec -> dec
     M_STATE_HISTORY, 	// rec <- dec
 
+    M_DEBUG,		// gui -> rec
     M_MESSAGE,		// gui <- rec <- dec
   };
 
