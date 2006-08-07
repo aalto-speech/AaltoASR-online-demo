@@ -2,7 +2,6 @@
 #ifndef WIDGETWAVE_HH_
 #define WIDGETWAVE_HH_
 
-#include "undefine.hh"
 #include <pgwidget.h>
 #include "AudioInputController.hh"
 
@@ -25,19 +24,33 @@ public:
   
 protected:
 
-  unsigned int blit_old(unsigned long left_index);
-  unsigned long calculate_new(unsigned long left_index, unsigned long old_size);
-  virtual void draw_new(unsigned long left_index,
-                        unsigned int oldview_size,
-                        unsigned int audio_size);
+  void calculate_old(unsigned int &oldview_from,
+                     unsigned int &oldview_to,
+                     unsigned int &oldview_size);
+
+  virtual void fix_oldview_size(unsigned int oldview_from,
+                                unsigned int &oldview_size);
+                                
+  unsigned int blit_old();
+
+  void calculate_new(unsigned long old_size,
+                     unsigned long &newaudio_from,
+                     unsigned long &newaudio_size);
+
+  void draw_new(unsigned int x,
+                unsigned long newaudio_from,
+                unsigned long newaudio_size);
+
+  virtual void draw_screen_vector(SDL_Surface *surface, unsigned int x);
+  
+  virtual bool eventMouseButtonUp(const SDL_MouseButtonEvent *button);
 
   AudioInputController *m_audio_input;
   SDL_Surface *m_surface_backbuffer;
-  AUDIO_FORMAT *m_audio_buffer;
   const unsigned int m_pixels_per_second;
   const unsigned int m_frames_per_pixel;
   unsigned long m_left_index, m_last_left_index;
-  unsigned int m_width, m_height;
+//  unsigned int m_width, m_height;
   unsigned long m_last_audio_data_size;
   bool m_force_redraw;
   Uint32 m_foreground_color;

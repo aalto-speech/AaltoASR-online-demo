@@ -16,15 +16,12 @@ WindowSettings::initialize()
 {
   WindowChild::initialize();
   
-  PG_Label *text_label = new PG_Label(this->m_window,
-                                      PG_Rect(10, 50, 200, 20),
-                                      "Enter parameters.");
-  PG_Label *beam_label = new PG_Label(this->m_window,
-                                      PG_Rect(10, 100, 150, 20),
-                                      "Beam (1-200):");
-  PG_Label *lmscale_label = new PG_Label(this->m_window,
-                                         PG_Rect(10, 150, 150, 20),
-                                         "LM-scale (1-100):");
+  // Text labels.
+  new PG_Label(this->m_window, PG_Rect(10, 50, 200, 20), "Enter parameters.");
+  new PG_Label(this->m_window, PG_Rect(10, 100, 150, 20), "Beam (1-200):");
+  new PG_Label(this->m_window, PG_Rect(10, 150, 150, 20), "LM-scale (1-100):");
+  
+  // Text edit boxes.
   this->m_beam_edit = new PG_LineEdit(this->m_window,
                                       PG_Rect(170, 100, 50, 20),
                                       "LineEdit",
@@ -34,12 +31,6 @@ WindowSettings::initialize()
                                          "LineEdit",
                                          3);
   
-  this->m_window->AddChild(text_label);
-  this->m_window->AddChild(beam_label);
-  this->m_window->AddChild(lmscale_label);
-  this->m_window->AddChild(this->m_beam_edit);
-  this->m_window->AddChild(this->m_lmscale_edit);
-
   // Write current settings into line edits.  
   char buffer[100];
   sprintf(buffer, "%d", Settings::beam);
@@ -70,7 +61,13 @@ WindowSettings::do_ok()
   // Send parameter change messages to recognizer.
   Settings::beam = beam;
   Settings::lmscale = lmscale;
-  Settings::send_settings(this->m_out_queue); // this might throw exception!
+  try {
+    Settings::send_settings(this->m_out_queue);
+  }
+  catch(msg::ExceptionBrokenPipe) {
+    this->end_running(-1);
+    return false;
+  }
 
   return true;
 }

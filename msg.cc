@@ -180,8 +180,10 @@ namespace msg {
           if (errno == EINTR) // interrupted by signal
             continue;
           perror("flush_send(): write() failed");
-          if (errno == EPIPE)
+          if (errno == EPIPE) {
+            //exit(1);
             throw ExceptionBrokenPipe(fd);
+          }
           exit(1);
         }
         break;

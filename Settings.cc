@@ -1,4 +1,4 @@
-
+//*
 //#include <fstream>
 #include <stdio.h>
 #include "Settings.hh"
@@ -74,3 +74,4 @@ Settings::send_settings(msg::OutQueue *out_queue) throw(msg::ExceptionBrokenPipe
     out_queue->flush();
   }
 }
+//*/

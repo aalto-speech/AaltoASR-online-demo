@@ -11,6 +11,12 @@ AudioFileInputController::~AudioFileInputController()
 {
 }
 
+unsigned long
+AudioFileInputController::get_audio_cursor() const
+{
+  return this->m_output_buffer.get_frames_read();
+}
+
 bool
 AudioFileInputController::load_file(const std::string &filename)
 {
@@ -40,6 +46,7 @@ AudioFileInputController::pause_listening(bool pause)
 {
   AudioInputController::pause_listening(pause);
   if (!pause) {
+//    this->m_audio_stream.set_output_buffer(&this->m_output_buffer);
     this->m_audio_stream.set_output_buffer(&this->m_output_buffer);
   }
 }

@@ -2,10 +2,6 @@
 #ifndef WINDOWMESSAGEBOX_HH_
 #define WINDOWMESSAGEBOX_HH_
 
-//#include <pglabel.h>
-#include "undefine.hh"
-#include <pgrichedit.h>
-#include <pgbutton.h>
 #include "WindowChild.hh"
 
 class WindowMessageBox  :  public WindowChild

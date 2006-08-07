@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export LD_LIBRARY_PATH="/share/puhe/x86_64/lib"
+
 cd /home/thirsima/Work/online-demo-libs
 
 dir=/home/thirsima/Work/online-demo-libs

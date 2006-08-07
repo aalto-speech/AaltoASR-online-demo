@@ -4,10 +4,11 @@
 
 #include "Window.hh"
 #include "Process.hh"
-#include "Recognition.hh"
-#include "AudioFileInputController.hh"
+#include "RecognitionParser.hh"
+#include "AudioInputController.hh"
 #include "WidgetRecognitionArea.hh"
-#include "QueueController.hh"
+#include "WidgetTextsArea.hh"
+#include "RecognizerListener.hh"
 #include "msg.hh"
 #include <pgbutton.h>
 
@@ -47,12 +48,13 @@ protected:
   bool handle_enablerecog_button();
   bool handle_endaudio_button();
   bool handle_settings_button();
-  bool handle_showtext_button();
+  bool handle_adapt_button();
+  bool handle_resetadaptation_button();
   
   void set_status(Status status);
   inline Status get_status() const { return this->m_status; }
   
-  void pause_audio_input(bool pause);
+  virtual void pause_audio_input(bool pause);
   virtual void reset(bool reset_audio);
   void end_of_audio();
   
@@ -60,24 +62,27 @@ protected:
   
   void pause_window_functionality(bool pause);
   
-  void handle_broken_pipe();
+  bool handle_broken_pipe();
 
   Process *m_process;
-  Recognition m_recognition;
+  RecognitionParser m_recognition;
   msg::InQueue *m_in_queue;
   msg::OutQueue *m_out_queue;
-  QueueController m_queue;
+  RecognizerListener m_queue;
 
+  WidgetRecognitionArea *m_recognition_area;
+  WidgetTextsArea *m_texts_area;
   
 private:
 
   PG_Button *m_play_button;
   PG_Button *m_endaudio_button;
   PG_Button *m_enablerecog_button;
+  PG_Button *m_adapt_button;
+  
+  bool m_broken_pipe;
 
   Status m_status;
-  
-  WidgetRecognitionArea *m_recognition_area;
 };
 
 #endif /*WINDOWRECOGNIZER_HH_*/

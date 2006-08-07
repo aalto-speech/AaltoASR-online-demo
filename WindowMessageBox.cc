@@ -1,5 +1,6 @@
 
 #include "WindowMessageBox.hh"
+#include <pgrichedit.h>
 
 WindowMessageBox::WindowMessageBox(const PG_Widget *parent,
                                    const std::string &title,

@@ -2,7 +2,6 @@
 #ifndef WINDOWCHILD_HH_
 #define WINDOWCHILD_HH_
 
-#include "undefine.hh"
 #include <pgbutton.h>
 #include "Window.hh"
 

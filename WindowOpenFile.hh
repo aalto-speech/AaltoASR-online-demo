@@ -3,23 +3,19 @@
 #define WINDOWOPENFILE_HH_
 
 #include "WindowFile.hh"
-#include "AudioFileInputController.hh"
 
 class WindowOpenFile  :  public WindowFile
 {
   
 public:
 
-  WindowOpenFile(const PG_Widget *parent, AudioFileInputController *audio_input);
+  WindowOpenFile(const PG_Widget *parent, const std::string &title);
   virtual ~WindowOpenFile() { }
   
 protected:
 
   virtual bool do_ok();
-
-private:
-
-  AudioFileInputController *m_audio_input;
+  virtual bool read_file() = 0;
 
 };
 

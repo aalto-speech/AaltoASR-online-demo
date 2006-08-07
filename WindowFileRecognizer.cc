@@ -1,7 +1,7 @@
 
 #include "WindowFileRecognizer.hh"
 #include "WindowReset.hh"
-#include "WindowOpenFile.hh"
+#include "WindowOpenAudioFile.hh"
 
 WindowFileRecognizer::WindowFileRecognizer(Process *process,
                                            msg::InQueue *in_queue,
@@ -21,7 +21,7 @@ WindowFileRecognizer::initialize()
 {
   WindowRecognizer::initialize();
   
-  this->construct_button("Open file", 0, 2, slot(*this, &WindowFileRecognizer::handle_open_button));
+  this->construct_button("Open audio", 0, 2, slot(*this, &WindowFileRecognizer::handle_open_button));
 }
 
 void
@@ -74,15 +74,16 @@ WindowFileRecognizer::reset(bool reset_audio)
 bool
 WindowFileRecognizer::handle_open_button()
 {
-  WindowOpenFile window(this->m_window, this->m_audio_input);
+  WindowOpenAudioFile window(this->m_window, this->m_audio_input);
   int ret_val;
   
   this->pause_window_functionality(true);
-  this->pause_audio_input(true);
   window.initialize();
   ret_val = this->run_child_window(&window);
 
   if (ret_val == 1) {
+    this->pause_audio_input(true);
+    this->m_recognition_area->set_scroll_position(0);
     // Run reset window without reseting audio.
     this->reset(false);
 
@@ -90,5 +91,6 @@ WindowFileRecognizer::handle_open_button()
       this->set_status(LISTENING);
     }
   }
+  this->pause_window_functionality(false);
   return true;
 }

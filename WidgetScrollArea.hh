@@ -11,10 +11,7 @@
 #ifndef WIDGETSCROLLAREA_HH_
 #define WIDGETSCROLLAREA_HH_
 
-#include "undefine.hh"
 #include <pgwidget.h>
-
-
 
 class WidgetScrollArea  :  public PG_Widget
 {

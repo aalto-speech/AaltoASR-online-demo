@@ -21,8 +21,9 @@ public:
 protected:
 
   virtual void do_opening();
-  // May throw msg::ExceptionBrokenPipe
-  virtual void do_running();// throw(msg::ExceptionBrokenPipe);
+  virtual void do_running();
+  
+  virtual void handle_broken_pipe();
 
   msg::InQueue *m_in_queue;
   

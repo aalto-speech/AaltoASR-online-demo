@@ -1,6 +1,12 @@
 
 #include "Application.hh"
 #include "Settings.hh"
+#include "WindowStartProcess.hh"
+#include "WindowMain.hh"
+#include "WindowFileRecognizer.hh"
+#include "WindowMicrophoneRecognizer.hh"
+
+//Application* Application::app = NULL;
 
 Application::Application()
 {
@@ -9,7 +15,6 @@ Application::Application()
   this->m_in_queue = NULL;
   
   this->m_current_window = NULL;
-//  this->m_init_window = NULL;
   this->m_startprocess_window = NULL;
   this->m_main_window = NULL;
   this->m_recognizer_window = NULL;
@@ -17,66 +22,21 @@ Application::Application()
   
   this->m_app = NULL;
   
-//  pthread_mutex_init(&this->m_lock, NULL);
+//  Application::app = this;
 }
 
 Application::~Application()
 {
-//  pthread_mutex_destroy(&this->m_lock);
   this->clean();
 }
 
-
-void
-Application::run()
-{
-  // Program starts in initialization window.
-  this->m_current_window = this->m_startprocess_window;//this->m_init_window;
-  
-  try {
-    while (this->m_current_window) {
-      int ret_val = this->m_current_window->run_modal();
-      this->next_window(ret_val);
-    }
-  }
-//  catch (ExceptionChildProcess process) {
-//    this->start_recognizer();
-//  }
-  catch (msg::ExceptionBrokenPipe exception) {
-    fprintf(stderr, "Warning: Unhandled broken pipe exception. Program exits.\n");
-  }
-}
-
-/*
-void
-Application::start_recognizer()
-{
-  // This catch is only for the child process! All audio streams must be
-  // closed
-  AudioStream::close_all_streams();
-//  this->clean();
-  Settings::read_settings();
-  int ret = execlp("ssh",
-                   "ssh",
-                   Settings::ssh_to.data(),
-                   Settings::script_file.data(),
-                   (char*)NULL);
-                  
-  if (ret < 0) {
-    perror("Application::run exec() failed");
-    exit(1);                                    
-  }
-  assert(false);
-}
-//*/
-
 bool
-Application::initialize(const std::string &ssh_to, const std::string &script_file)
+Application::initialize()
 {
   this->m_app = new PG_Application;
   
   // Initialize PG_Application.
-  if(!this->m_app->InitScreen(1024, 900)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
+  if(!this->m_app->InitScreen(1024, 768)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
     fprintf(stderr, "Resolution not supported\n");
     return false;
   }
@@ -87,27 +47,14 @@ Application::initialize(const std::string &ssh_to, const std::string &script_fil
 //  this->m_app->DeleteBackground();
   this->m_app->RedrawBackground(PG_Rect(0,0,this->m_app->GetScreenWidth(),this->m_app->GetScreenHeight()));
   this->m_app->FlipPage();
+//  this->m_app->SetBulkMode(true);
   
-  // Set some settings.
-  Settings::read_settings();
-  Settings::ssh_to = ssh_to;
-  Settings::script_file = script_file;
-
-  // Initialize recognizer process.
-//* Commenting these lines out will disable recognizer.
-  this->m_recognizer = new Process();
-  this->m_out_queue = new msg::OutQueue();//this->m_recognizer->write_fd);
-  this->m_in_queue = new msg::InQueue();//this->m_recognizer->read_fd);
-//*/
-
   // Initialize windows.
-//  this->m_init_window = new WindowInit(this->m_in_queue);
   this->m_startprocess_window = new WindowStartProcess(NULL, this->m_recognizer, this->m_in_queue, this->m_out_queue);
   this->m_main_window = new WindowMain();
   this->m_recognizer_window = new WindowFileRecognizer(this->m_recognizer, this->m_in_queue, this->m_out_queue);
   this->m_microphone_window = new WindowMicrophoneRecognizer(this->m_recognizer, this->m_in_queue, this->m_out_queue);
   
-//  this->m_init_window->initialize();
   this->m_startprocess_window->initialize();
   this->m_main_window->initialize();
   this->m_recognizer_window->initialize();
@@ -116,19 +63,72 @@ Application::initialize(const std::string &ssh_to, const std::string &script_fil
   return true;
 }
 
+bool
+Application::initialize(const std::string &ssh_to,
+                        const std::string &script_file)
+{
+  // Set some settings.
+  Settings::ssh_to = ssh_to;
+  Settings::script_file = script_file;
+  Settings::read_settings();
+
+  // Initialize recognizer process.
+//* Commenting these lines out will disable recognizer.
+  this->m_recognizer = new Process();
+  this->m_out_queue = new msg::OutQueue();
+  this->m_in_queue = new msg::InQueue();
+//*/
+
+  return this->initialize();
+}
+
+void
+Application::run()
+{
+  // Program starts in initialization window.
+  this->m_current_window = this->m_startprocess_window;
+  
+  try {
+    while (this->m_current_window) {
+      int ret_val = this->m_current_window->run_modal();
+      this->next_window(ret_val);
+    }
+  }
+  catch (msg::ExceptionBrokenPipe exception) {
+    fprintf(stderr, "Warning: Unhandled broken pipe exception. Program exits.\n");
+  }
+  /*
+  catch (ExceptionChildProcess) {
+    
+    fprintf(stderr, "cleaning...\n");
+    this->clean();
+    
+    int ret = execlp("ssh",
+                     "ssh",
+                     Settings::ssh_to.data(),
+                     Settings::script_file.data(),
+                     (char*)NULL);
+                    
+    if (ret < 0) {
+      perror("Application::run exec() failed");
+      exit(1);                                    
+    }
+    assert(false);
+  }
+  //*/
+}
+
 void
 Application::clean()
 {
   // Do cleaning in reverse order compared to initialization.
   
   // Clean windows.
-//  delete this->m_init_window;
   delete this->m_startprocess_window;
   delete this->m_main_window;
   delete this->m_recognizer_window;
   delete this->m_microphone_window;
   this->m_startprocess_window = NULL;
-//  this->m_init_window = NULL;
   this->m_main_window = NULL;
   this->m_recognizer_window = NULL;
   this->m_microphone_window = NULL;
@@ -154,7 +154,6 @@ Application::clean()
 void
 Application::next_window(int ret_val)
 {
-//  Window *new_window = NULL;
   if (this->m_current_window) {
     if (ret_val == 0) {
       this->m_current_window = NULL;

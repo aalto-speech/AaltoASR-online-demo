@@ -1,11 +1,11 @@
 
 #include "WindowSaveFile.hh"
+#include "WindowMessageBox.hh"
 
 WindowSaveFile::WindowSaveFile(const PG_Widget *parent,
-                               AudioInputController *audio_input)
-  : WindowFile(parent, "Save Audio File")
+                               const std::string &title)
+  : WindowFile(parent, title)
 {
-  this->m_audio_input = audio_input;
 }
 
 bool
@@ -42,6 +42,7 @@ WindowSaveFile::confirm_overwrite()
   return ret_val == 1;
 }
 
+/*
 bool
 WindowSaveFile::write_file()
 {
@@ -54,4 +55,4 @@ WindowSaveFile::write_file()
   }
   return true;
 }
-
+//*/

@@ -3,6 +3,7 @@
 #include "WindowMessageBox.hh"
 #include "AudioStream.hh"
 #include "Settings.hh"
+//#include "Application.hh"
 
 WindowStartProcess::WindowStartProcess(const PG_Widget *parent,
                                        Process *process,
@@ -10,6 +11,7 @@ WindowStartProcess::WindowStartProcess(const PG_Widget *parent,
                                        msg::OutQueue *out_queue)
   : WindowWaitRecognizer(parent, "Starting recognizer..", 350, 150, in_queue)
 {
+//  this->m_app = app;
   this->m_process = process;
 //  this->m_in_queue = in_queue;
   this->m_out_queue = out_queue;
@@ -32,17 +34,6 @@ WindowStartProcess::do_opening()
   
   try {
     Settings::send_settings(this->m_out_queue);
-  }
-  catch (msg::ExceptionBrokenPipe) {
-    this->handle_broken_pipe();
-  }
-}
-
-void
-WindowStartProcess::do_running()
-{
-  try {
-    WindowWaitRecognizer::do_running();
   }
   catch (msg::ExceptionBrokenPipe) {
     this->handle_broken_pipe();
@@ -85,7 +76,17 @@ WindowStartProcess::start_process()
 //  Settings::read_settings();
   if (this->m_process->create() == 0) {
     // All streams must be closed!
-    AudioStream::close_all_streams();
+//    AudioStream::close_all_streams();
+//    AudioStream::close();
+//    AudioStream::terminate();
+//    this->m_audio_input->terminate();
+    // NOTE: Here we should free all memory and close all streams, but how
+    // could we do that? If we free everything, we would have to reload
+    // surfaces....
+//    throw ExceptionChildProcess();
+    //*
+//    Application::app->clean();
+//    fcloseall();
     int ret = execlp("ssh",
                      "ssh",
                      Settings::ssh_to.data(),
@@ -97,6 +98,7 @@ WindowStartProcess::start_process()
       exit(1);                                    
     }
     assert(false);
+    //*/
   }
   
   msg::set_non_blocking(this->m_process->read_fd);

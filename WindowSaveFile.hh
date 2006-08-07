@@ -3,15 +3,14 @@
 #define WINDOWSAVEFILE_HH_
 
 #include "WindowFile.hh"
-#include "AudioInputController.hh"
-#include "WindowMessageBox.hh"
 
 class WindowSaveFile  :  public WindowFile
 {
 
 public:
 
-  WindowSaveFile(const PG_Widget *parent, AudioInputController *audio_input);
+  WindowSaveFile(const PG_Widget *parent, const std::string &title);
+  virtual ~WindowSaveFile() { }
 
 protected:
 
@@ -20,9 +19,7 @@ protected:
 private:
 
   bool confirm_overwrite();
-  bool write_file();
-
-  AudioInputController *m_audio_input;
+  virtual bool write_file() = 0;
   
 };
 

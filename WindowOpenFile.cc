@@ -2,10 +2,9 @@
 #include "WindowOpenFile.hh"
 
 WindowOpenFile::WindowOpenFile(const PG_Widget *parent,
-                               AudioFileInputController *audio_input)
-  : WindowFile(parent, "Open Audio File")
+                               const std::string &title)
+  : WindowFile(parent, title)
 {
-  this->m_audio_input = audio_input;
 }
 
 bool
@@ -17,12 +16,5 @@ WindowOpenFile::do_ok()
     return false;
   }
 
-  // Try to load audio file.
-  if (!this->m_audio_input->load_file(this->get_filename())) {
-    this->error("Could not open audio file.", ERROR_NORMAL);
-    this->focus_textbox();
-    return false;
-  }
-
-  return true;
+  return this->read_file();
 }

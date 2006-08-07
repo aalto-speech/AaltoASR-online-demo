@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <deque>
+#include <exception>
 #include "endian.hh"
 
 namespace msg {
@@ -50,15 +51,14 @@ namespace msg {
 
   void set_non_blocking(int fd);
   
-  class ExceptionBrokenPipe
+  class ExceptionBrokenPipe  :  public std::exception
   {
   public:
-    ExceptionBrokenPipe(int fd) : m_fd(fd), m_message("Broken pipe.") { }
+    ExceptionBrokenPipe(int fd) throw() : m_fd(fd) { }
     inline int get_fd() const { return m_fd; }
-    inline const std::string& get_message() const { return m_message; }
+    virtual const char* what() const throw () { return "Broken pipe."; }
   private:
     int m_fd;
-    std::string m_message;
   };
 
   class Message {

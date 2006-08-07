@@ -1,6 +1,6 @@
 
 #include "WindowMicrophoneRecognizer.hh"
-#include "WindowSaveFile.hh"
+#include "WindowSaveAudioFile.hh"
 
 WindowMicrophoneRecognizer::WindowMicrophoneRecognizer(Process *process,
                                                        msg::InQueue *in_queue,
@@ -20,7 +20,7 @@ WindowMicrophoneRecognizer::initialize()
 {
   WindowRecognizer::initialize();
 
-  this->construct_button("Save", 0, 2, slot(*this, &WindowMicrophoneRecognizer::handle_save_button));
+  this->construct_button("Save audio", 0, 2, slot(*this, &WindowMicrophoneRecognizer::handle_save_button));
 }
 
 void
@@ -59,12 +59,12 @@ WindowMicrophoneRecognizer::handle_save_button()
   this->pause_audio_input(true);
 
   if (this->m_audio_input->get_audio_data_size()) {
-    WindowSaveFile window(this->m_window, this->m_audio_input);
+    WindowSaveAudioFile window(this->m_window, this->m_audio_input);
     window.initialize();
     this->run_child_window(&window);
   }
   else {
-    this->error("No audio to save. Record some audio first.", ERROR_NORMAL);
+    this->error("No audio to save. Record some audio first using Run-button.", ERROR_NORMAL);
   }
 
   this->pause_window_functionality(false);

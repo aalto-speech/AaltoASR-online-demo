@@ -2,8 +2,6 @@
 #ifndef WINDOWMAIN_HH_
 #define WINDOWMAIN_HH_
 
-#include "undefine.hh"
-#include <pgbutton.h>
 #include "Window.hh"
 
 class WindowMain  :  public Window

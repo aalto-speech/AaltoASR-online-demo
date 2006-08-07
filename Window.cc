@@ -1,6 +1,7 @@
 
 #include "Window.hh"
 #include "WindowMessageBox.hh"
+#include <pgapplication.h>
 
 Window::Window()
 {
@@ -25,9 +26,10 @@ Window::run_modal()
 {
   SDL_Event event;
 
+  // Opening procedures.
   this->open();
 
-  // run while in modal mode
+  // Run until requested to end.
   while(!this->m_end_run) {
     if (SDL_PollEvent(&event)) {
       if (event.type == SDL_QUIT)
@@ -37,10 +39,12 @@ Window::run_modal()
       PG_Application::DrawCursor();
     }
     else {
+      // When idle, allow window to perform its own operations.
       this->do_running();
     }
   }
   
+  // Closing procedures.
   this->close();
   
   return this->m_return_value;
@@ -73,21 +77,39 @@ Window::end_running(int return_value)
     
   this->m_end_run = true;
 }
+
+void
+Window::pause_window_functionality(bool pause)
+{
+  this->m_window->EnableReceiver(!pause, true);
+}
   
 int
 Window::run_child_window(Window *child_window)
 {
   int ret_val;
 
-  this->m_window->EnableReceiver(false, true);
+  this->pause_window_functionality(true);
   ret_val = child_window->run_modal();
-  this->m_window->EnableReceiver(true, true);
+  this->pause_window_functionality(false);
 
   if (ret_val == 0)
     this->end_running(0);
     
   return ret_val;
 }
+
+PG_Widget*
+Window::create_window()
+{
+  // Creates a full screen window. (Full screen in application window.)
+  return new PG_Widget(NULL,
+                       PG_Rect(0,
+                               0,
+                               PG_Application::GetScreenWidth(),
+                               PG_Application::GetScreenHeight()),
+                       false);
+  }
 
 void
 Window::error(const std::string &message, ErrorType type)

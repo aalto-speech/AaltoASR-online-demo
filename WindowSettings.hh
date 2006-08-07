@@ -2,7 +2,6 @@
 #ifndef WINDOWSETTINGS_HH_
 #define WINDOWSETTINGS_HH_
 
-#include <pglabel.h>
 #include <pglineedit.h>
 #include "WindowChild.hh"
 #include "msg.hh"
@@ -19,7 +18,7 @@ public:
 protected:
 
   long read_value(PG_LineEdit *line_edit, long min, long max, bool *ok);
-
+  
   virtual bool do_ok();
 
 private:

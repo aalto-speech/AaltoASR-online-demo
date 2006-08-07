@@ -1,10 +1,11 @@
 
 #include "WidgetRecognitionArea.hh"
+#include "WidgetScrollBar.hh"
 
 WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                              const PG_Rect &rect,
                                              AudioInputController *audio_input,
-                                             Recognition *recognition,
+                                             RecognitionParser *recognition,
                                              unsigned int pixels_per_second)
   : PG_Widget(parent, rect, false),
     m_pixels_per_second(pixels_per_second),
@@ -12,7 +13,6 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
 {
   this->m_audio_input = audio_input;
   this->m_recognition = recognition;
-
 
   // Create autoscrolling radio buttons.
   int x = 10;
@@ -41,9 +41,24 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
   audioscroll_radio->SetPressed();
   this->m_autoscroll = AUDIO;
 
+  // Create time axis.
+  this->m_time_axis = new WidgetTimeAxis(this,
+                                         PG_Rect(0, 30, this->Width(), 30),
+                                         pixels_per_second);
+
+  // Wave and spectrogram views have relative heights whereas other components
+  // have absolute heights. Thus making this widget higher makes wave and
+  // spectrogram higher.
+  const int top = 65;
+  const int bottom = this->my_height - 55;
+  const int height = bottom - top;
+  const int wave_height = (int)(0.4 * height);
+  const int spectrogram_height = (int)(0.6 * height);
+  assert(height > 0);
+  
   // Create wave view.
   this->m_wave = new WidgetWave(this,
-                                PG_Rect(0, 60, this->Width(), (int)(0.2 * this->Height())),
+                                PG_Rect(0, top, this->Width(), wave_height),
                                 audio_input,
                                 pixels_per_second);
   this->m_wave->initialize();
@@ -51,9 +66,9 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
   // Create spectrogram.
   this->m_spectrogram = new WidgetSpectrogram(this,
                                               PG_Rect(0,
-                                                      60+(int)(0.2 * this->Height()),
+                                                      top + wave_height,
                                                       this->Width(),
-                                                      (int)(0.3 * this->Height())),
+                                                      spectrogram_height),
                                               audio_input,
                                               pixels_per_second);
   this->m_spectrogram->initialize();
@@ -61,17 +76,20 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
   // Create recognition text area.
   this->m_text_area = new WidgetRecognitionTexts(this,
                                                  PG_Rect(0,
-                                                         60+(int)(0.55 * this->Height()),
+                                                         this->my_height - 50,
                                                          this->Width(),
-                                                         50),
+                                                         30),
                                                  audio_input,
                                                  recognition,
                                                  pixels_per_second);
   
   // Create scroll bar.
-  this->m_scroll_bar = new PG_ScrollBar(this,
-                                     PG_Rect(0, this->Height()-21, this->Width(), 10),
-                                     PG_ScrollBar::HORIZONTAL);
+  this->m_scroll_bar = new WidgetScrollBar(this,
+                                           PG_Rect(0,
+                                                   this->Height() - 15,
+                                                   this->Width(),
+                                                   10),
+                                           PG_ScrollBar::HORIZONTAL);
   this->m_scroll_bar->SetPageSize(this->Width());
   this->m_scroll_bar->SetLineSize(30);
   this->set_scroll_range();
@@ -92,9 +110,10 @@ WidgetRecognitionArea::reset()
   this->m_wave->reset();
   this->m_spectrogram->reset();
   this->m_text_area->reset();
+  this->m_time_axis->reset();
   this->set_scroll_range();
-  // Scroll to zero.
-  this->set_scroll_position(0);
+
+  this->set_scroll_position(this->m_scroll_bar->GetPosition());
 }
 
 void
@@ -104,6 +123,7 @@ WidgetRecognitionArea::set_scroll_position(unsigned long page)
   page = page <= max ? page : max;
   this->m_scroll_bar->SetPosition(page);
   this->m_text_area->set_scroll_position(page);
+  this->m_time_axis->set_scroll_position(page);
 //  this->m_text_area->ScrollTo(page, 0);
   this->m_wave->set_position(page);
   this->m_spectrogram->set_position(page);
@@ -113,9 +133,13 @@ void
 WidgetRecognitionArea::update_cursors()
 {
   unsigned long audio_cursor = this->m_audio_input->get_audio_cursor() / this->m_frames_per_pixel;
-  unsigned long recognition_cursor = this->m_pixels_per_second * this->m_recognition->get_recognition_frame() / Recognition::frames_per_second;
+  unsigned long recognition_cursor = this->m_pixels_per_second * this->m_recognition->get_recognition_frame() / RecognitionParser::frames_per_second;
   this->draw_cursor(audio_cursor, PG_Color(255, 255, 255));
   this->draw_cursor(recognition_cursor, PG_Color(255, 0, 255));
+  if (this->m_audio_input->is_playbacking()) {
+    audio_cursor = this->m_audio_input->get_playback_cursor() / this->m_frames_per_pixel;
+    this->draw_cursor(audio_cursor, PG_Color(255, 255, 0));
+  }
 }
 
 void
@@ -140,8 +164,10 @@ WidgetRecognitionArea::update_screen(bool new_data)
 {
   this->m_wave->update();
   this->m_spectrogram->update();
-  if (new_data)
+  if (new_data) {
     this->m_text_area->update();
+  }
+  this->m_time_axis->update(this->m_audio_input->get_audio_data_size() / SAMPLE_RATE);
     
   this->update_cursors();
 
@@ -161,7 +187,7 @@ WidgetRecognitionArea::update()
     if (this->m_autoscroll == AUDIO)// && !this->m_audio_input->is_paused())
       read_cursor_px = this->m_audio_input->get_audio_cursor() / this->m_frames_per_pixel;
     else if (this->m_autoscroll == RECOGNIZER)
-      read_cursor_px = this->m_pixels_per_second * this->m_recognition->get_recognition_frame() / Recognition::frames_per_second;
+      read_cursor_px = this->m_pixels_per_second * this->m_recognition->get_recognition_frame() / RecognitionParser::frames_per_second;
     else
       scrolling = false;
     if (scrolling) {

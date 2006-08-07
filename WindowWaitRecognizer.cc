@@ -22,11 +22,19 @@ WindowWaitRecognizer::do_opening()
 }
 
 void
+WindowWaitRecognizer::handle_broken_pipe()
+{
+  this->end_running(-1);
+}
+
+void
 WindowWaitRecognizer::do_running()// throw(msg::ExceptionBrokenPipe)
 {
   if (this->m_in_queue->get_eof()) {
     fprintf(stderr, "Warning: WindowWaitRecognizer got eof from input!\n");
-    throw msg::ExceptionBrokenPipe(this->m_in_queue->get_fd());
+    this->handle_broken_pipe();
+    return;
+    //throw msg::ExceptionBrokenPipe(this->m_in_queue->get_fd());
   }
   
   this->m_in_queue->flush();

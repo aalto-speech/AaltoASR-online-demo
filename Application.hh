@@ -2,59 +2,64 @@
 #ifndef APPLICATION_HH_
 #define APPLICATION_HH_
 
-#include "undefine.hh"
-#include <paragui.h>
-#include "undefine.hh"
 #include <pgapplication.h>
-#include <pthread.h>
 #include "Process.hh"
 #include "msg.hh"
-//#include "WindowInit.hh"
-#include "WindowStartProcess.hh"
-#include "WindowMain.hh"
-#include "WindowFileRecognizer.hh"
-#include "WindowMicrophoneRecognizer.hh"
+#include "Window.hh"
 
+/**
+ * Class for running the application. Works as a top-level window manager too.
+ */
 class Application
 {
   
 public:
 
+  /** Contructs the application object. */
   Application();
+  /** Destruction and cleaning. */
   virtual ~Application();
 
-  bool initialize(const std::string &ssh_to, const std::string &script_file);
-  void clean();
-  void run();
+  /** Initializes the application without recognizer.
+   * \return false if ParaGUI initialization failed. */
+  bool initialize();
   
-//  virtual void eventIdle();
+  /** Initializes the application with recognizer.
+   * \param ssh_to Computer which should run the recognizer.
+   * \param script_file File that should be run in the ssh computer.
+   * \return false if ParaGUI initialization failed. */
+  bool initialize(const std::string &ssh_to, const std::string &script_file);
+  
+  /** Cleans memory allocations. */
+  void clean();
+  
+  /** Runs the application. This function returns when the application has
+   * finished. */
+  void run();
   
 protected:
 
+  /** Selects next window to run according to current window and its return
+   * value
+   * \param ret_val Return value of run modal function of the current window.
+   */
   void next_window(int ret_val);
-//  void next_window2();
+  
+private:
 
-//  void start_recognizer();
-//  static void* start_gui(void *user_data);
-//  virtual bool eventQuit(int id, PG_MessageObject *widget, unsigned long data);
-  
-//  Window* select_next_window(Window );
-  
+  // Recognition process
   Process *m_recognizer;
   msg::OutQueue *m_out_queue;
   msg::InQueue *m_in_queue;
   
+  // Windowing system
   Window *m_current_window;
-//  WindowInit *m_init_window;
-  WindowStartProcess *m_startprocess_window;
-  WindowMain *m_main_window;
-  WindowFileRecognizer *m_recognizer_window;
-  WindowMicrophoneRecognizer *m_microphone_window;
-//  pthread_mutex_t m_lock;
-//  bool m_thread_finished;
+  Window *m_startprocess_window;
+  Window *m_main_window;
+  Window *m_recognizer_window;
+  Window *m_microphone_window;
 
-private:
-
+  // ParaGUI
   PG_Application *m_app;
   
 };

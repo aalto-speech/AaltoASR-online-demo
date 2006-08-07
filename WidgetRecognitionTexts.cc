@@ -1,10 +1,11 @@
 
 #include "WidgetRecognitionTexts.hh"
+#include <pglabel.h>
 
 WidgetRecognitionTexts::WidgetRecognitionTexts(PG_Widget *parent,
                                                const PG_Rect &rect,
                                                AudioInputController *audio_input,
-                                               Recognition *recognition,
+                                               RecognitionParser *recognition,
                                                unsigned int pixels_per_second)
   : WidgetScrollArea(parent, rect),//PG_ScrollArea(parent, rect),//
     m_pixels_per_second(pixels_per_second)
@@ -23,6 +24,12 @@ void
 WidgetRecognitionTexts::initialize()
 {
   this->m_last_recognition_count = 0;
+//  MorphemeList morphemes = this->m_recognition.get_recognized().end();
+//  this->m_last_recognized_morpheme = NULL;
+//  this->m_recognition->lock();
+//  this->m_recognized_iter = this->m_recognition->get_recognized().rend();
+//  this->m_recognition->unlock();
+//  this->m_last_recognized_morpheme = this->m_recognition->get_recognized().rend();
 }
 
 void
@@ -52,13 +59,13 @@ PG_Widget*
 WidgetRecognitionTexts::add_morpheme_widget(const Morpheme &morpheme,
                                             const PG_Color &color)
 {
-  double multiplier = this->m_pixels_per_second / (double)Recognition::frames_per_second;
+  double multiplier = this->m_pixels_per_second / (double)RecognitionParser::frames_per_second;
   unsigned int w = (int)(morpheme.duration * multiplier);
-  PG_Rect rect(0, 0, w, 30);
+  PG_Rect rect(0, 0, w, this->my_height);
   Sint32 x = (Sint32)(morpheme.time * multiplier);
   PG_Widget *item;
   
-  if (morpheme.data == "<w>") {
+  if (morpheme.data == " ") {
     rect.w = w > 1 ? w : 1; // Word separator at least one pixel wide.
     item = new PG_Widget(NULL, rect, true);
     SDL_FillRect(item->GetWidgetSurface(),
@@ -83,28 +90,56 @@ WidgetRecognitionTexts::add_morpheme_widget(const Morpheme &morpheme,
 void
 WidgetRecognitionTexts::update_recognition()
 {
-  const std::vector<Morpheme> *morphemes = this->m_recognition->get_morphemes();
-  unsigned int morpheme_count = morphemes->size();
-  
-  if (morpheme_count > this->m_last_recognition_count) {
-    for (unsigned int ind = this->m_last_recognition_count; ind < morpheme_count; ind++) {
-      this->add_morpheme_widget(morphemes->at(ind), PG_Color(255, 255, 255));
-    }
-    this->m_last_recognition_count = morpheme_count;
+//  const MorphemeList &morphemes = this->m_recognition->get_recognized();
+//  MorphemeList::const_iterator iter;
+//  if (this->m_last_recognized_morpheme) {
+//    iter = this->m_last_recognized_morpheme; = morphemes.begin();
+//  unsigned int morpheme_count = morphemes.size();
+  const MorphemeList &morphemes = this->m_recognition->get_recognized();
+  MorphemeList::const_reverse_iterator iter = morphemes.rbegin();// = this->m_recognition->get_recognized().rbegin();
+//  fprintf(stderr, "WRT update recog 1\n");
+//  fprintf(stderr, "WRT %p\n", &(*this->m_recognized_iter));
+  for (unsigned int ind = 0;
+       ind + this->m_last_recognition_count < morphemes.size();
+       ind++) {
+//       iter = morphemes.rbegin();
+//       iter != m_recognized_iter;
+//       *iter != *this->m_last_recognized_morpheme;// != this->m_recognition->get_recognized().end();
+//       iter++) {
+        
+    this->add_morpheme_widget(*iter,
+                              PG_Color(255, 255, 255));
+    iter++;
   }
+  this->m_last_recognition_count = morphemes.size();
+//  this->m_last_recognized_morpheme = &morphemes.back();
+//  this->m_recognized_iter = morphemes.rbegin();
+//  fprintf(stderr, "WRT update recog 2\n");
+//  this->m_recognized_iter = this->m_recognition->get_recognized().rbegin();
+//  this->m_recognized_iter = morphemes.end();
+
+//  if (morphemes.size() > this->m_last_recognition_count) {
+//    for (unsigned int ind = this->m_last_recognition_count; ind < morpheme_count; ind++) {
+//      this->add_morpheme_widget(morphemes.at(ind), PG_Color(255, 255, 255));
+//    }
+//    this->m_last_recognition_count = morpheme_count;
+//  }
+//  this->m_last_recognized_morpheme = &morphemes.back();
 }
 
 void
 WidgetRecognitionTexts::update_hypothesis()
 {
   PG_Widget *widget;
-  const std::vector<Morpheme> *morphemes;
+  const MorphemeList &morphemes = this->m_recognition->get_hypothesis();
 
   this->remove_hypothesis();
-  morphemes = this->m_recognition->get_hypothesis().get_morphemes();
 
-  for (unsigned int ind = 0; ind < morphemes->size(); ind++) {
-    widget = this->add_morpheme_widget(morphemes->at(ind), PG_Color(255, 255, 0));
+  for (MorphemeList::const_iterator iter = morphemes.begin();
+       iter != morphemes.end();
+       iter++) {
+
+    widget = this->add_morpheme_widget(*iter, PG_Color(255, 255, 0));
     this->m_hypothesis_widgets.push_back(widget);
   }
 }
@@ -129,8 +164,8 @@ WidgetRecognitionTexts::handle_morpheme_widget(PG_MessageObject *widget, const S
   x += this->get_scroll_position();//this->GetScrollPosX();//
   x = (unsigned long)(x * multiplier);
   w = (unsigned long)(w * multiplier);
-  fprintf(stderr, "Morpheme pressed... Playing %d, %d.\n", x, w);
-  this->m_audio_input->play(x, w);
+//  fprintf(stderr, "Morpheme pressed... Playing %d, %d.\n", x, w);
+  this->m_audio_input->start_playback(x, w);
   return true;
 }
 

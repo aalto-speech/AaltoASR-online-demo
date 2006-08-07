@@ -2,8 +2,6 @@
 #ifndef WINDOWFILERECOGNIZER_HH_
 #define WINDOWFILERECOGNIZER_HH_
 
-#include "undefine.hh"
-#include <pgbutton.h>
 #include "AudioFileInputController.hh"
 #include "WindowRecognizer.hh"
 

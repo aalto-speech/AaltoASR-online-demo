@@ -1,5 +1,6 @@
 
 #include "WindowMain.hh"
+#include <pgbutton.h>
 
 void
 WindowMain::initialize()

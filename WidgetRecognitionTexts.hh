@@ -2,16 +2,12 @@
 #ifndef WIDGETRECOGNITIONTEXTS_HH_
 #define WIDGETRECOGNITIONTEXTS_HH_
 
-#include "undefine.hh"
-#include <pglabel.h>
-#include <pgbutton.h>
 #include <vector>
 #include "AudioInputController.hh"
 #include "WidgetScrollArea.hh"
-//#include <pgscrollarea.h>
-#include "Recognition.hh"
+#include "RecognitionParser.hh"
 
-class WidgetRecognitionTexts  :  public WidgetScrollArea//PG_ScrollArea//
+class WidgetRecognitionTexts  :  public WidgetScrollArea
 {
   
 public:
@@ -19,7 +15,7 @@ public:
   WidgetRecognitionTexts(PG_Widget *parent,
                          const PG_Rect &rect,
                          AudioInputController *audio_input,
-                         Recognition *recognition,
+                         RecognitionParser *recognition,
                          unsigned int pixels_per_second);
   virtual ~WidgetRecognitionTexts();
   
@@ -44,9 +40,11 @@ protected:
 private:
 
   const unsigned int m_pixels_per_second;
-  Recognition *m_recognition;
+  RecognitionParser *m_recognition;
   std::vector<PG_Widget*> m_hypothesis_widgets;
   unsigned int m_last_recognition_count;
+//  MorphemeList::const_reverse_iterator m_recognized_iter;
+//  const Morpheme *m_last_recognized_morpheme;
   
   AudioInputController *m_audio_input;
 };

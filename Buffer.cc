@@ -28,7 +28,7 @@ Buffer<T>::~Buffer()
     this->m_buffer = NULL;
   }
 }
-//*
+
 template <class T>
 unsigned long
 Buffer<T>::read(T *to, unsigned long frames)
@@ -45,14 +45,12 @@ Buffer<T>::read(T *to, unsigned long frames)
   
   return read_size;
 }
-//*/
+
 template <class T>
 unsigned long
 Buffer<T>::read(std::string &to)
 {
   unsigned long read_size = this->get_read_size();
-//  if (read_size > frames)
-//    read_size = frames;
 
   // We can read without locking, because writing is done to different part
   read_size = this->do_reading(to, read_size);
@@ -88,7 +86,7 @@ Buffer<T>::do_reading(T *buffer, unsigned long frames) const
   
   if (frames >= this->m_size) {
     frames = this->m_size - 1;
-    assert(false);
+    assert(false); // Use assert just to notice if this occurs.
   }
 
   // Check for end of buffer (need for two-part-copying)
@@ -114,7 +112,7 @@ Buffer<T>::do_reading(std::string &buffer, unsigned long frames) const
 
   if (frames >= this->m_size) {
     frames = this->m_size - 1;
-    assert(false);
+    assert(false); // Use assert just to notice if this occurs.
   }
 
   // Check for end of buffer (need for two-part-copying)
@@ -136,13 +134,12 @@ template <class T>
 unsigned long
 Buffer<T>::do_writing(const T *buffer, unsigned long frames)
 {
-//  return this->write((char*)buffer, frames);
   unsigned long halfing_size = 0;
 
   if (frames >= this->m_size) {
     frames = this->m_size - 1;
     fprintf(stderr, "Warning: Trying to write to buffer more than its size.\n");
-    assert(false);
+    assert(false); // Use assert just to notice if this occurs.
   }
   
   // Check for end of buffer (need for two-part-copying)
@@ -150,7 +147,6 @@ Buffer<T>::do_writing(const T *buffer, unsigned long frames)
     halfing_size = this->m_size - this->m_write_index;
     
   // Write the buffer (in two parts if necessary)
-//  fprintf(stderr, "Buffer:do_writing before (frames: %d, half: %d)\n", frames, halfing_size);
   if (halfing_size) {
     memcpy(this->m_buffer + this->m_write_index, buffer, sizeof(T) * halfing_size);
     memcpy(this->m_buffer, buffer + halfing_size, sizeof(T) * (frames - halfing_size));
@@ -158,7 +154,6 @@ Buffer<T>::do_writing(const T *buffer, unsigned long frames)
   else {
     memcpy(this->m_buffer + this->m_write_index, buffer, sizeof(T) * frames);
   }
-//  fprintf(stderr, "Buffer:do_writing after\n");
   return frames;
 }
 
@@ -172,15 +167,23 @@ Buffer<T>::clear()
 
 template <class T>
 unsigned long
+Buffer<T>::get_size() const
+{
+  return this->m_size;
+}
+
+template <class T>
+unsigned long
+Buffer<T>::get_frames_read() const
+{
+  return this->m_frames_read;
+}
+
+template <class T>
+unsigned long
 Buffer<T>::get_read_size() const
 {
   return (this->m_size + this->m_write_index - this->m_read_index) % this->m_size;
-  /*
-  if (this->m_write_index >= this->m_read_index)
-    return this->m_write_index - this->m_read_index;
-  else
-    return this->m_size - (this->m_read_index - this->m_write_index);
-  //*/
 }
 
 template <class T>
@@ -188,12 +191,6 @@ unsigned long
 Buffer<T>::get_write_size() const
 {
   return (this->m_size + this->m_read_index - this->m_write_index - 1) % this->m_size;
-  /*
-  if (this->m_write_index < this->m_read_index)
-    return this->m_read_index - this->m_write_index - 1;
-  else
-    return this->m_size - (this->m_write_index - this->m_read_index) - 1;
-  //*/
 }
 
 template <class T>
@@ -202,10 +199,6 @@ Buffer<T>::move_read_pos(unsigned long add)
 {
   this->m_read_index = (this->m_read_index + add) % this->m_size;
   this->m_frames_read += add;
-  /*
-  this->m_read_index += add;
-  this->m_read_index %= this->m_size;
-  //*/
 }
 
 template <class T>
@@ -213,10 +206,6 @@ void
 Buffer<T>::move_write_pos(unsigned long add)
 {
   this->m_write_index = (this->m_write_index + add) % this->m_size;
-  /*
-  this->m_write_index += add;
-  this->m_write_index %= this->m_size;
-  //*/
 }
 
 #endif
