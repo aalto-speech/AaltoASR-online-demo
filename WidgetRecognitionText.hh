@@ -7,17 +7,17 @@
 #include "WidgetScrollArea.hh"
 #include "RecognitionParser.hh"
 
-class WidgetRecognitionTexts  :  public WidgetScrollArea
+class WidgetRecognitionText  :  public WidgetScrollArea
 {
   
 public:
 
-  WidgetRecognitionTexts(PG_Widget *parent,
+  WidgetRecognitionText(PG_Widget *parent,
                          const PG_Rect &rect,
                          AudioInputController *audio_input,
                          RecognitionParser *recognition,
                          unsigned int pixels_per_second);
-  virtual ~WidgetRecognitionTexts();
+  virtual ~WidgetRecognitionText();
   
   void update();
   void reset();
@@ -32,7 +32,7 @@ protected:
   
   void remove_hypothesis();
 
-  PG_Widget* add_morpheme_widget(const Morpheme &morpheme, const PG_Color &color);
+  PG_Widget* add_morpheme_widget(const Morpheme &morpheme, const PG_Color &color, PG_Widget *&word_widget);
   bool handle_morpheme_widget(PG_MessageObject *widget,
                               const SDL_MouseButtonEvent *event,
                               void *user_data);
@@ -43,10 +43,12 @@ private:
   RecognitionParser *m_recognition;
   std::vector<PG_Widget*> m_hypothesis_widgets;
   unsigned int m_last_recognition_count;
-//  MorphemeList::const_reverse_iterator m_recognized_iter;
+  unsigned long m_last_recognition_frame;
+//  MorphemeList::const_iterator m_recognized_iter;
 //  const Morpheme *m_last_recognized_morpheme;
   
   AudioInputController *m_audio_input;
+  PG_Widget *m_last_recog_word;
 };
 
 #endif /*WIDGETRECOGNITIONTEXTS_HH_*/

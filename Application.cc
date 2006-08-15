@@ -1,6 +1,5 @@
 
 #include "Application.hh"
-#include "Settings.hh"
 #include "WindowStartProcess.hh"
 #include "WindowMain.hh"
 #include "WindowFileRecognizer.hh"
@@ -11,8 +10,8 @@
 Application::Application()
 {
   this->m_recognizer = NULL;
-  this->m_out_queue = NULL;
-  this->m_in_queue = NULL;
+//  this->m_out_queue = NULL;
+//  this->m_in_queue = NULL;
   
   this->m_current_window = NULL;
   this->m_startprocess_window = NULL;
@@ -36,24 +35,24 @@ Application::initialize()
   this->m_app = new PG_Application;
   
   // Initialize PG_Application.
-  if(!this->m_app->InitScreen(1024, 768)){//, 0, SDL_FULLSCREEN)){// | SDL_SWSURFACE | SDL_DOUBLEBUF)){
+//  if(!this->m_app->InitScreen(1024, 768, 0, SDL_FULLSCREEN | SDL_SWSURFACE | SDL_DOUBLEBUF)) {
+  if(!this->m_app->InitScreen(1024, 768)) {
     fprintf(stderr, "Resolution not supported\n");
     return false;
   }
-  this->m_app->EnableAppIdleCalls();
+//  this->m_app->EnableAppIdleCalls(); 
+//  this->m_app->SetEmergencyQuit(true);
   this->m_app->LoadTheme("default");
   this->m_app->SetCaption("Online-demo", NULL);
-  this->m_app->SetEmergencyQuit(true);
 //  this->m_app->DeleteBackground();
-  this->m_app->RedrawBackground(PG_Rect(0,0,this->m_app->GetScreenWidth(),this->m_app->GetScreenHeight()));
+  this->m_app->RedrawBackground(PG_Rect(0, 0, this->m_app->GetScreenWidth(), this->m_app->GetScreenHeight()));
   this->m_app->FlipPage();
-//  this->m_app->SetBulkMode(true);
   
   // Initialize windows.
-  this->m_startprocess_window = new WindowStartProcess(NULL, this->m_recognizer, this->m_in_queue, this->m_out_queue);
+  this->m_startprocess_window = new WindowStartProcess(NULL, this->m_recognizer);
   this->m_main_window = new WindowMain();
-  this->m_recognizer_window = new WindowFileRecognizer(this->m_recognizer, this->m_in_queue, this->m_out_queue);
-  this->m_microphone_window = new WindowMicrophoneRecognizer(this->m_recognizer, this->m_in_queue, this->m_out_queue);
+  this->m_recognizer_window = new WindowFileRecognizer(this->m_recognizer);
+  this->m_microphone_window = new WindowMicrophoneRecognizer(this->m_recognizer);
   
   this->m_startprocess_window->initialize();
   this->m_main_window->initialize();
@@ -67,17 +66,8 @@ bool
 Application::initialize(const std::string &ssh_to,
                         const std::string &script_file)
 {
-  // Set some settings.
-  Settings::ssh_to = ssh_to;
-  Settings::script_file = script_file;
-  Settings::read_settings();
-
-  // Initialize recognizer process.
-//* Commenting these lines out will disable recognizer.
-  this->m_recognizer = new Process();
-  this->m_out_queue = new msg::OutQueue();
-  this->m_in_queue = new msg::InQueue();
-//*/
+  // Create the recognizer.
+  this->m_recognizer = new RecognizerProcess(ssh_to, script_file);
 
   return this->initialize();
 }
@@ -134,14 +124,14 @@ Application::clean()
   this->m_microphone_window = NULL;
 
   // Finish and clean recognizer process.
-  delete this->m_out_queue;
-  delete this->m_in_queue;
-  this->m_out_queue = NULL;
-  this->m_in_queue = NULL;
+//  delete this->m_out_queue;
+//  delete this->m_in_queue;
+//  this->m_out_queue = NULL;
+//  this->m_in_queue = NULL;
   if (this->m_recognizer) {
-    if (this->m_recognizer->is_created()) {
+//    if (this->m_recognizer->is_created()) {
       this->m_recognizer->finish();
-    }
+//    }
     delete this->m_recognizer;
     this->m_recognizer = NULL;
   }

@@ -3,21 +3,19 @@
 #define WIDGETTEXTSAREA_HH_
 
 #include <pgwidget.h>
-//#include <pgrichedit.h>
-//#include <pgmultilineedit.h>
 #include "WidgetMultiLineEdit.hh"
 #include "RecognitionParser.hh"
 #include "Window.hh"
 
-class WidgetTextsArea  :  public PG_Widget
+class WidgetComparisonArea  :  public PG_Widget
 {
 
 public:
 
-  WidgetTextsArea(Window &parent,
-                  const PG_Rect &rect,
-                  RecognitionParser *recognition);
-  virtual ~WidgetTextsArea() { }
+  WidgetComparisonArea(Window &parent,
+                       const PG_Rect &rect,
+                       RecognitionParser *recognition);
+  virtual ~WidgetComparisonArea() { }
   
 protected:
 

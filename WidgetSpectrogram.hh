@@ -3,9 +3,10 @@
 #define WIDGETSPECTROGRAM_HH_
 
 #include <fftw3.h>
-#include "WidgetWave.hh"
+//#include "WidgetWave.hh"
+#include "WidgetAudioView.hh"
 
-class WidgetSpectrogram  :  public WidgetWave
+class WidgetSpectrogram  :  public WidgetAudioView//WidgetWave
 {
 
 public:
@@ -22,8 +23,7 @@ public:
 
 protected:
 
-//  virtual void draw_new(unsigned int oldview_size,
-//                        unsigned int audio_size);
+//  virtual Uint32 get_background_color(SDL_PixelFormat *format) const;
 
   virtual void fix_oldview_size(unsigned int oldview_from,
                                 unsigned int &oldview_size);
@@ -36,7 +36,11 @@ protected:
   static double interpolate(double *array, double index);
 
   Uint32 get_color_by_value(double value);
-  static void draw_pixel(SDL_Surface *surface, unsigned int x, unsigned int y, Uint32 color);
+
+  static void draw_pixel(SDL_Surface *surface,
+                         unsigned int x,
+                         unsigned int y,
+                         Uint32 color);
   
   
 private:

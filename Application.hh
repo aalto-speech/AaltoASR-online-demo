@@ -3,8 +3,7 @@
 #define APPLICATION_HH_
 
 #include <pgapplication.h>
-#include "Process.hh"
-#include "msg.hh"
+#include "RecognizerProcess.hh"
 #include "Window.hh"
 
 /**
@@ -20,7 +19,8 @@ public:
   /** Destruction and cleaning. */
   virtual ~Application();
 
-  /** Initializes the application without recognizer.
+  /** Initializes the application without recognizer. This is mostly for
+   * debugging purposes only.
    * \return false if ParaGUI initialization failed. */
   bool initialize();
   
@@ -47,10 +47,8 @@ protected:
   
 private:
 
-  // Recognition process
-  Process *m_recognizer;
-  msg::OutQueue *m_out_queue;
-  msg::InQueue *m_in_queue;
+  // Recognizer process
+  RecognizerProcess *m_recognizer;
   
   // Windowing system
   Window *m_current_window;

@@ -6,7 +6,7 @@ WidgetSpectrogram::WidgetSpectrogram(PG_Widget *parent,
                                      const PG_Rect &rect,
                                      AudioInputController *audio_input,
                                      unsigned int pixels_per_second)
-  : WidgetWave(parent, rect, audio_input, pixels_per_second)
+  : WidgetAudioView(parent, rect, audio_input, pixels_per_second)
 {
   this->m_window_width = 256;//1000;//256;//2 * this->my_height;//
   this->m_data_in = new double[this->m_window_width];
@@ -14,8 +14,8 @@ WidgetSpectrogram::WidgetSpectrogram(PG_Widget *parent,
   this->m_data_out[this->m_window_width] = 0;
   this->m_y_axis = NULL;
 
-  SDL_Surface *surface = this->GetWidgetSurface();
-  this->m_background_color = SDL_MapRGB(surface->format, 0, 0, 0);
+//  SDL_Surface *surface = this->GetWidgetSurface();
+//  this->m_background_color = SDL_MapRGB(surface->format, 0, 0, 0);
 
   this->m_coeffs = fftw_plan_r2r_1d(this->m_window_width,
                                     this->m_data_in,
@@ -34,7 +34,7 @@ WidgetSpectrogram::~WidgetSpectrogram()
 void
 WidgetSpectrogram::initialize()
 {
-  WidgetWave::initialize();
+  WidgetAudioView::initialize();
 
   SDL_FillRect(this->GetWidgetSurface(), NULL, 0);
   this->create_y_axis();
@@ -43,24 +43,30 @@ WidgetSpectrogram::initialize()
 void
 WidgetSpectrogram::terminate()
 {
-  WidgetWave::terminate();
+  WidgetAudioView::terminate();
 
   delete [] this->m_y_axis;
   this->m_y_axis = NULL;
 }
-
+/*
+Uint32
+WidgetSpectrogram::get_background_color(SDL_PixelFormat *format) const
+{
+  return SDL_MapRGB(surface->format, 0, 0, 0);
+}
+//*/
 void
 WidgetSpectrogram::fix_oldview_size(unsigned int oldview_from,
                                     unsigned int &oldview_size)
 {
-  unsigned long first_pixel = this->m_last_left_index + oldview_from;
+  unsigned long first_pixel = this->m_last_scroll_pos + oldview_from;
 
   // Calculate pixels that had enough information when they were drawn.
   // Pixel might be drawn with less than m_window_width information if there
   // was not enough audio data.
   unsigned long correct_audio_pixels;
   if (this->m_last_audio_data_size > this->m_window_width)
-    correct_audio_pixels = (this->m_last_audio_data_size - this->m_window_width) / this->m_frames_per_pixel;
+    correct_audio_pixels = (long)((this->m_last_audio_data_size - this->m_window_width) / this->m_samples_per_pixel);
   else
     correct_audio_pixels = 0;
 
@@ -77,7 +83,7 @@ WidgetSpectrogram::fix_oldview_size(unsigned int oldview_from,
 void
 WidgetSpectrogram::draw_screen_vector(SDL_Surface *surface, unsigned int x)
 {
-  this->write_data_in(x + this->m_left_index);
+  this->write_data_in(x + this->m_scroll_pos);
   fftw_execute(this->m_coeffs);
   this->calculate_output_values();
   this->do_drawing(surface, x);
@@ -91,15 +97,15 @@ WidgetSpectrogram::write_data_in(unsigned int audio_pixel)
   const AUDIO_FORMAT *audio_data = this->m_audio_input->get_audio_data();
   
   // Check if not enough audio data for the fftw window.
-  if (audio_pixel * this->m_frames_per_pixel + this->m_window_width > audio_size) {
+  if (audio_pixel * this->m_samples_per_pixel + this->m_window_width > audio_size) {
     memset(this->m_data_in, 0, sizeof(double) * this->m_window_width);
-    audio_window_size = audio_size - audio_pixel * this->m_frames_per_pixel;
+    audio_window_size = (int)(audio_size - audio_pixel * this->m_samples_per_pixel);
   }
   
   // Write data from audio buffer to data input buffer.
   for (unsigned jnd = 0; jnd < audio_window_size; jnd++) {
-    this->m_data_in[jnd] =
-      (double)audio_data[jnd+audio_pixel*this->m_frames_per_pixel];
+    unsigned int index = (int)(jnd + audio_pixel * this->m_samples_per_pixel);
+    this->m_data_in[jnd] = (double)audio_data[index];
   }
 }
 

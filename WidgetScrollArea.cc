@@ -34,21 +34,36 @@ WidgetScrollArea::set_widget_position(PG_Widget *item) const
 {
   Sint32 x;
   item->GetUserData(&x);
+  //*
+  if (abs(x - this->m_scroll_x) < 20000)
+    item->MoveWidget(x - this->m_scroll_x, 0, false);
+  else
+    item->MoveWidget(-20000, 0, false);
+    //*/
+  /*
   if (x < this->m_scroll_x + this->my_width &&
       x + item->my_width > this->m_scroll_x)
   {
-    item->my_xpos = x - this->m_scroll_x;
-//    item->SetVisible(true);
+    item->MoveWidget(x - this->m_scroll_x, 0, false);
+    //item->my_xpos = x - this->m_scroll_x;
+    item->SetVisible(true);
   }
   else {
-    item->my_xpos = -item->my_width;
-//    item->SetVisible(false);
+    //item->MoveWidget(-10000, 0, false);
+    //item->my_xpos = -item->my_width;
+    item->SetVisible(false);
   }
+  //*/
 }
 
 void
 WidgetScrollArea::AddChild(PG_Widget *item)
 {
-  this->set_widget_position(item);
+//  fprintf(stderr, "add child 1\n");
+  item->SetVisible(false);
+//  fprintf(stderr, "add child 2\n");
   PG_Widget::AddChild(item);
+//  fprintf(stderr, "add child 3\n");
+  this->set_widget_position(item);
+//  fprintf(stderr, "add child 4\n");
 }

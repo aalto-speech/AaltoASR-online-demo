@@ -7,7 +7,7 @@
 #include <pthread.h>
 #include "Buffer.hh"
 
-// These definitions make it easier to change audio format etc.
+// These definitions make it easier to change audio format.
 typedef short AUDIO_FORMAT;
 #define audio_read_function sf_read_short
 #define audio_write_function sf_write_short
@@ -17,6 +17,9 @@ const unsigned long SAMPLE_RATE = 16000;
 // This definition makes a bit nicer code.
 typedef Buffer<AUDIO_FORMAT> AudioBuffer;
 
+// I define these functions here because they need to know the audio format.
+// Everything that has this kind of audio format dependency should be
+// defined here to make it easier to change the audio format.
 namespace audio
 {
   /** Reads the audio data from an audio file.

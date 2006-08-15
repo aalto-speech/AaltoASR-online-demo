@@ -1,39 +1,49 @@
 
 #include "WindowStartProcess.hh"
 #include "WindowMessageBox.hh"
-#include "AudioStream.hh"
-#include "Settings.hh"
-//#include "Application.hh"
 
 WindowStartProcess::WindowStartProcess(const PG_Widget *parent,
-                                       Process *process,
-                                       msg::InQueue *in_queue,
-                                       msg::OutQueue *out_queue)
-  : WindowWaitRecognizer(parent, "Starting recognizer..", 350, 150, in_queue)
+                                       RecognizerProcess *recognizer)
+//                                       Process *process,
+//                                       msg::InQueue *in_queue,
+//                                       msg::OutQueue *out_queue)
+  : WindowWaitRecognizer(parent,
+                         "Starting recognizer..",
+                         350,
+                         150,
+                         recognizer ? recognizer->get_in_queue() : NULL)
 {
 //  this->m_app = app;
-  this->m_process = process;
+//  this->m_process = process;
 //  this->m_in_queue = in_queue;
-  this->m_out_queue = out_queue;
+//  this->m_out_queue = out_queue;
+  this->m_recognizer = recognizer;
 }
 
 void
 WindowStartProcess::do_opening()
 {
-  if (!this->m_process) {
+  if (!this->m_recognizer) {
     this->end_running(1);
     return;
   }
-
+  
+  // Finish old process and start a new one.
+  this->m_recognizer->finish();
+  this->m_recognizer->start();
+  
+/*
   this->finish_process_and_queues();
 
   this->start_process();
   this->start_queues();
-  
+  //*/
   WindowWaitRecognizer::do_opening();
   
   try {
-    Settings::send_settings(this->m_out_queue);
+    this->m_recognizer->send_settings();
+    this->m_recognizer->get_out_queue()->flush();
+//    Settings::send_settings(this->m_out_queue);
   }
   catch (msg::ExceptionBrokenPipe) {
     this->handle_broken_pipe();
@@ -56,7 +66,7 @@ WindowStartProcess::handle_broken_pipe()
   if (ret_val == 2)
     this->end_running(0);
 }
-
+/*
 void
 WindowStartProcess::finish_process_and_queues()
 {
@@ -84,7 +94,7 @@ WindowStartProcess::start_process()
     // could we do that? If we free everything, we would have to reload
     // surfaces....
 //    throw ExceptionChildProcess();
-    //*
+
 //    Application::app->clean();
 //    fcloseall();
     int ret = execlp("ssh",
@@ -98,7 +108,7 @@ WindowStartProcess::start_process()
       exit(1);                                    
     }
     assert(false);
-    //*/
+
   }
   
   msg::set_non_blocking(this->m_process->read_fd);
@@ -116,3 +126,4 @@ WindowStartProcess::start_queues()
     this->m_out_queue->enable(this->m_process->write_fd);
   }
 }
+//*/

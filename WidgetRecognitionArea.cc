@@ -9,7 +9,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                              unsigned int pixels_per_second)
   : PG_Widget(parent, rect, false),
     m_pixels_per_second(pixels_per_second),
-    m_frames_per_pixel(SAMPLE_RATE / pixels_per_second)
+    m_frames_per_pixel(SAMPLE_RATE / (double)pixels_per_second)
 {
   this->m_audio_input = audio_input;
   this->m_recognition = recognition;
@@ -74,7 +74,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
   this->m_spectrogram->initialize();
   
   // Create recognition text area.
-  this->m_text_area = new WidgetRecognitionTexts(this,
+  this->m_text_area = new WidgetRecognitionText(this,
                                                  PG_Rect(0,
                                                          this->my_height - 50,
                                                          this->Width(),
@@ -125,27 +125,25 @@ WidgetRecognitionArea::set_scroll_position(unsigned long page)
   this->m_text_area->set_scroll_position(page);
   this->m_time_axis->set_scroll_position(page);
 //  this->m_text_area->ScrollTo(page, 0);
-  this->m_wave->set_position(page);
-  this->m_spectrogram->set_position(page);
+  this->m_wave->set_scroll_position(page);
+  this->m_spectrogram->set_scroll_position(page);
 }
 
 void
 WidgetRecognitionArea::update_cursors()
 {
-  unsigned long audio_cursor = this->m_audio_input->get_audio_cursor() / this->m_frames_per_pixel;
-  unsigned long recognition_cursor = this->m_pixels_per_second * this->m_recognition->get_recognition_frame() / RecognitionParser::frames_per_second;
-  this->draw_cursor(audio_cursor, PG_Color(255, 255, 255));
-  this->draw_cursor(recognition_cursor, PG_Color(255, 0, 255));
-  if (this->m_audio_input->is_playbacking()) {
-    audio_cursor = this->m_audio_input->get_playback_cursor() / this->m_frames_per_pixel;
-    this->draw_cursor(audio_cursor, PG_Color(255, 255, 0));
-  }
+  this->draw_cursor(this->get_audio_cursor(), PG_Color(255, 255, 255));
+  this->draw_cursor(this->get_recognizer_cursor(), PG_Color(255, 0, 255));
+  if (this->m_audio_input->is_playbacking())
+    this->draw_cursor(this->get_playback_cursor(), PG_Color(255, 255, 0));
 }
 
 void
 WidgetRecognitionArea::draw_cursor(long position, PG_Color color)
 {
-  if (position >= this->m_scroll_bar->GetPosition() && position <= this->m_scroll_bar->GetPosition() + this->Width()) {
+  if (position >= this->m_scroll_bar->GetPosition() &&
+      position <= this->m_scroll_bar->GetPosition() + this->Width()) {
+        
     this->m_wave->DrawVLine(position - this->m_scroll_bar->GetPosition(),
                             0,
                             this->m_wave->Height(),
@@ -184,14 +182,16 @@ WidgetRecognitionArea::update()
     long read_cursor_px = 0;
     unsigned long scroll_pos = 0;
     bool scrolling = true;
-    if (this->m_autoscroll == AUDIO)// && !this->m_audio_input->is_paused())
-      read_cursor_px = this->m_audio_input->get_audio_cursor() / this->m_frames_per_pixel;
+    if (this->m_autoscroll == AUDIO)
+      read_cursor_px = this->get_audio_cursor();
     else if (this->m_autoscroll == RECOGNIZER)
-      read_cursor_px = this->m_pixels_per_second * this->m_recognition->get_recognition_frame() / RecognitionParser::frames_per_second;
+      read_cursor_px = this->get_recognizer_cursor();
     else
       scrolling = false;
     if (scrolling) {
-      if (read_cursor_px < this->m_scroll_bar->GetPosition() || read_cursor_px > this->m_scroll_bar->GetPosition() + this->Width()) {
+      if (read_cursor_px < this->m_scroll_bar->GetPosition() ||
+          read_cursor_px > this->m_scroll_bar->GetPosition() + this->Width()) {
+
         if (read_cursor_px > this->Width() / 2) {
           scroll_pos = read_cursor_px - this->Width() / 2;
         }
@@ -210,7 +210,7 @@ WidgetRecognitionArea::update()
 void
 WidgetRecognitionArea::set_scroll_range()
 {
-  unsigned long audio_data_pixels = this->m_audio_input->get_audio_data_size() / this->m_frames_per_pixel;
+  unsigned long audio_data_pixels = this->get_audio_pixels();
   if (audio_data_pixels > this->Width()) {
     this->m_scroll_bar->SetRange(0, audio_data_pixels - this->Width());
   }

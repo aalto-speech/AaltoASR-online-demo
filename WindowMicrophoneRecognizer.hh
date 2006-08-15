@@ -10,9 +10,9 @@ class WindowMicrophoneRecognizer  :  public WindowRecognizer
 
 public:
   
-  WindowMicrophoneRecognizer(Process *process,
-                             msg::InQueue *in_queue,
-                             msg::OutQueue *out_queue);
+  WindowMicrophoneRecognizer(RecognizerProcess *recognizer);//Process *process,
+                             //msg::InQueue *in_queue,
+                             //msg::OutQueue *out_queue);
   virtual ~WindowMicrophoneRecognizer();
   
   virtual void initialize();

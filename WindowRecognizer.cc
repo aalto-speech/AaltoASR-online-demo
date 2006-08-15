@@ -7,8 +7,10 @@
 #include "WindowStartProcess.hh"
 #include "str.hh"
 
-WindowRecognizer::WindowRecognizer(Process *process, msg::InQueue *in_queue, msg::OutQueue *out_queue)
-  : m_queue(in_queue, &m_recognition)
+//WindowRecognizer::WindowRecognizer(Process *process, msg::InQueue *in_queue, msg::OutQueue *out_queue)
+WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
+  : m_queue(recognizer ? recognizer->get_in_queue() : NULL,
+            &m_recognition)
 {
   
   this->m_play_button = NULL;
@@ -19,9 +21,10 @@ WindowRecognizer::WindowRecognizer(Process *process, msg::InQueue *in_queue, msg
   this->m_recognition_area = NULL;
   this->m_texts_area = NULL;
   
-  this->m_process = process;
-  this->m_in_queue = in_queue;
-  this->m_out_queue = out_queue;
+  this->m_recognizer = recognizer;
+//  this->m_process = process;
+//  this->m_in_queue = in_queue;
+//  this->m_out_queue = out_queue;
   
   this->m_broken_pipe = false;
   
@@ -64,7 +67,7 @@ WindowRecognizer::do_opening()
   const float recognizer_part = 1.0 - text_part;
 
   // Create area for original and recognized texts.
-  this->m_texts_area = new WidgetTextsArea(*this,
+  this->m_texts_area = new WidgetComparisonArea(*this,
                                            PG_Rect(0,
                                                    top,
                                                    this->m_window->Width(),
@@ -117,10 +120,10 @@ WindowRecognizer::do_running()
   }
   else {
     unsigned long read_size = this->get_audio_input()->operate();
-    if (read_size > 0) {
+//    if (read_size > 0) {
       this->flush_out_queue();
 //      fprintf(stderr, "read_size: %d\n", read_size);
-    }
+//    }
     this->m_recognition_area->update();
   }
   
@@ -153,9 +156,12 @@ WindowRecognizer::handle_broken_pipe()
   int ret_val;
 
   this->m_broken_pipe = true;  
-  this->error("Recognition process disconnected.\nPress OK to restart.", ERROR_NORMAL);
+  if (!this->error("Recognition process disconnected.\nPress OK to restart.",
+                   ERROR_NORMAL)) {
+    return false;
+  }
 
-  WindowStartProcess window(this->m_window, this->m_process, this->m_in_queue, this->m_out_queue);
+  WindowStartProcess window(this->m_window, this->m_recognizer);//this->m_process, this->m_in_queue, this->m_out_queue);
   window.initialize();
   
   // NOTE: We have to close audio stream or the forked process will have its own
@@ -165,18 +171,20 @@ WindowRecognizer::handle_broken_pipe()
   this->get_audio_input()->terminate();
 
   ret_val = this->run_child_window(&window);
-  
+
+  // Check that whole application wasn't terminated.  
   if (ret_val != 0) {
     this->reset(false);
+    this->handle_adapt_button();
     this->m_broken_pipe = false;
+
+    // Now re-open the audio stream (look at the note above).
+    if (!this->get_audio_input()->initialize()) {
+      this->error("Failed to re-initialize audio input.", ERROR_CLOSE);
+      ret_val = 0;
+    }
   }
 
-  // Now re-open the audio stream (look at the note above).
-  if (!this->get_audio_input()->initialize()) {
-    this->error("Failed to re-initialize audio input.", ERROR_CLOSE);
-    ret_val = 0;
-  }
-  
   return !this->m_broken_pipe;
 }
 //*
@@ -184,8 +192,8 @@ void
 WindowRecognizer::flush_out_queue()
 {
   try {
-    if (this->m_out_queue)
-      this->m_out_queue->flush();
+    if (this->m_recognizer)
+      this->m_recognizer->get_out_queue()->flush();
   }
   catch (msg::ExceptionBrokenPipe exception) {
     this->m_broken_pipe = true;
@@ -213,7 +221,9 @@ WindowRecognizer::pause_window_functionality(bool pause)
 void
 WindowRecognizer::reset(bool reset_audio)
 {
-  WindowReset window(this->m_window, this->m_in_queue, this->m_out_queue);
+  WindowReset window(this->m_window,
+                     this->m_recognizer ? this->m_recognizer->get_in_queue() : NULL,
+                     this->m_recognizer ? this->m_recognizer->get_out_queue() : NULL);
 
   // Window functionality will be paused and unpaused when running a child
   // window but we want to do these pauses before running the child window
@@ -236,13 +246,9 @@ WindowRecognizer::reset(bool reset_audio)
   if (this->run_child_window(&window) == -1) {
     this->m_broken_pipe = true;
     return;
-//    if (!this->handle_broken_pipe())
-//      return;
   }
 
   this->handle_enablerecog_button();
-  this->handle_adapt_button();
-//  this->pause_window_functionality(false);
 }
 
 void
@@ -257,8 +263,10 @@ WindowRecognizer::end_of_audio()
 {
   this->pause_audio_input(true);
   this->set_status(END_OF_AUDIO);
-  if (this->m_out_queue) {
-    this->m_out_queue->add_message(msg::Message(msg::M_AUDIO_END));
+  if (this->m_recognizer) {
+    msg::Message message(msg::M_AUDIO_END, true);
+    this->m_recognizer->get_out_queue()->add_message(message);
+//    this->m_out_queue->add_message(msg::Message(msg::M_AUDIO_END));
     this->flush_out_queue();
   }
 }
@@ -284,13 +292,13 @@ WindowRecognizer::set_status(Status status)
 void
 WindowRecognizer::enable_recognizer(bool enable)
 {
-  if (this->m_out_queue) {
+  if (this->m_recognizer) {
 
     msg::Message message(msg::M_DECODER_PAUSE, true);
     if (enable)
       message.set_type(msg::M_DECODER_UNPAUSE);
 
-    this->m_out_queue->add_message(message);
+    this->m_recognizer->get_out_queue()->add_message(message);
     this->flush_out_queue();
   }
 }
@@ -337,7 +345,7 @@ WindowRecognizer::handle_resetrecog_button()
 bool
 WindowRecognizer::handle_settings_button()
 {
-  WindowSettings window(this->m_window, this->m_out_queue);
+  WindowSettings window(this->m_window, this->m_recognizer);
   window.initialize();
   if (this->run_child_window(&window) == -1) {
     this->m_broken_pipe = true;
@@ -355,22 +363,36 @@ WindowRecognizer::handle_back_button()
 bool
 WindowRecognizer::handle_adapt_button()
 {
-  msg::Message message(msg::M_ADAPT_OFF);
-
-  if (this->m_adapt_button->GetPressed())
+  msg::Message message(msg::M_ADAPT_ON);//, true);
+  
+  if (this->m_adapt_button->GetPressed()) {
     message.set_type(msg::M_ADAPT_ON);
+//    this->reset(false);
+  }
+  else {
+    message.set_type(msg::M_ADAPT_OFF);
+//    if (this->m_status != END_OF_AUDIO)
+//      this->end_of_audio();
+  }
 
-  if (this->m_out_queue)
-    this->m_out_queue->add_message(message);
-
-  this->flush_out_queue();
+  if (this->m_recognizer) {
+    this->m_recognizer->get_out_queue()->add_message(message);
+    this->flush_out_queue();
+  }
+  
   return true;
 }
 
 bool
 WindowRecognizer::handle_resetadaptation_button()
 {
-  this->error("Reset adaptation not implemented.", ERROR_NORMAL);
+//  this->error("Reset adaptation not implemented.", ERROR_NORMAL);
+  if (this->m_recognizer) {
+    msg::Message message(msg::M_ADAPT_RESET, true);
+    this->m_recognizer->get_out_queue()->add_message(message);
+    this->flush_out_queue();
+  }
+  
   return true;
 }
 

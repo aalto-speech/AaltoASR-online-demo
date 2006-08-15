@@ -1,12 +1,13 @@
 
-#include "WidgetTextsArea.hh"
+#include "WidgetComparisonArea.hh"
 #include "WindowOpenTextFile.hh"
 #include "WindowSaveTextFile.hh"
+#include "WindowComparison.hh"
 #include <pglabel.h>
 
-WidgetTextsArea::WidgetTextsArea(Window &parent,
-                                 const PG_Rect &rect,
-                                 RecognitionParser *recognition)
+WidgetComparisonArea::WidgetComparisonArea(Window &parent,
+                                           const PG_Rect &rect,
+                                           RecognitionParser *recognition)
   : PG_Widget(parent.get_widget(), rect, false),
     m_parent(parent),
     m_recognition(recognition)
@@ -19,13 +20,13 @@ WidgetTextsArea::WidgetTextsArea(Window &parent,
 
   // Create titles for both fields.  
   PG_Label *label;
-  label = new PG_Label(this, PG_Rect(0,0,0,0), "Original");
+  label = new PG_Label(this, PG_Rect(0,0,0,0), "Reference");
   label->SetSizeByText();
-  label->MoveRect((field_width - label->Width()) / 2, 0);
+  label->MoveWidget((field_width - label->Width()) / 2, 0);
 
-  label = new PG_Label(this, PG_Rect(0,0,0,0), "Recognition");
+  label = new PG_Label(this, PG_Rect(0,0,0,0), "Hypothesis");
   label->SetSizeByText();
-  label->MoveRect(field_width + field_space + (field_width - label->Width()) / 2, 0);
+  label->MoveWidget(field_width + field_space + (field_width - label->Width()) / 2, 0);
 
 
   // Create text areas for both fields.
@@ -51,40 +52,40 @@ WidgetTextsArea::WidgetTextsArea(Window &parent,
   // Buttons for original text field.
   x = (field_width - 3 * button_width - 2 * button_space) / 2;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Open");
-  button->sigClick.connect(slot(*this, &WidgetTextsArea::handle_openoriginal_button));
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_openoriginal_button));
   
   x += button_width + button_space;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Save");
-  button->sigClick.connect(slot(*this, &WidgetTextsArea::handle_saveoriginal_button));
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_saveoriginal_button));
   
   x += button_width + button_space;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Clear");
-  button->sigClick.connect(slot(*this, &WidgetTextsArea::handle_clearoriginal_button));
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_clearoriginal_button));
   
 
   // Buttons for recognition text field.
   x = (field_width + field_space) + (field_width - 2 * button_width - 1 * button_space) / 2;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Update");
-  button->sigClick.connect(slot(*this, &WidgetTextsArea::handle_updaterecognition_button));
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_updaterecognition_button));
   
   x += button_width + button_space;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Save");
-  button->sigClick.connect(slot(*this, &WidgetTextsArea::handle_saverecognition_button));
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_saverecognition_button));
   
 
   // Button for comparing original and recognized text.
   const unsigned int compare_width = 2 * button_width;
   x = field_width + (field_space - compare_width) / 2;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, compare_width, 40), "<- Compare ->");
-  button->sigClick.connect(slot(*this, &WidgetTextsArea::handle_compare_button));
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_compare_button));
 
 }
 
 bool
-WidgetTextsArea::handle_openoriginal_button()
+WidgetComparisonArea::handle_openoriginal_button()
 {
   std::string content;
-  WindowOpenTextFile window(this->GetParent(), content);
+  WindowOpenTextFile window(this->m_parent.get_widget(), content);
   window.initialize();
   if (this->m_parent.run_child_window(&window) == 1) {
     this->m_original_text->SetText(content.data());
@@ -95,16 +96,17 @@ WidgetTextsArea::handle_openoriginal_button()
 }
 
 bool
-WidgetTextsArea::handle_saveoriginal_button()
+WidgetComparisonArea::handle_saveoriginal_button()
 {
-  WindowSaveTextFile window(this->GetParent(), this->m_original_text->GetText());
+  WindowSaveTextFile window(this->m_parent.get_widget(),
+                            this->m_original_text->GetText());
   window.initialize();
   this->m_parent.run_child_window(&window);
   return true;
 }
 
 bool
-WidgetTextsArea::handle_clearoriginal_button()
+WidgetComparisonArea::handle_clearoriginal_button()
 {
   this->m_original_text->SetText("");
 //  this->m_original_text->SetVPosition(0);
@@ -113,7 +115,7 @@ WidgetTextsArea::handle_clearoriginal_button()
 }
 
 bool
-WidgetTextsArea::handle_updaterecognition_button()
+WidgetComparisonArea::handle_updaterecognition_button()
 {
 //  Uint16 x = this->m_recognition_text->GetScrollPosX();
 //  Uint16 y = this->m_recognition_text->GetScrollPosY();
@@ -143,17 +145,23 @@ WidgetTextsArea::handle_updaterecognition_button()
 }
 
 bool
-WidgetTextsArea::handle_saverecognition_button()
+WidgetComparisonArea::handle_saverecognition_button()
 {
-  WindowSaveTextFile window(this->GetParent(), this->m_recognition_text->GetText());
+  WindowSaveTextFile window(this->m_parent.get_widget(),
+                            this->m_recognition_text->GetText());
   window.initialize();
   this->m_parent.run_child_window(&window);
   return true;
 }
 
 bool
-WidgetTextsArea::handle_compare_button()
+WidgetComparisonArea::handle_compare_button()
 {
-  this->m_parent.error("Comparing not yet implemented.", Window::ERROR_NORMAL);
+//  this->m_parent.error("Comparing not yet implemented.", Window::ERROR_NORMAL);
+  WindowComparison window(this->m_parent.get_widget(),
+                              this->m_original_text->GetText(),
+                              this->m_recognition_text->GetText());
+  window.initialize();
+  this->m_parent.run_child_window(&window);
   return true;
 }

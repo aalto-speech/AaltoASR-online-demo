@@ -1,7 +1,7 @@
 
 /****************
  * These implementations are copied from pgmultilineedit.h. Some changes are
- * made to fix some bugs and also to change some undesired behaviour.
+ * made to fix some bugs and also to change some behaviour.
  * "Change:" and "CHANGE:" tags help you find these changes.
  */
 
@@ -361,7 +361,6 @@ void WidgetMultiLineEdit::SetupVScroll() {
   } 
   
   else {
-    fprintf(stderr, "SetupVScroll lines %d\n", my_textdata.size());
     my_vscroll->SetRange(0, my_textdata.size() - my_height/GetFontHeight()); 
     if (my_firstLine > my_vscroll->GetMaxRange()) {
       SetVPosition(my_vscroll->GetMaxRange()); 
@@ -371,8 +370,9 @@ void WidgetMultiLineEdit::SetupVScroll() {
       // scrollbar makes the window less wide, so we have to redo the text 
       // (note: don't switch these next two lines, unless you like infinite loops) 
       my_vscroll->Show(); 
-      // Change: Of course we have to setup the scroll bar if re-create the
-      // text vector and thus allowing the amount of lines to change!
+      // Change: Of course we have to setup the scroll bar again if we re-create
+      // the text vector and thus allow the number of lines to change! (that is:
+      // give parameter true)
       CreateTextVector(true);
 //      CreateTextVector(false);
     } 

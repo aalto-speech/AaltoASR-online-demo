@@ -4,13 +4,14 @@
 
 #include <pglineedit.h>
 #include "WindowChild.hh"
-#include "msg.hh"
+//#include "msg.hh"
+#include "RecognizerProcess.hh"
 
 class WindowSettings  :  public WindowChild
 {
 public:
 
-  WindowSettings(const PG_Widget *parent, msg::OutQueue *out_queue);
+  WindowSettings(const PG_Widget *parent, RecognizerProcess *recognizer);
   virtual ~WindowSettings() { }
 
   virtual void initialize();
@@ -23,7 +24,8 @@ protected:
 
 private:
 
-  msg::OutQueue *m_out_queue;
+//  msg::OutQueue *m_out_queue;
+  RecognizerProcess *m_recognizer;
 
   PG_LineEdit *m_beam_edit;
   PG_LineEdit *m_lmscale_edit;

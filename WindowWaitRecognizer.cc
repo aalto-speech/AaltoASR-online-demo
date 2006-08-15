@@ -18,7 +18,8 @@ WindowWaitRecognizer::do_opening()
   if (!this->m_in_queue)
     this->end_running(1);
   else
-    fprintf(stderr, "WindowWaitRecognizer::do_opening: Waiting recognizer to be ready...\n");
+    fprintf(stderr, "WindowWaitRecognizer::do_opening: "
+                    "Waiting recognizer to be ready...\n");
 }
 
 void

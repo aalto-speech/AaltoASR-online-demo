@@ -9,12 +9,16 @@
 #include <pgstring.h>
 
 /** This class has been copied from pgmultilineedit.h and made a few changes
- * that were impossible to implement by deriving.
- */
+ * that were impossible to implement by deriving. */
 class WidgetMultiLineEdit : public PG_LineEdit {
 public:
 
-  WidgetMultiLineEdit(PG_Widget* parent, const PG_Rect& r, const char* style="LineEdit", int maximumLength = 1000000);
+  WidgetMultiLineEdit(PG_Widget* parent,
+                      const PG_Rect& r,
+                      const char* style="LineEdit",
+                      int maximumLength = 1000000);
+  // Change: (Virtual) destructor added.
+  virtual ~WidgetMultiLineEdit() { }
   virtual void SetText(const char* new_text); 
   
   // Change: This function is moved to public.
@@ -52,7 +56,7 @@ private:
   void CreateTextVector(bool bSetupVScroll = true);
   void SetupVScroll();
   std::vector<PG_String> my_textdata;
-  // Change: Use our own scroll bar.
+  // Change: Use our own scroll bar because it's better.
 //  PG_ScrollBar* my_vscroll;
   WidgetScrollBar* my_vscroll;
   int my_firstLine;

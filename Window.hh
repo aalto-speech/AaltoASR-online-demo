@@ -40,7 +40,7 @@ public:
   /** Pops a message box with error report.
    * \param message Error report.
    * \param type Tells the action to take.*/
-  void error(const std::string &message, ErrorType type);
+  bool error(const std::string &message, ErrorType type);
   
 protected:
 

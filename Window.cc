@@ -32,10 +32,11 @@ Window::run_modal()
   // Run until requested to end.
   while(!this->m_end_run) {
     if (SDL_PollEvent(&event)) {
+      PG_Application::ClearOldMousePosition();
       if (event.type == SDL_QUIT)
         this->end_running(0);
-      PG_Application::ClearOldMousePosition();
-      this->m_window->ProcessEvent(&event, true);
+      else
+        this->m_window->ProcessEvent(&event, true);
       PG_Application::DrawCursor();
     }
     else {
@@ -91,10 +92,12 @@ Window::run_child_window(Window *child_window)
 
   this->pause_window_functionality(true);
   ret_val = child_window->run_modal();
-  this->pause_window_functionality(false);
 
   if (ret_val == 0)
     this->end_running(0);
+
+  if (!this->m_end_run)    
+    this->pause_window_functionality(false);
     
   return ret_val;
 }
@@ -109,9 +112,9 @@ Window::create_window()
                                PG_Application::GetScreenWidth(),
                                PG_Application::GetScreenHeight()),
                        false);
-  }
+}
 
-void
+bool
 Window::error(const std::string &message, ErrorType type)
 {
   fprintf(stderr, "%s\n", message.data());
@@ -127,5 +130,6 @@ Window::error(const std::string &message, ErrorType type)
   else if (type == ERROR_FATAL) {
     this->end_running(0);
   }
+  return !this->m_end_run;
 }
 

@@ -1,59 +1,13 @@
 
-#include "WidgetWave.hh"
-
-WidgetWave::WidgetWave(PG_Widget *parent,
-                       const PG_Rect &rect,
-                       AudioInputController *audio_input,
-                       const unsigned int pixels_per_second)
-  : WidgetAudioView(parent, rect, audio_input, pixels_per_second)
-{
-
-}
-
-void
-WidgetWave::initialize()
-{
-  WidgetAudioView::initialize();
-  
-  SDL_Surface *surface = this->GetWidgetSurface();
-  this->m_foreground_color = SDL_MapRGB(surface->format, 255, 255, 0);
-  this->set_background_color(SDL_MapRGB(surface->format, 10, 100, 20));
-}
-
-void
-WidgetWave::draw_screen_vector(SDL_Surface *surface, unsigned int x)
-{
-  const AUDIO_FORMAT *audio_data = this->m_audio_input->get_audio_data();
-  SDL_Rect line_rect;
-
-  unsigned int index = (int)((x + this->m_scroll_pos) * this->m_samples_per_pixel);
-  const AUDIO_FORMAT *first = audio_data + index;
-  AUDIO_FORMAT max = *std::max_element(first, first + (int)this->m_samples_per_pixel);
-  AUDIO_FORMAT min = *std::min_element(first, first + (int)this->m_samples_per_pixel);
-
-  static double scale = surface->h / pow(256, sizeof(AUDIO_FORMAT));
-  int y1 = (int)(max * scale + 0.5 * surface->h);
-  int y2 = (int)(min * scale + 0.5 * surface->h);
-
-  line_rect.x = x;
-  line_rect.w = 1;
-  line_rect.y = y2;
-  line_rect.h = y1 - y2 + 1;
-
-  SDL_FillRect(surface, &line_rect, this->m_foreground_color);
-}
-
-/*
 #include <math.h>
 #include <SDL.h>
 #include <algorithm>
-//#include <minmax_element.hpp>
-//#include <ororor>
 #include "WidgetWave.hh"
 
-WidgetWave::WidgetWave(PG_Widget *parent, const PG_Rect &rect,
-                               AudioInputController *audio_input,
-                               const unsigned int pixels_per_second)
+WidgetAudioView::WidgetAudioView(PG_Widget *parent,
+                                 const PG_Rect &rect,
+                                 AudioInputController *audio_input,
+                                 const unsigned int pixels_per_second)
   : PG_Widget(parent, rect, true),
     m_pixels_per_second(pixels_per_second),
     m_samples_per_pixel(SAMPLE_RATE / (double)pixels_per_second)
@@ -62,22 +16,24 @@ WidgetWave::WidgetWave(PG_Widget *parent, const PG_Rect &rect,
   
   this->m_surface_backbuffer = NULL;
 
-  this->m_left_index = 0;
-  this->m_last_left_index = 0;
+  this->m_scroll_pos = 0;
+  this->m_last_scroll_pos = 0;
   this->m_last_audio_data_size = 0;
+  
+  this->m_background_color = 0;
 
-  SDL_Surface *surface = this->GetWidgetSurface();
-  this->m_foreground_color = SDL_MapRGB(surface->format, 255, 255, 0);
-  this->m_background_color = SDL_MapRGB(surface->format, 10, 100, 20);
+//  SDL_Surface *surface = this->GetWidgetSurface();
+//  this->m_foreground_color = SDL_MapRGB(surface->format, 255, 255, 0);
+//  this->m_background_color = this->get_background_color(surface->format);//SDL_MapRGB(surface->format, 10, 100, 20);
 }
 
-WidgetWave::~WidgetWave()
+WidgetAudioView::~WidgetAudioView()
 {
   this->terminate();
 }
 
 void
-WidgetWave::initialize()
+WidgetAudioView::initialize()
 {
   this->m_force_redraw = true;
   
@@ -100,7 +56,7 @@ WidgetWave::initialize()
 }
 
 void
-WidgetWave::terminate()
+WidgetAudioView::terminate()
 {
   if (this->m_surface_backbuffer) {
     SDL_FreeSurface(this->m_surface_backbuffer);
@@ -110,32 +66,33 @@ WidgetWave::terminate()
 
 
 void
-WidgetWave::reset()
+WidgetAudioView::reset()
 {
   this->terminate();
   this->initialize();
 }
 
 void
-WidgetWave::fix_oldview_size(unsigned int oldview_from, unsigned int &oldview_size)
+WidgetAudioView::fix_oldview_size(unsigned int oldview_from,
+                                  unsigned int &oldview_size)
 {
   unsigned long audio_data_pixels = 
     (unsigned long)(this->m_last_audio_data_size / this->m_samples_per_pixel);
     
-  if (this->m_last_left_index + oldview_from + oldview_size > audio_data_pixels) {
-    if (audio_data_pixels > this->m_last_left_index + oldview_from)
-      oldview_size = audio_data_pixels - (this->m_last_left_index + oldview_from);
+  if (this->m_last_scroll_pos + oldview_from + oldview_size > audio_data_pixels) {
+    if (audio_data_pixels > this->m_last_scroll_pos + oldview_from)
+      oldview_size = audio_data_pixels - (this->m_last_scroll_pos + oldview_from);
     else
       oldview_size = 0;
   }
 }
 
 void
-WidgetWave::calculate_old(unsigned int &oldview_from,
-                          unsigned int &oldview_to,
-                          unsigned int &oldview_size)
+WidgetAudioView::calculate_old(unsigned int &oldview_from,
+                               unsigned int &oldview_to,
+                               unsigned int &oldview_size)
 {
-  int difference = this->m_left_index - this->m_last_left_index;
+  int difference = this->m_scroll_pos - this->m_last_scroll_pos;
 
   if (difference > 0) {
     oldview_from = this->my_width < abs(difference) ? this->my_width : abs(difference);
@@ -153,7 +110,7 @@ WidgetWave::calculate_old(unsigned int &oldview_from,
 }
 
 unsigned int
-WidgetWave::blit_old()
+WidgetAudioView::blit_old()
 {
   unsigned int oldview_from, oldview_to, oldview_size;
   
@@ -179,15 +136,15 @@ WidgetWave::blit_old()
 }
 
 void
-WidgetWave::calculate_new(unsigned long old_size,
-                          unsigned long &newaudio_from,
-                          unsigned long &newaudio_size)
+WidgetAudioView::calculate_new(unsigned long old_size,
+                               unsigned long &newaudio_from,
+                               unsigned long &newaudio_size)
 {
-  newaudio_from = (long)(this->m_left_index * this->m_samples_per_pixel);
+  newaudio_from = (long)(this->m_scroll_pos * this->m_samples_per_pixel);
   unsigned long audio_data_size = this->m_audio_input->get_audio_data_size();
 
   // Check whether the new visible audio comes from left or right.  
-  if (this->m_left_index >= this->m_last_left_index)
+  if (this->m_scroll_pos >= this->m_last_scroll_pos)
     newaudio_from += (long)(old_size * this->m_samples_per_pixel);
 
   // Calculate the size of the new view.
@@ -203,16 +160,16 @@ WidgetWave::calculate_new(unsigned long old_size,
 }
 
 void
-WidgetWave::draw_new(unsigned int x,
-                     unsigned long newaudio_from,
-                     unsigned long newaudio_size)
+WidgetAudioView::draw_new(unsigned int x,
+                          unsigned long newaudio_from,
+                          unsigned long newaudio_size)
 {
   SDL_Rect rect;
   SDL_Surface *surface = this->GetWidgetSurface();
   unsigned int audio_pixels = (int)(newaudio_size / this->m_samples_per_pixel);
 
   rect.x = x;
-  rect.w = this->m_left_index >= this->m_last_left_index ? (this->my_width - x) : audio_pixels;
+  rect.w = this->m_scroll_pos >= this->m_last_scroll_pos ? (this->my_width - x) : audio_pixels;
   rect.y = 0;
   rect.h = surface->h;
   SDL_FillRect(surface, &rect, this->m_background_color);
@@ -224,30 +181,7 @@ WidgetWave::draw_new(unsigned int x,
 }
 
 void
-WidgetWave::draw_screen_vector(SDL_Surface *surface, unsigned int x)
-{
-  const AUDIO_FORMAT *audio_data = this->m_audio_input->get_audio_data();
-  SDL_Rect line_rect;
-
-  unsigned int index = (int)((x + this->m_left_index) * this->m_samples_per_pixel);
-  const AUDIO_FORMAT *first = audio_data + index;
-  AUDIO_FORMAT max = *std::max_element(first, first + this->m_samples_per_pixel);
-  AUDIO_FORMAT min = *std::min_element(first, first + this->m_samples_per_pixel);
-
-  static double scale = surface->h / pow(256, sizeof(AUDIO_FORMAT));
-  int y1 = (int)(max * scale + 0.5 * surface->h);
-  int y2 = (int)(min * scale + 0.5 * surface->h);
-
-  line_rect.x = x;
-  line_rect.w = 1;
-  line_rect.y = y2;
-  line_rect.h = y1 - y2 + 1;
-
-  SDL_FillRect(surface, &line_rect, this->m_foreground_color);
-}
-
-void
-WidgetWave::update()
+WidgetAudioView::update()
 {
   unsigned int oldview_size = 0;
   unsigned long newaudio_from, newaudio_size;
@@ -263,28 +197,28 @@ WidgetWave::update()
   // Draw the new parts of the view.
   if (newaudio_size) {
     unsigned int x =
-      (this->m_left_index >= this->m_last_left_index ? oldview_size : 0);
+      (this->m_scroll_pos >= this->m_last_scroll_pos ? oldview_size : 0);
       
     this->draw_new(x, newaudio_from, newaudio_size);
   }
 
   // Update variables and backbuffer.
-  this->m_last_left_index = this->m_left_index;
+  this->m_last_scroll_pos = this->m_scroll_pos;
   this->m_force_redraw = false;
   SDL_BlitSurface(this->GetWidgetSurface(), NULL, this->m_surface_backbuffer, NULL);
 }
 
 bool
-WidgetWave::eventMouseButtonUp(const SDL_MouseButtonEvent *button)
+WidgetAudioView::eventMouseButtonUp(const SDL_MouseButtonEvent *button)
 {
   if (button->button == SDL_BUTTON_LEFT) {
     if (this->m_audio_input->is_playbacking()) {
       this->m_audio_input->stop_playback();
     }
     else {
-      long cursor_px = this->m_left_index + (button->x - this->my_xpos);
+      long cursor_px = this->m_scroll_pos + (button->x - this->my_xpos);
       if (cursor_px >= 0) {
-        unsigned long cursor_audio = this->m_samples_per_pixel * cursor_px;
+        unsigned long cursor_audio = (long)(this->m_samples_per_pixel * cursor_px);
         this->m_audio_input->start_playback(cursor_audio);
       }
     }
@@ -296,5 +230,3 @@ WidgetWave::eventMouseButtonUp(const SDL_MouseButtonEvent *button)
   }
   return false;
 }
-//*/
-

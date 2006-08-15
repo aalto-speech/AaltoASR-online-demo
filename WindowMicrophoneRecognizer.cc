@@ -2,10 +2,11 @@
 #include "WindowMicrophoneRecognizer.hh"
 #include "WindowSaveAudioFile.hh"
 
-WindowMicrophoneRecognizer::WindowMicrophoneRecognizer(Process *process,
-                                                       msg::InQueue *in_queue,
-                                                       msg::OutQueue *out_queue)
-  : WindowRecognizer(process, in_queue, out_queue)
+WindowMicrophoneRecognizer::WindowMicrophoneRecognizer(RecognizerProcess *recognizer)//Process *process,
+                                                       //msg::InQueue *in_queue,
+                                                       //msg::OutQueue *out_queue)
+  : WindowRecognizer(recognizer)
+//  : WindowRecognizer(process, in_queue, out_queue)
 {
   this->m_audio_input = NULL;
 }
@@ -26,7 +27,7 @@ WindowMicrophoneRecognizer::initialize()
 void
 WindowMicrophoneRecognizer::do_opening()
 {
-  this->m_audio_input = new AudioLineInputController(this->m_out_queue);
+  this->m_audio_input = new AudioLineInputController(this->m_recognizer ? this->m_recognizer->get_out_queue() : NULL);
   if (!this->m_audio_input->initialize()) {
     this->error("Audio input controller initialization failed. Try closing all other programs.", ERROR_CLOSE);
     return;

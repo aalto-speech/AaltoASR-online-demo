@@ -10,9 +10,25 @@ class WindowChild  :  public Window
   
 public:
 
-  WindowChild(const PG_Widget *parent, const std::string &title, Uint16 width, Uint16 height, bool close);
-  WindowChild(const PG_Widget *parent, const std::string &title, Uint16 width, Uint16 height, bool close, const std::string &ok_text);
-  WindowChild(const PG_Widget *parent, const std::string &title, Uint16 width, Uint16 height, bool close, const std::string &ok_text, const std::string &cancel_text);
+  WindowChild(const PG_Widget *parent,
+              const std::string &title,
+              Uint16 width,
+              Uint16 height,
+              bool close);
+  WindowChild(const PG_Widget *parent,
+              const std::string &title,
+              Uint16 width,
+              Uint16 height,
+              bool close,
+              const std::string &ok_text);
+  WindowChild(const PG_Widget *parent,
+              const std::string &title,
+              Uint16 width,
+              Uint16 height,
+              bool close,
+              const std::string &ok_text,
+              const std::string &cancel_text);
+              
   virtual ~WindowChild() {}
   
   virtual void initialize();

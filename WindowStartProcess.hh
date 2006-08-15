@@ -3,18 +3,16 @@
 #define WINDOWSTARTPROCESS_HH_
 
 #include "WindowWaitRecognizer.hh"
-#include "Process.hh"
-#include "msg.hh"
+//#include "Process.hh"
+//#include "msg.hh"
+#include "RecognizerProcess.hh"
 
 class WindowStartProcess  :  public WindowWaitRecognizer
 {
 
 public:
 
-  WindowStartProcess(const PG_Widget *parent,
-                     Process *process,
-                     msg::InQueue *in_queue,
-                     msg::OutQueue *out_queue);
+  WindowStartProcess(const PG_Widget *parent, RecognizerProcess *m_recognizer);
   virtual ~WindowStartProcess() { }
 
 protected:
@@ -23,14 +21,15 @@ protected:
   
   virtual void handle_broken_pipe();
   
-  Process *m_process;
-  msg::OutQueue *m_out_queue;
+  RecognizerProcess *m_recognizer;
+//  Process *m_process;
+//  msg::OutQueue *m_out_queue;
   
 private:
 
-  void finish_process_and_queues();
-  void start_process();
-  void start_queues();
+//  void finish_process_and_queues();
+//  void start_process();
+//  void start_queues();
 
 };
 

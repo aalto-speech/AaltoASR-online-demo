@@ -10,7 +10,7 @@ class WindowFileRecognizer  :  public WindowRecognizer
 
 public:
   
-  WindowFileRecognizer(Process *process, msg::InQueue *in_queue, msg::OutQueue *out_queue);
+  WindowFileRecognizer(RecognizerProcess *recognizer);//Process *process, msg::InQueue *in_queue, msg::OutQueue *out_queue);
   virtual ~WindowFileRecognizer();
   
   virtual void initialize();

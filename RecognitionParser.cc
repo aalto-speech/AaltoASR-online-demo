@@ -91,8 +91,10 @@ RecognitionParser::write_morpheme_data(std::string &data, const std::string &mor
 {
   if (morpheme == "<w>")
     data = " ";
-  else if (morpheme != "<s>" && morpheme != "</s>")
-    data = morpheme;
-  else
+  else if (/*morpheme == "<s>" || */morpheme == "</s>")
+    data = ".";
+  else if (morpheme == "<s>")
     data = "";
+  else if (morpheme != "<s>")
+    data = morpheme;
 }

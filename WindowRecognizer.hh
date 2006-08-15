@@ -3,13 +3,14 @@
 #define WINDOWRECOGNIZER_HH_
 
 #include "Window.hh"
-#include "Process.hh"
+//#include "Process.hh"
 #include "RecognitionParser.hh"
 #include "AudioInputController.hh"
 #include "WidgetRecognitionArea.hh"
-#include "WidgetTextsArea.hh"
+#include "WidgetComparisonArea.hh"
 #include "RecognizerListener.hh"
-#include "msg.hh"
+//#include "msg.hh"
+#include "RecognizerProcess.hh"
 #include <pgbutton.h>
 
 class WindowRecognizer  :  public Window
@@ -17,9 +18,10 @@ class WindowRecognizer  :  public Window
 
 public:
   
-  WindowRecognizer(Process *process,
-                   msg::InQueue *in_queue,
-                   msg::OutQueue *out_queue);
+//  WindowRecognizer(Process *process,
+//                   msg::InQueue *in_queue,
+//                   msg::OutQueue *out_queue);
+  WindowRecognizer(RecognizerProcess *recognizer);
   virtual ~WindowRecognizer() { }
   
   virtual void initialize();
@@ -64,14 +66,15 @@ protected:
   
   bool handle_broken_pipe();
 
-  Process *m_process;
+//  Process *m_process;
+//  msg::InQueue *m_in_queue;
+//  msg::OutQueue *m_out_queue;
+  RecognizerProcess *m_recognizer;
   RecognitionParser m_recognition;
-  msg::InQueue *m_in_queue;
-  msg::OutQueue *m_out_queue;
   RecognizerListener m_queue;
 
   WidgetRecognitionArea *m_recognition_area;
-  WidgetTextsArea *m_texts_area;
+  WidgetComparisonArea *m_texts_area;
   
 private:
 
