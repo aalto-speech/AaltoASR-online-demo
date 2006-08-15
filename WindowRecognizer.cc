@@ -17,6 +17,8 @@ WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
   this->m_endaudio_button = NULL;
   this->m_enablerecog_button = NULL;
   this->m_adapt_button = NULL;
+  
+  this->m_status_label = NULL;
 
   this->m_recognition_area = NULL;
   this->m_texts_area = NULL;
@@ -53,17 +55,24 @@ WindowRecognizer::initialize()
   this->m_enablerecog_button->SetToggle(true);
   this->m_adapt_button->SetToggle(true);
   
+  this->m_status_label = new PG_Label(this->m_window,
+                                      PG_Rect(10,
+                                              this->m_window->Height() - 25,
+                                              this->m_window->Width() - 10,
+                                              20),
+                                      "Recognizer status: ");
+
 }
 
 void
 WindowRecognizer::do_opening()
 {
   // These constants are used to construct the following areas.
-  const unsigned int top = 180;
-  const unsigned int space = 10;
-  const unsigned int bottom = 10;
+  const unsigned int top = 140;
+  const unsigned int space = 5;
+  const unsigned int bottom = 50;
   const unsigned int height = this->m_window->Height() - (top + space + bottom);
-  const float text_part = 0.4;
+  const float text_part = 0.35;
   const float recognizer_part = 1.0 - text_part;
 
   // Create area for original and recognized texts.
@@ -84,7 +93,7 @@ WindowRecognizer::do_opening()
                               this->get_audio_input(),
                               &this->m_recognition,
                               250);
-
+                              
   // Enable recognizer.
   this->m_enablerecog_button->SetPressed(true);
   this->m_queue.enable();
@@ -119,7 +128,8 @@ WindowRecognizer::do_running()
     this->m_queue.start();
   }
   else {
-    unsigned long read_size = this->get_audio_input()->operate();
+//    unsigned long read_size = this->get_audio_input()->operate();
+    this->get_audio_input()->operate();
 //    if (read_size > 0) {
       this->flush_out_queue();
 //      fprintf(stderr, "read_size: %d\n", read_size);
@@ -402,8 +412,8 @@ WindowRecognizer::construct_button(const std::string &label,
                                    unsigned int row_index,
                                    const SigC::Slot0<bool> &callback)
 {
-  const int width = 160;
-  const int height = 50;
+  const int width = 150;
+  const int height = 40;
   const int horizontal_space = 50;
   const int vertical_space = 0;
   const int columns = 4;

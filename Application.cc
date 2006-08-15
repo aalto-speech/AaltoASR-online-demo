@@ -30,14 +30,24 @@ Application::~Application()
 }
 
 bool
-Application::initialize()
+Application::initialize(unsigned int width, unsigned int height)
 {
   this->m_app = new PG_Application;
   
+  if (width < 800) {
+    fprintf(stderr, "Width must be at least 800.\n", width, height);
+    return false;
+  }
+  
+  if (height < 600) {
+    fprintf(stderr, "Width must be at least 600.\n", width, height);
+    return false;
+  }
+
   // Initialize PG_Application.
 //  if(!this->m_app->InitScreen(1024, 768, 0, SDL_FULLSCREEN | SDL_SWSURFACE | SDL_DOUBLEBUF)) {
-  if(!this->m_app->InitScreen(1024, 768)) {
-    fprintf(stderr, "Resolution not supported\n");
+  if(!this->m_app->InitScreen(width, height)) {
+    fprintf(stderr, "Resolution %dx%d not supported\n", width, height);
     return false;
   }
 //  this->m_app->EnableAppIdleCalls(); 
@@ -63,13 +73,15 @@ Application::initialize()
 }
 
 bool
-Application::initialize(const std::string &ssh_to,
+Application::initialize(unsigned int width,
+                        unsigned int height,
+                        const std::string &ssh_to,
                         const std::string &script_file)
 {
   // Create the recognizer.
   this->m_recognizer = new RecognizerProcess(ssh_to, script_file);
 
-  return this->initialize();
+  return this->initialize(width, height);
 }
 
 void

@@ -21,14 +21,21 @@ public:
 
   /** Initializes the application without recognizer. This is mostly for
    * debugging purposes only.
+   * \param width Application window width.
+   * \param height Application window height.
    * \return false if ParaGUI initialization failed. */
-  bool initialize();
+  bool initialize(unsigned int width, unsigned int height);
   
   /** Initializes the application with recognizer.
+   * \param width Application window width.
+   * \param height Application window height.
    * \param ssh_to Computer which should run the recognizer.
    * \param script_file File that should be run in the ssh computer.
    * \return false if ParaGUI initialization failed. */
-  bool initialize(const std::string &ssh_to, const std::string &script_file);
+  bool initialize(unsigned int width,
+                  unsigned int height,
+                  const std::string &ssh_to,
+                  const std::string &script_file);
   
   /** Cleans memory allocations. */
   void clean();

@@ -17,9 +17,9 @@ WindowWaitRecognizer::do_opening()
   // If no in queue, no need to wait for recognizer.
   if (!this->m_in_queue)
     this->end_running(1);
-  else
-    fprintf(stderr, "WindowWaitRecognizer::do_opening: "
-                    "Waiting recognizer to be ready...\n");
+//  else
+//    fprintf(stderr, "WindowWaitRecognizer::do_opening: "
+//                    "Waiting recognizer to be ready...\n");
 }
 
 void
@@ -42,7 +42,7 @@ WindowWaitRecognizer::do_running()// throw(msg::ExceptionBrokenPipe)
   if (!this->m_in_queue->empty()) {
     msg::Message message = this->m_in_queue->queue.front();
     if (message.type() == msg::M_READY) {
-      fprintf(stderr, "WindowWaitRecognizer::do_running: Recognizer ready.\n");
+//      fprintf(stderr, "WindowWaitRecognizer::do_running: Recognizer ready.\n");
       this->end_running(1);
     }
     this->m_in_queue->queue.pop_front();

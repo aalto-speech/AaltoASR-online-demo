@@ -12,6 +12,8 @@ int main(int argc, char* argv[])
 //  conf("", "beam", "arg", "", "Beam value for recognizer.");
 //  conf("", "lmscale", "arg", "", "Language model scale value for recognizer.");
   config(0, "help", "", "", "Help text.");
+  config('w', "width", "arg", "1024", "Window width.");
+  config('h', "height", "arg", "768", "Window height.");
   config(0, "cluster", "arg", "itl-cl1", "Computer to take ssh connection and run recognizer.");
   config(0, "script", "arg", "rec.sh", "Script file that starts recognizer.");
   config('b', "", "", "", "Allow less than 4 byte int.");
@@ -40,10 +42,13 @@ int main(int argc, char* argv[])
   bool ok;
 
   if (config['d'].specified) {
-    ok = app.initialize();
+    ok = app.initialize(config["width"].get_int(),
+                        config["height"].get_int());
   }  
   else {
-    ok = app.initialize(config["cluster"].get_str(),
+    ok = app.initialize(config["width"].get_int(),
+                        config["height"].get_int(),
+                        config["cluster"].get_str(),
                         config["script"].get_str());
   }
   

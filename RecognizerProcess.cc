@@ -161,7 +161,6 @@ RecognizerProcess::read_settings()
         (lmscale >= MIN_LMSCALE && lmscale <= MAX_LMSCALE);
         
   if (read_settings && ok) {
-    fprintf(stderr, "Read settings. Beam: %d, LM-scale: %d\n", beam, lmscale);
     this->m_beam = beam;
     this->m_lmscale = lmscale;
   }

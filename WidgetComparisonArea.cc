@@ -16,7 +16,7 @@ WidgetComparisonArea::WidgetComparisonArea(Window &parent,
   const unsigned int field_space = 30;
   const unsigned int field_width = (this->my_width - field_space) / 2;
   const unsigned int button_space = 10;
-  const unsigned int button_width = 80;
+  const unsigned int button_width = 70;
 
   // Create titles for both fields.  
   PG_Label *label;

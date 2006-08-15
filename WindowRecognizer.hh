@@ -12,6 +12,7 @@
 //#include "msg.hh"
 #include "RecognizerProcess.hh"
 #include <pgbutton.h>
+#include <pglabel.h>
 
 class WindowRecognizer  :  public Window
 {
@@ -82,6 +83,8 @@ private:
   PG_Button *m_endaudio_button;
   PG_Button *m_enablerecog_button;
   PG_Button *m_adapt_button;
+  
+  PG_Label *m_status_label;
   
   bool m_broken_pipe;
 

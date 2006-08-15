@@ -172,9 +172,9 @@ WidgetRecognitionText::update_recognition()
       iter++;
       
     for (; iter != morphemes.end(); iter++) {
-      fprintf(stderr, "Add recog morpheme 1: \"%s\"\n", iter->data.data());
+//      fprintf(stderr, "Add recog morpheme 1: \"%s\"\n", iter->data.data());
       this->add_morpheme_widget(*iter, PG_Color(255, 255, 255), this->m_last_recog_word);
-      fprintf(stderr, "Add recog morpheme 2\n");
+//      fprintf(stderr, "Add recog morpheme 2\n");
     }
   }
   this->m_last_recognition_count = morphemes.size();

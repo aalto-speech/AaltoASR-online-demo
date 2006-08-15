@@ -194,7 +194,6 @@ TextComparer::operate(ProcessExecutor *&process,
       parsing_ok = TextComparer::parse_result(result, output);
       delete process;
       process = NULL;
-      fprintf(stderr, "Delete files: %s and %s\n", reference_file.data(), hypothesis_file.data());
       remove(reference_file.data());
       remove(hypothesis_file.data());
       reference_file = "";
@@ -278,8 +277,6 @@ TextComparer::TextComparer(const std::string &reference,
 
 TextComparer::~TextComparer()
 {
-  fprintf(stderr, "TextComparer destructor.\n");
-  fprintf(stderr, "Delete files: %s, %s, %s and %s\n", this->m_word_ref_file.data(), this->m_word_hyp_file.data(), this->m_char_ref_file.data(), this->m_char_hyp_file.data());
   remove(this->m_word_ref_file.data());
   remove(this->m_word_hyp_file.data());
   remove(this->m_char_ref_file.data());
