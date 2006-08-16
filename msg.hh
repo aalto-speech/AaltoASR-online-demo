@@ -162,6 +162,8 @@ namespace msg {
      * complete messages are read.
      */
     void flush();
+
+    /** Check if queue is empty. */
     bool empty() { return queue.empty(); }
 
     /** File descriptor of the queue. */
