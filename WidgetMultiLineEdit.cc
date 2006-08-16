@@ -365,8 +365,11 @@ void WidgetMultiLineEdit::SetupVScroll() {
     if (my_firstLine > my_vscroll->GetMaxRange()) {
       SetVPosition(my_vscroll->GetMaxRange()); 
     }
-    
-    if (!my_vscroll->IsVisible() || my_vscroll->IsHidden()) { 
+  
+    // Change: Original if statement causes eternal loops if text area is not
+    // visible when setting text.
+//    if (!my_vscroll->IsVisible() || my_vscroll->IsHidden()) { 
+    if (my_vscroll->IsHidden()) { 
       // scrollbar makes the window less wide, so we have to redo the text 
       // (note: don't switch these next two lines, unless you like infinite loops) 
       my_vscroll->Show(); 

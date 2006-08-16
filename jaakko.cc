@@ -3,7 +3,6 @@
 #include "Application.hh"
 #include "conf.hh"
 
-
 // cluster, beam, lmscale, int16
 int main(int argc, char* argv[])
 {

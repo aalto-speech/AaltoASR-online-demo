@@ -50,7 +50,7 @@ protected:
    * value
    * \param ret_val Return value of run modal function of the current window.
    */
-  void next_window(int ret_val);
+//  void next_window(int ret_val);
   
 private:
 
@@ -58,11 +58,11 @@ private:
   RecognizerProcess *m_recognizer;
   
   // Windowing system
-  Window *m_current_window;
-  Window *m_startprocess_window;
-  Window *m_main_window;
-  Window *m_recognizer_window;
-  Window *m_microphone_window;
+//  Window *m_current_window;
+//  Window *m_startprocess_window;
+//  Window *m_main_window;
+//  Window *m_recognizer_window;
+//  Window *m_microphone_window;
 
   // ParaGUI
   PG_Application *m_app;

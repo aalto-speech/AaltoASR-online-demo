@@ -81,7 +81,7 @@ WindowChild::initialize()
     }
   }
   
-  this->m_window->sigKeyDown.connect(slot(*this, &WindowChild::handle_key_pressed));
+  this->m_window->sigKeyUp.connect(slot(*this, &WindowChild::handle_key_pressed));
 
 }
 

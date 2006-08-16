@@ -114,11 +114,7 @@ WindowComparison::construct_result_array(const TextComparisonResult &result)
   this->construct_numeric_label(1, 11, result._char.deletion);
   this->construct_numeric_label(1, 12, result._char.insertion);
 
-  unsigned int correct;
-  if (result._word.correct > result._word.insertion)
-    correct = result._word.correct - result._word.insertion;
-  else
-    correct = 0;
+  long correct = (long)result._word.correct - result._word.insertion;
   unsigned int ref_words = result._word.correct + result._word.substitution +
                            result._word.deletion;// - result._word.insertion;
   unsigned int total = result._word.correct + result._word.substitution +
@@ -129,10 +125,7 @@ WindowComparison::construct_result_array(const TextComparisonResult &result)
   this->construct_percentage_label(2, 4, result._word.deletion, total);
   this->construct_percentage_label(2, 5, result._word.insertion, total);
   
-  if (result._char.correct > result._char.insertion)
-    correct = result._char.correct - result._char.insertion;
-  else
-    correct = 0;
+  correct = (long)result._char.correct - result._char.insertion;
   ref_words = result._char.correct + result._char.substitution +
               result._char.deletion;// - result._char.insertion;
   total = result._char.correct + result._char.substitution +

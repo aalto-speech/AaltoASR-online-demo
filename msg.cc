@@ -98,10 +98,18 @@ namespace msg {
       
       	Message message;
       	message.buf = buffer;
-      	if (message.urgent())
-      	  queue.push_front(message);
-      	else
-      	  queue.push_back(message);
+        if (message.urgent()) {
+          std::deque<Message>::iterator iter;
+          // Find the position just before first non-urgent message.
+          for (iter = this->queue.begin(); iter != this->queue.end(); iter++) {
+            if (!iter->urgent())
+              break;
+          }
+          this->queue.insert(iter, message);
+        }
+        else {
+          this->queue.push_back(message);
+        }
 
       	buffer.resize(header_size);
       	bytes_got = 0;

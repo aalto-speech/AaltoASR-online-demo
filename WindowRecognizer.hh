@@ -49,11 +49,11 @@ protected:
   bool handle_recognize_button();
   bool handle_pause_button();
   bool handle_back_button();
-  bool handle_play_button();
-  bool handle_reset_button();
-  bool handle_resetrecog_button();
+//  bool handle_play_button();
+//  bool handle_reset_button();
+//  bool handle_resetrecog_button();
   bool handle_enablerecog_button();
-  bool handle_endaudio_button();
+//  bool handle_endaudio_button();
   bool handle_settings_button();
   bool handle_adapt_button();
   bool handle_resetadaptation_button();
@@ -88,8 +88,8 @@ protected:
   
 private:
 
-  PG_Button *m_play_button;
-  PG_Button *m_endaudio_button;
+//  PG_Button *m_play_button;
+//  PG_Button *m_endaudio_button;
   PG_Button *m_enablerecog_button;
   PG_Button *m_adapt_button;
   

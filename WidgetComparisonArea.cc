@@ -4,6 +4,7 @@
 #include "WindowSaveTextFile.hh"
 #include "WindowComparison.hh"
 #include "WindowTextEdit.hh"
+#include "scrap.h"
 #include <pglabel.h>
 
 WidgetComparisonArea::WidgetComparisonArea(Window &parent,
@@ -17,7 +18,7 @@ WidgetComparisonArea::WidgetComparisonArea(Window &parent,
   const unsigned int field_space = 30;
   const unsigned int field_width = (this->my_width - field_space) / 2;
   const unsigned int button_space = 5;
-  const unsigned int button_width = 60;
+  const unsigned int button_width = 65;
 
   // Create titles for both fields.  
   PG_Label *label;
@@ -52,9 +53,17 @@ WidgetComparisonArea::WidgetComparisonArea(Window &parent,
   unsigned int x;
   
   // Buttons for original text field.
-  x = (field_width - 4 * button_width - 3 * button_space) / 2;
+  x = (field_width - 5 * button_width - 4 * button_space) / 2;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Edit");
   button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_editoriginal_button));
+  
+  x += button_width + button_space;
+  button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Paste");
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_pasteoriginal_button));
+  
+  x += button_width + button_space;
+  button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Clear");
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_clearoriginal_button));
   
   x += button_width + button_space;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Open");
@@ -63,10 +72,6 @@ WidgetComparisonArea::WidgetComparisonArea(Window &parent,
   x += button_width + button_space;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Save");
   button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_saveoriginal_button));
-  
-  x += button_width + button_space;
-  button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Clear");
-  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_clearoriginal_button));
   
 
   // Buttons for recognition text field.
@@ -133,6 +138,26 @@ WidgetComparisonArea::handle_editoriginal_button()
   //*/
   return true;
 }
+
+bool
+WidgetComparisonArea::handle_pasteoriginal_button()
+{
+  char *scrap = NULL;
+  int scraplen = 0;
+  get_scrap(T('T','E','X','T'), &scraplen, &scrap);
+
+  // Convert carriage returns into normal new lines because ParaGUI doesn't
+  // show carriage returns.
+  for (int ind = 0; ind < scraplen; ind++) {
+    if ((int)scrap[ind] == 13)
+      scrap[ind] = '\n';
+  }
+  this->m_original_text->SetText(scrap);
+  delete[] scrap;
+  this->m_original_text->Update();
+  return true;
+}
+
 
 bool
 WidgetComparisonArea::handle_updaterecognition_button()

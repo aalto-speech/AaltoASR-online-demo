@@ -51,7 +51,8 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	WidgetTimeAxis.cc WidgetComparisonArea.cc WindowOpenAudioFile.cc \
 	WindowSaveAudioFile.cc WindowOpenTextFile.cc WindowSaveTextFile.cc \
 	WidgetMultiLineEdit.cc conf.cc RecognizerProcess.cc WidgetAudioView.cc \
-	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc
+	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc \
+	scrap.c
 jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype -lfftw3
 jaakko: $(jaakko_srcs:%.cc=%.o)
 

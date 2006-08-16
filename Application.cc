@@ -5,6 +5,9 @@
 #include "WindowRecognizer.hh"
 //#include "WindowFileRecognizer.hh"
 //#include "WindowMicrophoneRecognizer.hh"
+#include "scrap.h"
+
+
 
 //Application* Application::app = NULL;
 
@@ -14,11 +17,11 @@ Application::Application()
 //  this->m_out_queue = NULL;
 //  this->m_in_queue = NULL;
   
-  this->m_current_window = NULL;
-  this->m_startprocess_window = NULL;
-  this->m_main_window = NULL;
-  this->m_recognizer_window = NULL;
-  this->m_microphone_window = NULL;
+//  this->m_current_window = NULL;
+//  this->m_startprocess_window = NULL;
+//  this->m_main_window = NULL;
+//  this->m_recognizer_window = NULL;
+//  this->m_microphone_window = NULL;
   
   this->m_app = NULL;
   
@@ -35,13 +38,13 @@ Application::initialize(unsigned int width, unsigned int height)
 {
   this->m_app = new PG_Application;
   
-  if (width < 800) {
-    fprintf(stderr, "Width must be at least 800.\n", width, height);
+  if (width < 1000) {
+    fprintf(stderr, "Width must be at least 1000.\n", width, height);
     return false;
   }
   
-  if (height < 600) {
-    fprintf(stderr, "Width must be at least 600.\n", width, height);
+  if (height < 700) {
+    fprintf(stderr, "Width must be at least 700.\n", width, height);
     return false;
   }
 
@@ -58,12 +61,19 @@ Application::initialize(unsigned int width, unsigned int height)
 //  this->m_app->DeleteBackground();
   this->m_app->RedrawBackground(PG_Rect(0, 0, this->m_app->GetScreenWidth(), this->m_app->GetScreenHeight()));
   this->m_app->FlipPage();
-  
+
+  // Initialize clipboard.
+  if (init_scrap() < 0) {
+    fprintf(stderr, "Failed to initialize clipboard\n");
+    return false;
+  }
+
+  /*
   // Initialize windows.
   this->m_startprocess_window = new WindowStartProcess(NULL, this->m_recognizer);
-  this->m_main_window = new WindowMain();
+//  this->m_main_window = new WindowMain();
   this->m_recognizer_window = new WindowRecognizer(this->m_recognizer);
-  this->m_microphone_window = new WindowRecognizer(this->m_recognizer);
+//  this->m_microphone_window = new WindowRecognizer(this->m_recognizer);
 //  this->m_recognizer_window = new WindowFileRecognizer(this->m_recognizer);
 //  this->m_microphone_window = new WindowMicrophoneRecognizer(this->m_recognizer);
   
@@ -71,7 +81,7 @@ Application::initialize(unsigned int width, unsigned int height)
   this->m_main_window->initialize();
   this->m_recognizer_window->initialize();
   this->m_microphone_window->initialize();
-  
+  //*/
   return true;
 }
 
@@ -91,16 +101,46 @@ void
 Application::run()
 {
   // Program starts in initialization window.
-  this->m_current_window = this->m_startprocess_window;
+//  this->m_current_window = this->m_startprocess_window;
+/*  
+  char *scrap = NULL;
+  int scraplen = 0;
+  get_scrap(T('T','E','X','T'), &scraplen, &scrap);
   
+  fprintf(stderr, "Clipboard content: %s\n", scrap);
+//  for (int ind = 0; ind < scraplen; ind++) {
+//    fprintf(stderr, "%c", scrap[ind]);
+//  }
+  delete[] scrap;
+//  fprintf(stderr, "\n");
+  return;
+//*/
   try {
+    // Run recognizer starting window.
+    Window *start_window = new WindowStartProcess(NULL, this->m_recognizer);
+    start_window->initialize();
+    int ret_val = start_window->run_modal();
+    delete start_window;
+    
+    // If application is not finished, run actual recognizer window.
+    if (ret_val != 0) {
+      Window *recognizer_window = new WindowRecognizer(this->m_recognizer);
+      recognizer_window->initialize();
+      recognizer_window->run_modal();
+      delete recognizer_window;
+    }
+    /*
     while (this->m_current_window) {
       int ret_val = this->m_current_window->run_modal();
       this->next_window(ret_val);
     }
+    //*/
   }
   catch (msg::ExceptionBrokenPipe exception) {
-    fprintf(stderr, "Warning: Unhandled broken pipe exception. Program exits.\n");
+    fprintf(stderr, "Error: Unhandled broken pipe exception. Program exits.\n");
+  }
+  catch (std::exception exception) {
+    fprintf(stderr, "Error: Unhandled exception: %s\n", exception.what());
   }
 }
 
@@ -108,16 +148,20 @@ void
 Application::clean()
 {
   // Do cleaning in reverse order compared to initialization.
-  
+  /*
   // Clean windows.
   delete this->m_startprocess_window;
-  delete this->m_main_window;
+//  delete this->m_main_window;
   delete this->m_recognizer_window;
-  delete this->m_microphone_window;
+//  delete this->m_microphone_window;
   this->m_startprocess_window = NULL;
-  this->m_main_window = NULL;
+//  this->m_main_window = NULL;
   this->m_recognizer_window = NULL;
-  this->m_microphone_window = NULL;
+//  this->m_microphone_window = NULL;
+//*/
+
+  // Uninitialize clipboard
+  lost_scrap();
 
   // Finish and clean recognizer process.
   if (this->m_recognizer) {
@@ -131,6 +175,7 @@ Application::clean()
 
 }
 
+/*
 void
 Application::next_window(int ret_val)
 {
@@ -160,3 +205,4 @@ Application::next_window(int ret_val)
     }
   }
 }
+//*/

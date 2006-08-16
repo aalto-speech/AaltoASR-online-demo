@@ -16,8 +16,8 @@ WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
 {
   this->m_audio_input = NULL;
   
-  this->m_play_button = NULL;
-  this->m_endaudio_button = NULL;
+//  this->m_play_button = NULL;
+//  this->m_endaudio_button = NULL;
   this->m_enablerecog_button = NULL;
   this->m_adapt_button = NULL;
 
@@ -51,12 +51,12 @@ WindowRecognizer::initialize()
 {
   Window::initialize();
   //*
-  this->m_play_button =
-    this->construct_button("Play", 0, 0, slot(*this, &WindowRecognizer::handle_play_button));
-  this->m_endaudio_button =
-    this->construct_button("End audio", 0, 0, slot(*this, &WindowRecognizer::handle_endaudio_button));
+//  this->m_play_button =
+//    this->construct_button("Play", 0, 0, slot(*this, &WindowRecognizer::handle_play_button));
+//  this->m_endaudio_button =
+//    this->construct_button("End audio", 0, 0, slot(*this, &WindowRecognizer::handle_endaudio_button));
   this->m_enablerecog_button =
-    this->construct_button("Enable recognizer", 0, 0, slot(*this, &WindowRecognizer::handle_enablerecog_button));
+    this->construct_button("Enable recognizer", 2, 0, slot(*this, &WindowRecognizer::handle_enablerecog_button));
   //*/
   this->m_record_button =
     this->construct_button("Record", 1, 0, slot(*this, &WindowRecognizer::handle_record_button));
@@ -109,7 +109,7 @@ WindowRecognizer::do_opening()
   const unsigned int space = 5;
   const unsigned int bottom = 50;
   const unsigned int height = this->m_window->Height() - (top + space + bottom);
-  const float text_part = 0.35;
+  const float text_part = 0.4;
   const float recognizer_part = 1.0 - text_part;
 
   // Create area for original and recognized texts.
@@ -303,7 +303,7 @@ WindowRecognizer::reset(bool reset_audio)
     return;
   }
   //*/
-  //* If we don't run reset window, use this line.
+  //* If we don't run reset window, use these lines.
   if (this->m_recognizer) {
     msg::Message message(msg::M_RESET, true);
     this->m_recognizer->get_out_queue()->clear_non_urgent();
@@ -372,7 +372,7 @@ WindowRecognizer::enable_recognizer(bool enable)
     this->flush_out_queue();
   }
 }
-
+/*
 bool
 WindowRecognizer::handle_play_button()
 {
@@ -381,14 +381,14 @@ WindowRecognizer::handle_play_button()
   }
   return true;
 }
-
+//*/
 bool
 WindowRecognizer::handle_enablerecog_button()
 {
   this->enable_recognizer(this->m_enablerecog_button->GetPressed());
   return true;
 }
-
+/*
 bool
 WindowRecognizer::handle_endaudio_button()
 {
@@ -397,7 +397,7 @@ WindowRecognizer::handle_endaudio_button()
   }
   return true;
 }
-
+//*/
 bool
 WindowRecognizer::handle_record_button()
 {
@@ -457,7 +457,7 @@ WindowRecognizer::handle_stop_button()
   this->end_of_audio();
   return true;
 }
-
+/*
 bool
 WindowRecognizer::handle_reset_button()
 {
@@ -471,7 +471,7 @@ WindowRecognizer::handle_resetrecog_button()
   this->reset(false);
   return true;
 }
-
+//*/
 bool
 WindowRecognizer::handle_settings_button()
 {
