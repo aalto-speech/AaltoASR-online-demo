@@ -16,10 +16,8 @@ AudioLineInputController::pause_listening(bool pause)
   AudioInputController::pause_listening(pause);
   if (pause)
     this->m_audio_stream.set_input_buffer(NULL);
-//    this->m_audio_stream.set_input_buffer(NULL);
   else
     this->m_audio_stream.set_input_buffer(&this->m_input_buffer);
-//    this->m_audio_stream.set_input_buffer(&this->m_input_buffer);
 }
 
 unsigned long
@@ -39,5 +37,4 @@ void
 AudioLineInputController::read_input()
 {
   this->m_input_buffer.read(this->m_audio_data);
-//  return this->get_audio_data_size() - this->get_read_cursor();
 }

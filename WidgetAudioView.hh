@@ -28,6 +28,8 @@ public:
   virtual void initialize();
   virtual void terminate();
   
+  inline void force_clear();
+  
 protected:
 
   /** Calculates the area that can be blitted from previously drawn surface. */

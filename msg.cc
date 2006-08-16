@@ -213,11 +213,32 @@ namespace msg {
   void
   OutQueue::add_message(const Message &msg)
   {
-    if (msg.urgent())
-      this->queue.push_front(msg);
-    else
+    if (msg.urgent()) {
+      std::deque<Message>::iterator iter;
+      // Find the position just before first non-urgent message.
+      for (iter = this->queue.begin(); iter != this->queue.end(); iter++) {
+        if (!iter->urgent())
+          break;
+      }
+      this->queue.insert(iter, msg);
+    }
+    else {
       this->queue.push_back(msg);
+    }
   }
+  
+  void
+  OutQueue::clear_non_urgent()
+  {
+    std::deque<Message>::iterator iter;
+    // Find the position just before first non-urgent message.
+    for (iter = this->queue.begin(); iter != this->queue.end(); iter++) {
+      if (!iter->urgent())
+        break;
+    }
+    this->queue.erase(iter, this->queue.end());
+  }
+  
 
   Mux::Mux()
     : max_fd(-1)

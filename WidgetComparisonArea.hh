@@ -22,6 +22,7 @@ protected:
   bool handle_openoriginal_button();
   bool handle_saveoriginal_button();
   bool handle_clearoriginal_button();
+  bool handle_editoriginal_button();
   bool handle_updaterecognition_button();
   bool handle_saverecognition_button();
   bool handle_compare_button();

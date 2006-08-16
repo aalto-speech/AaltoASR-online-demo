@@ -14,16 +14,6 @@ class AudioInputController
 {
 public:
 
-  enum Mode { RECORD, PLAY };
-
-  /** Reads the audio data from an audio file into own audio data array.
-   * \param filename Audio file to read.
-   * \return false if failed to read the file. */  
-  bool load_file(const std::string &filename);
-
-  /** Set mode. */  
-  void set_mode(Mode mode);
-
   /** Constructs an audio input controller.
    * \param out_queue The out queue which the audio messages should be sent
    *                  to. */
@@ -65,6 +55,14 @@ public:
   /** Resets cursors thus starting to send audio messages from the beginning. */
   virtual void reset_cursors();
 
+  /** Opens audio stream. Stream is opened by default and this function is not
+   * not needed from outside unless close_audio_stream is explicitly used.
+   * \return true if opening is successful. */  
+//  bool open_audio_stream();
+  /** Closes audio stream. Normally there's no need to close the stream from
+   * outside. */
+//  void close_audio_stream();
+
   /** \return Audio samples (=audio data) as an array. */
   inline const AUDIO_FORMAT* get_audio_data() const;
   /** \return The amount of audio samples (=size of audio data array). */
@@ -73,14 +71,12 @@ public:
   /** \return The amount of audio frames sent to out queue. */
   inline unsigned long get_read_cursor() const;
   /** \return The index of last audio sample allowed to send out queue. */
-  inline unsigned long get_audio_cursor() const;
-  
-  inline bool is_eof() const;
+  virtual unsigned long get_audio_cursor() const = 0;
   
 protected:
 
   /** Reads audio samples from some source. */
-  inline void read_input();
+  virtual void read_input() = 0;
   
   /** Opens an audio stream. Opens both input and output streams (no matter
    * used or not) because it seemed to fix the audio delay bug.
@@ -101,7 +97,6 @@ private:
 
   /** Index of the last audio sample sent as an audio message. */
   unsigned long m_recognizer_cursor;
-  unsigned long m_output_cursor;
 
   // Variables for playback.
   AudioBuffer m_playback_buffer;
@@ -110,52 +105,9 @@ private:
   unsigned long m_playback_length;
   unsigned long m_playback_played; //!< Frames written to output buffer.
 
-  AudioBuffer m_output_buffer;
-  AudioBuffer m_input_buffer;
-  Mode m_mode;
-
   bool m_paused;
 
 };
-//*
-bool
-AudioInputController::is_eof() const
-{
-  if (this->m_mode == PLAY)
-    return this->get_read_cursor() >= this->get_audio_data_size();
-  
-  return false;
-}
-//*/
-
-bool
-AudioInputController::is_paused() const
-{
-  return this->m_paused;
-}
-
-unsigned long
-AudioInputController::get_audio_cursor() const
-{
-  if (this->m_mode == PLAY)
-    return this->m_output_buffer.get_frames_read();
-  else // this->m_mode == RECORD
-    return this->get_audio_data_size();
-}
-
-void
-AudioInputController::read_input()
-{
-  if (this->m_mode == PLAY) {
-    // Send audio to output stream.
-    this->m_output_cursor +=
-      this->m_output_buffer.write(this->get_audio_data() + this->m_output_cursor,
-                                  this->get_audio_data_size() - this->m_output_cursor);
-  }
-  else { // this->m_mode == RECORD
-    this->m_input_buffer.read(this->m_audio_data);
-  }
-}  
 
 bool
 AudioInputController::is_playbacking() const

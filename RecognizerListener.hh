@@ -38,6 +38,9 @@ public:
    * often. This class does't do any broken pipe handling.
    * \return true if in queue has a broken pipe. */
   inline bool is_broken_pipe() const;
+  
+  inline void wait_for_ready();
+  inline bool is_ready() const;
 
 private:
 
@@ -60,6 +63,8 @@ private:
   bool m_broken_pipe; //!< Flag telling if in queue has a broken pipe.
   pthread_t m_thread; //!< Thread structure.
   pthread_mutex_t m_disable_lock; //!< Lock to make disabling safe.
+  
+  unsigned int m_wait_ready;
 
 };
 
@@ -68,5 +73,20 @@ RecognizerListener::is_broken_pipe() const
 {
   return this->m_broken_pipe;
 }
+
+void
+RecognizerListener::wait_for_ready()
+{
+  pthread_mutex_lock(&this->m_disable_lock);
+  this->m_wait_ready++;
+  pthread_mutex_unlock(&this->m_disable_lock);
+}
+
+bool
+RecognizerListener::is_ready() const
+{
+  return this->m_wait_ready == 0;
+}
+
 
 #endif /*RECOGNIZERLISTENER_HH_*/

@@ -3,14 +3,14 @@
 #define WINDOWOPENAUDIOFILE_HH_
 
 #include "WindowOpenFile.hh"
-#include "AudioFileInputController.hh"
+#include "AudioInputController.hh"
 
 class WindowOpenAudioFile  :  public WindowOpenFile
 {
   
 public:
 
-  WindowOpenAudioFile(const PG_Widget *parent, AudioFileInputController *audio_input)
+  WindowOpenAudioFile(const PG_Widget *parent, AudioInputController *audio_input)
     : WindowOpenFile(parent, "Open Audio File"), m_audio_input(audio_input) { }
     
   virtual ~WindowOpenAudioFile() { }
@@ -30,7 +30,7 @@ protected:
 
 private:
 
-  AudioFileInputController *m_audio_input;
+  AudioInputController *m_audio_input;
 
 };
 

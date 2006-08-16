@@ -2,15 +2,9 @@
 #include "AudioInputController.hh"
 
 AudioInputController::AudioInputController(msg::OutQueue *out_queue)
-  : m_out_queue(out_queue),
-    m_playback_buffer(32000),
-    m_output_buffer(48000),
-    m_input_buffer(48000),
-    m_mode(RECORD)//, m_speakers(32000)
+  : m_out_queue(out_queue), m_playback_buffer(32000)//, m_speakers(32000)
 {
   this->m_recognizer_cursor = 0;
-  this->m_output_cursor = 0;
-  
   this->m_audio_data.clear();
 
   this->m_paused = true;
@@ -36,29 +30,80 @@ AudioInputController::initialize()
     return false;
   }
   return true;
+//  return this->open_audio_stream();
+  
+  /*
+  if (!AudioStream::initialize()) {
+    fprintf(stderr, "AIC initialization failed: Audio stream initialization failed\n");
+    return false;
+  }
+  
+//  if (!this->open_stream(false)) {
+  if (!this->open_stream()) {
+    fprintf(stderr, "AIC initialization failed: Failed opening audio stream.\n");
+    return false;
+  }
+  
+  if (!this->m_audio_stream.start()) {
+    fprintf(stderr, "AIC initialization failed to start audio stream.\n");
+    return false;
+  }
+  //*/
 }
 
 void
 AudioInputController::terminate()
 {
   this->m_audio_stream.close();
+//  this->close_audio_stream();
+//  this->m_audio_stream.close();
+//  this->m_audio_stream.close();
+//  AudioStream::terminate();
 }
-
+/*
 bool
-AudioInputController::load_file(const std::string &filename)
+AudioInputController::open_audio_stream()
 {
-  bool ret_val = false;
-  if (audio::read_wav_data(filename, this->m_audio_data)) {
-    this->reset_cursors();
-    ret_val = true;
+  if (!this->m_audio_stream.open(true, true)) {
+    fprintf(stderr, "Failed to open audio stream.\n");
+    return false;
   }
-  else {
-    fprintf(stderr, "AudioFileInputController::load_file failed.\n");
-    ret_val = false;
+  if (!this->m_audio_stream.start()) {
+    fprintf(stderr, "AIC initialization failed to start audio stream.\n");
+    return false;
   }
-  return ret_val;
+  return true;
 }
 
+void
+AudioInputController::close_audio_stream()
+{
+  this->m_audio_stream.close();
+}
+//*/
+/*
+bool
+AudioInputController::open_stream()
+{
+  // NOTE: At first I opened only input or output streams if they were needed.
+  // For several weeks I perceived a delay in output playback. The delay was
+  // a bit less than second long. It bothered me but I couldn't fix it. One
+  // day I happened to notice that when both input and output streams are open,
+  // the output delay became obsolete. It sounds a bit weird to me and I don't
+  // know why this is, but since then I have opened both input and output
+  // because it seems to fix the "delay-bug".
+  assert(false);
+  return false;
+//  return this->m_audio_stream.open(true, true);
+}
+//*/
+/*
+bool
+AudioInputController::open_stream(bool input_stream)
+{
+  return this->m_audio_stream.open(input_stream, true);
+}
+//*/
 
 unsigned long
 AudioInputController::operate()
@@ -118,31 +163,20 @@ AudioInputController::operate()
 }
 
 void
-AudioInputController::set_mode(Mode mode)
-{
-  this->m_mode = mode;
-  this->pause_listening(this->m_paused);
-}
-
-void
 AudioInputController::pause_listening(bool pause)
 {
+  //*
   if (pause) {
-    this->m_audio_stream.set_input_buffer(NULL);
+//    this->m_audio_stream.set_output_buffer(&this->m_playback_buffer);
     this->m_audio_stream.set_output_buffer(&this->m_playback_buffer);
   }
   else {
-    if (this->m_mode == PLAY) {
-      this->m_audio_stream.set_input_buffer(NULL);
-      this->m_audio_stream.set_output_buffer(&this->m_output_buffer);
-    }
-    else { // this->m_mode == RECORD
-      this->m_audio_stream.set_input_buffer(&this->m_input_buffer);
-      this->m_audio_stream.set_output_buffer(NULL);
-    }
+    // Disconnect the buffer before clearing.
+//    this->m_audio_stream.set_output_buffer(NULL);
+    this->m_audio_stream.set_output_buffer(NULL);
     this->stop_playback();
   }
-
+  //*/
   this->m_paused = pause;
 }
 
@@ -173,8 +207,10 @@ void
 AudioInputController::stop_playback()
 {
   if (this->m_audio_stream.get_output_buffer() == &this->m_playback_buffer) {
+//    this->m_audio_stream.set_output_buffer(NULL);
     this->m_audio_stream.set_output_buffer(NULL);
     this->m_playback_buffer.clear();
+//    this->m_audio_stream.set_output_buffer(&this->m_playback_buffer);
     this->m_audio_stream.set_output_buffer(&this->m_playback_buffer);
   }
   else {
@@ -186,20 +222,16 @@ AudioInputController::stop_playback()
 void
 AudioInputController::reset()
 {
-  // TODO: AUDIOBUFFERS NOT THREAD SAFE HERE????
   this->m_audio_data.clear();
   this->m_playback_length = 0;
   this->m_playback_played = 0;
   this->m_playback = false;
-  this->m_playback_buffer.clear();
   this->reset_cursors();
 }
 
 void
 AudioInputController::reset_cursors()
 {
-  this->m_input_buffer.clear();
-  this->m_output_buffer.clear();
-  this->m_output_cursor = 0;
+  this->m_playback_buffer.clear();
   this->m_recognizer_cursor = 0;
 }

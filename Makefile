@@ -38,11 +38,11 @@ gui_libs = -lpthread -lakumod -lsndfile
 gui: $(gui_srcs:%.cc=%.o)
 
 jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
-	Process.cc msg.cc endian.cc AudioFileInputController.cc \
-	AudioInputController.cc AudioLineInputController.cc \
+	Process.cc msg.cc endian.cc \
+	AudioInputController.cc \
 	Application.cc Window.cc \
-	WindowMain.cc WindowFileRecognizer.cc WidgetWave.cc \
-	WindowReset.cc WindowRecognizer.cc WindowMicrophoneRecognizer.cc \
+	WindowMain.cc WidgetWave.cc \
+	WindowReset.cc WindowRecognizer.cc \
 	WidgetRecognitionArea.cc str.cc WidgetRecognitionText.cc \
 	RecognitionParser.cc WidgetScrollArea.cc WindowFile.cc WindowMessageBox.cc \
 	WidgetSpectrogram.cc WindowChild.cc WindowSettings.cc \
@@ -51,7 +51,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	WidgetTimeAxis.cc WidgetComparisonArea.cc WindowOpenAudioFile.cc \
 	WindowSaveAudioFile.cc WindowOpenTextFile.cc WindowSaveTextFile.cc \
 	WidgetMultiLineEdit.cc conf.cc RecognizerProcess.cc WidgetAudioView.cc \
-	comparison.cc WindowComparison.cc WidgetContainer.cc
+	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc
 jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype -lfftw3
 jaakko: $(jaakko_srcs:%.cc=%.o)
 

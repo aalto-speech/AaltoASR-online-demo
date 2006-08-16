@@ -2,8 +2,9 @@
 #include "Application.hh"
 #include "WindowStartProcess.hh"
 #include "WindowMain.hh"
-#include "WindowFileRecognizer.hh"
-#include "WindowMicrophoneRecognizer.hh"
+#include "WindowRecognizer.hh"
+//#include "WindowFileRecognizer.hh"
+//#include "WindowMicrophoneRecognizer.hh"
 
 //Application* Application::app = NULL;
 
@@ -61,8 +62,10 @@ Application::initialize(unsigned int width, unsigned int height)
   // Initialize windows.
   this->m_startprocess_window = new WindowStartProcess(NULL, this->m_recognizer);
   this->m_main_window = new WindowMain();
-  this->m_recognizer_window = new WindowFileRecognizer(this->m_recognizer);
-  this->m_microphone_window = new WindowMicrophoneRecognizer(this->m_recognizer);
+  this->m_recognizer_window = new WindowRecognizer(this->m_recognizer);
+  this->m_microphone_window = new WindowRecognizer(this->m_recognizer);
+//  this->m_recognizer_window = new WindowFileRecognizer(this->m_recognizer);
+//  this->m_microphone_window = new WindowMicrophoneRecognizer(this->m_recognizer);
   
   this->m_startprocess_window->initialize();
   this->m_main_window->initialize();
@@ -99,25 +102,6 @@ Application::run()
   catch (msg::ExceptionBrokenPipe exception) {
     fprintf(stderr, "Warning: Unhandled broken pipe exception. Program exits.\n");
   }
-  /*
-  catch (ExceptionChildProcess) {
-    
-    fprintf(stderr, "cleaning...\n");
-    this->clean();
-    
-    int ret = execlp("ssh",
-                     "ssh",
-                     Settings::ssh_to.data(),
-                     Settings::script_file.data(),
-                     (char*)NULL);
-                    
-    if (ret < 0) {
-      perror("Application::run exec() failed");
-      exit(1);                                    
-    }
-    assert(false);
-  }
-  //*/
 }
 
 void
@@ -136,14 +120,8 @@ Application::clean()
   this->m_microphone_window = NULL;
 
   // Finish and clean recognizer process.
-//  delete this->m_out_queue;
-//  delete this->m_in_queue;
-//  this->m_out_queue = NULL;
-//  this->m_in_queue = NULL;
   if (this->m_recognizer) {
-//    if (this->m_recognizer->is_created()) {
-      this->m_recognizer->finish();
-//    }
+    this->m_recognizer->finish();
     delete this->m_recognizer;
     this->m_recognizer = NULL;
   }

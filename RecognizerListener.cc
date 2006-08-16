@@ -11,6 +11,7 @@ RecognizerListener::RecognizerListener(msg::InQueue *in_queue,
   this->m_stop = false;
   this->m_enabled = true;
   this->m_thread_created = false;
+  this->m_wait_ready = 0;
   pthread_mutex_init(&this->m_disable_lock, NULL);
 }
 
@@ -23,6 +24,7 @@ bool
 RecognizerListener::start()
 {
   this->m_broken_pipe = false;
+  this->m_wait_ready = 0;
   if (this->m_thread_created) {
     fprintf(stderr, "Can't create thread for queue: thread already created.");
     return false;
@@ -112,11 +114,19 @@ RecognizerListener::run() throw(msg::ExceptionBrokenPipe)
       this->m_in_queue->flush();
       if (!this->m_in_queue->empty()) {
         message = this->m_in_queue->queue.front();
-        if (message.type() == msg::M_RECOG) {
-          // Pass recognition message forward.
-          this->m_recognition->lock();
-          this->m_recognition->parse(message.buf.substr(msg::header_size));
-          this->m_recognition->unlock();
+        // Check ready message.
+        if (message.type() == msg::M_READY && this->m_wait_ready > 0) {
+          this->m_wait_ready--;
+          fprintf(stderr, "Got ready, waiting for %d readys.\n", this->m_wait_ready);
+        }
+        if (!this->m_wait_ready) {
+          // Read recognition message if not waiting for ready.
+          if (message.type() == msg::M_RECOG) {
+            // Pass recognition message forward.
+            this->m_recognition->lock();
+            this->m_recognition->parse(message.buf.substr(msg::header_size));
+            this->m_recognition->unlock();
+          }
         }
         this->m_in_queue->queue.pop_front();
       }

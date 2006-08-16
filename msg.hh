@@ -214,7 +214,12 @@ namespace msg {
     /** Puts the message in the queue. **/
     void add_message(const Message &msg);
     
+    /** Removes all messages from the queue. */
     inline void clear() { this->queue.clear(); }
+    
+    /** Remove all non-urgent messages from the queue.
+     * TODO: Better name for this function? */
+    void clear_non_urgent();
 
   private:
     std::string buffer; //!< The internal buffer for the next message

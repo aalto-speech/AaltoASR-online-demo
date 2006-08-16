@@ -23,7 +23,7 @@ public:
 //                   msg::InQueue *in_queue,
 //                   msg::OutQueue *out_queue);
   WindowRecognizer(RecognizerProcess *recognizer);
-  virtual ~WindowRecognizer();
+  virtual ~WindowRecognizer() { }
   
   virtual void initialize();
   
@@ -35,7 +35,7 @@ protected:
   virtual void do_running();
   virtual void do_closing(int return_value);
   
-//  virtual AudioInputController* get_audio_input() = 0;
+  virtual AudioInputController* get_audio_input() = 0;
   
   PG_Button* construct_button(const std::string &label,
                               unsigned int column_index,
@@ -44,10 +44,6 @@ protected:
   
   void enable_recognizer(bool enable);
   
-  bool handle_stop_button();
-  bool handle_record_button();
-  bool handle_recognize_button();
-  bool handle_pause_button();
   bool handle_back_button();
   bool handle_play_button();
   bool handle_reset_button();
@@ -57,12 +53,7 @@ protected:
   bool handle_settings_button();
   bool handle_adapt_button();
   bool handle_resetadaptation_button();
-  bool handle_save_button();
-  bool handle_open_button();
-  bool handle_key_event(const SDL_KeyboardEvent *key);
   
-  void open_audio_file();
-
   void set_status(Status status);
   inline Status get_status() const { return this->m_status; }
   
@@ -93,17 +84,9 @@ private:
   PG_Button *m_enablerecog_button;
   PG_Button *m_adapt_button;
   
-  PG_Button *m_record_button;
-  PG_Button *m_recognize_button;
-  PG_Button *m_stop1_button;
-  PG_Button *m_stop2_button;
-  PG_Button *m_pause_button;
-  
   PG_Label *m_status_label;
   
   bool m_broken_pipe;
-  
-  AudioInputController *m_audio_input;
 
   Status m_status;
 };

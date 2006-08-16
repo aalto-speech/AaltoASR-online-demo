@@ -3,6 +3,7 @@
 #include "WindowOpenTextFile.hh"
 #include "WindowSaveTextFile.hh"
 #include "WindowComparison.hh"
+#include "WindowTextEdit.hh"
 #include <pglabel.h>
 
 WidgetComparisonArea::WidgetComparisonArea(Window &parent,
@@ -15,8 +16,8 @@ WidgetComparisonArea::WidgetComparisonArea(Window &parent,
   
   const unsigned int field_space = 30;
   const unsigned int field_width = (this->my_width - field_space) / 2;
-  const unsigned int button_space = 10;
-  const unsigned int button_width = 70;
+  const unsigned int button_space = 5;
+  const unsigned int button_width = 60;
 
   // Create titles for both fields.  
   PG_Label *label;
@@ -43,6 +44,7 @@ WidgetComparisonArea::WidgetComparisonArea(Window &parent,
                                                           this->my_height - 90));
 
   this->m_original_text->SetBorderSize(1);
+  this->m_original_text->SetEditable(false);
   this->m_recognition_text->SetBorderSize(1);
   this->m_recognition_text->SetEditable(false);
 
@@ -50,7 +52,11 @@ WidgetComparisonArea::WidgetComparisonArea(Window &parent,
   unsigned int x;
   
   // Buttons for original text field.
-  x = (field_width - 3 * button_width - 2 * button_space) / 2;
+  x = (field_width - 4 * button_width - 3 * button_space) / 2;
+  button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Edit");
+  button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_editoriginal_button));
+  
+  x += button_width + button_space;
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, button_width, 40), "Open");
   button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_openoriginal_button));
   
@@ -111,6 +117,20 @@ WidgetComparisonArea::handle_clearoriginal_button()
   this->m_original_text->SetText("");
 //  this->m_original_text->SetVPosition(0);
   this->m_original_text->Update();
+  return true;
+}
+
+bool
+WidgetComparisonArea::handle_editoriginal_button()
+{
+  //*
+  std::string text = this->m_original_text->GetText();
+  WindowTextEdit window(this->m_parent.get_widget(), "Edit reference", 300, 400, &text);
+  window.initialize();
+  this->m_parent.run_child_window(&window);
+  this->m_original_text->SetText(text.data());
+  this->m_original_text->Update();
+  //*/
   return true;
 }
 

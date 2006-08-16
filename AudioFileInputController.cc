@@ -58,8 +58,4 @@ AudioFileInputController::read_input()
   // Send audio to output stream.
   this->m_output_cursor += this->m_output_buffer.write(this->get_audio_data() + this->m_output_cursor,
                                                        this->get_audio_data_size() - this->m_output_cursor);
-
-  // Return the frames that have been played (in speakers) since last read.
-  // This way we will synchronize recognizer with the sound from speakers.
-//  return this->m_output_buffer.get_frames_read() - this->get_read_cursor();
 }
