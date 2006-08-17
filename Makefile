@@ -71,11 +71,11 @@ $(progs): %: %.o
 
 .PHONY: clean
 clean:
-	rm -f $(progs) $(objs) $(extra_clean) dep
+	rm -f $(progs) $(objs) $(extra_clean) 
 
 .PHONY: cleaner
 cleaner: clean
-	rm -f *~ Makefile
+	rm -f *~ dep
 
 dep:
 	$(CXX) -MM $(CPPFLAGS) $(CXXFLAGS) $(sort $(srcs)) > dep

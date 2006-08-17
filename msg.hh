@@ -157,6 +157,18 @@ namespace msg {
     void enable(int fd);
     void disable();
 
+    /** Suspend the queue so that mux ignores the queue. */
+    void mux_suspend()
+    {
+      suspended = true;
+    }
+
+    /** Release the queue so that mux uses the queue again. */
+    void mux_release()
+    {
+      suspended = false;
+    }
+
     /** Fetch message from the file descriptor and insert it to the
      * queue.  For non-blocking files the function may return before
      * complete messages are read.
@@ -172,11 +184,15 @@ namespace msg {
     /** EOF reached? */
     bool get_eof() { return eof; }
 
+    /** Return the suspend status of the queue. */
+    bool is_suspended() { return suspended; }
+
   private:
     std::string buffer;
     int bytes_got;
     int fd;
     bool eof;
+    bool suspended; //!< If true, mux ignores the queue
   };
 
   class OutQueue {

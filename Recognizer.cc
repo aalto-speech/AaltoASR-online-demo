@@ -273,9 +273,11 @@ Recognizer::process_stdin_queue()
         change_state(A_CLOSING, D_STALLED);
       }
       else {
-        fprintf(stderr, "rec: ignoring RESET in ac_state %d dec_state %d\n",
+        fprintf(stderr, "rec: WARNING: ignoring RESET in "
+                "ac_state %d dec_state %d which should not happen!\n",
                 ac_state, dec_state);
       }
+      stdin_queue.mux_suspend();
     }
 
     else if (message.type() == msg::M_ADAPT_ON) {
@@ -387,6 +389,7 @@ Recognizer::process_ac_in_queue()
         if (dec_state == D_READY) {
           stdout_queue.queue.push_back(message);
           stdout_queue.flush();
+          stdin_queue.mux_release();
         }
         change_state(A_READY, D_NULL);
       }
@@ -477,6 +480,7 @@ Recognizer::process_dec_in_queue()
         if (ac_state == A_READY) {
           stdout_queue.queue.push_back(message);
           stdout_queue.flush();
+          stdin_queue.mux_release();
         }
         change_state(A_NULL, D_READY);
       }
@@ -550,9 +554,12 @@ Recognizer::run()
 
     mux.wait_and_flush();
 
-    process_stdin_queue();
     process_ac_in_queue();
     process_dec_in_queue();
+
+    // FIXME: currently stdin_queue must be processed after other
+    // queues, because ac or dec can release suspended stddin_queue.
+    process_stdin_queue();
   };
 }
 

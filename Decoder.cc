@@ -41,6 +41,7 @@ Decoder::init(conf::Config &config)
 	    config["lexicon"].get_c_str());
   t.lex_read(config["lexicon"].get_c_str());
   t.set_sentence_boundary("<s>", "</s>");
+  t.set_require_sentence_end(true);
 
   if (verbose)
     fprintf(stderr, "decoder: reading language model %s\n",
@@ -142,40 +143,40 @@ Decoder::run()
   std::vector<float> log_probs;
   std::vector<std::string> fields;
   frame = 0;
-  while (1) {
 
-    if (in_queue.get_eof())
-      break;
+  msg::Mux mux;
+  msg::set_non_blocking(in_queue.get_fd());
+  mux.in_queues.push_back(&in_queue);
+
+  while (1) {
 
     if (verbose)
       fprintf(stderr, "decoder: waiting for frame %d\n", frame);
 
+    if (in_queue.get_eof())
+      break;
+      
+    // Note that we block in waiting new messages also when we are
+    // paused and new audio probs are in queue.  Queue is flushed
+    // every time to allow urgent messages to get through.
+    //
     in_queue.flush();
-    if (in_queue.queue.empty())
+    if (in_queue.empty() ||
+        (paused && in_queue.queue.front().type() == msg::M_PROBS))
+    {
+      mux.wait_and_flush();
       continue;
-
-    msg::Message &message = in_queue.queue.front();
-    if (paused) {
-      if (message.type() == msg::M_DECODER_UNPAUSE) {
-        paused = false;
-        in_queue.queue.pop_front();
-        continue;
-      }
-      else if (message.type() == msg::M_DECODER_PAUSE) {
-        in_queue.queue.pop_front();
-        continue;
-      }
-      else if (message.type() == msg::M_RESET)
-        paused = false;
-      else {
-        continue;
-      }
     }
 
-    // Process new frame
-    //
+    msg::Message &message = in_queue.queue.front();
 
-    if (message.type() == msg::M_PROBS) {
+    if (message.type() == msg::M_DECODER_UNPAUSE)
+      paused = false;
+
+    else if (message.type() == msg::M_DECODER_PAUSE)
+      paused = true;
+
+    else if (message.type() == msg::M_PROBS) {
       int num_log_probs = message.data_length() / 4;
       log_probs.resize(num_log_probs);
 
@@ -267,9 +268,6 @@ Decoder::run()
       out_queue.flush();
       in_queue.queue.clear();
     }
-
-    else if (message.type() == msg::M_DECODER_PAUSE)
-      paused = true;
 
     if (!in_queue.queue.empty())
       in_queue.queue.pop_front();

@@ -19,7 +19,8 @@ namespace msg {
   }
 
   InQueue::InQueue(int fd)
-    : buffer(header_size, 0), bytes_got(0), fd(fd), eof(false)
+    : buffer(header_size, 0), bytes_got(0), fd(fd), eof(false), 
+      suspended(false)
   {
     assert(sizeof(int) == 4);
   }
@@ -263,6 +264,8 @@ namespace msg {
 
     select_in_queues.clear();
     for (int i = 0; i < (int)in_queues.size(); i++) {
+      if (in_queues[i]->is_suspended())
+        continue;
       int fd = in_queues[i]->get_fd();
       if (fd < 0)
 	continue;
