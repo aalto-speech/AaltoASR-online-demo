@@ -7,12 +7,11 @@ AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
 
 OPT = -g -O2
 AUX_CXXFLAGS ?= -Wall
-INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) -I/usr/include/SDL \
-	-I/usr/include/paragui -I/usr/include/freetype2 \
-	-I/opt/gnome/lib/sigc++-1.2/include -I/opt/gnome/include/sigc++-1.2 \
+INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
+	$(shell paragui-config --cflags) \
 	-I/share/puhe/linux/include \
 	-I/share/puhe/linux/include/lapackpp
-LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH)
+LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) # -static
 CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT)
 
 ##################################################
@@ -52,7 +51,8 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	WindowSaveAudioFile.cc WindowOpenTextFile.cc WindowSaveTextFile.cc \
 	WidgetMultiLineEdit.cc conf.cc RecognizerProcess.cc WidgetAudioView.cc \
 	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc \
-	scrap.c
+	scrap.cc
+
 jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype -lfftw3
 jaakko: $(jaakko_srcs:%.cc=%.o)
 
