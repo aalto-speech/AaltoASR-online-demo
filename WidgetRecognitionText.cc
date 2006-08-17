@@ -79,15 +79,20 @@ WidgetRecognitionText::add_morpheme_widget(const Morpheme &morpheme,
   if (morpheme.data == " " || morpheme.data == "." || morpheme.data == "")
     word_widget = NULL;
 
-  // min_x is used to force word breaks.    
+  //* min_x is used to force word breaks.
+  // These lines may be commented out if forcing is undesired. Note that
+  // then sentence breaks will most likely hide.
   if (x < min_x) {
-    x = min_x;
+    // Cut width.
     if ((Sint32)w + x > min_x)
-      w -= min_x - x;
+      w = (long)(w + x) - min_x;
     else
       w = 1;
+    // Set new position.
+    x = min_x;
   }
-  
+  //*/
+
   PG_Rect rect(0, 0, w, this->my_height);
   PG_Widget *morph_widget = NULL;
 
@@ -176,6 +181,10 @@ WidgetRecognitionText::update_recognition()
 {
   const MorphemeList &morphemes = this->m_recognition->get_recognized();
   Sint32 min_x = 0;
+//  PG_Widget *last_nonnull_widget = this->m_last_recog_morph;
+//  PG_Widget *previous_word = this->m_last_recog_word;
+//  PG_Widget *current_morph = this->m_last_recog_morph;
+  
   // Update if new morphemes has been recognized.
   if (morphemes.size() > this->m_last_recognition_count) {
     MorphemeList::const_iterator iter = morphemes.begin();
@@ -186,17 +195,26 @@ WidgetRecognitionText::update_recognition()
       
     // Add new recognized morphemes.
     for (; iter != morphemes.end(); iter++) {
-
+      
+      // Force at least 2 pixels between words/separators.
       if (!this->m_last_recog_word && this->m_last_recog_morph) {
         this->m_last_recog_morph->GetUserData(&min_x);
         min_x += this->m_last_recog_morph->my_width + 2;
       }
 
-      this->m_last_recog_morph =
+      PG_Widget *current_morph =
         this->add_morpheme_widget(*iter,
                                   PG_Color(255, 255, 255),
                                   this->m_last_recog_word,
                                   min_x);
+      
+      // Save latest non-null widget (word/separator).
+      if (this->m_last_recog_word)
+        this->m_last_recog_morph = this->m_last_recog_word;
+      else if (current_morph)
+        this->m_last_recog_morph = current_morph;
+        
+
     }
   }
   this->m_last_recognition_count = morphemes.size();
@@ -205,36 +223,34 @@ WidgetRecognitionText::update_recognition()
 void
 WidgetRecognitionText::update_hypothesis()
 {//*
-  PG_Widget *current_morph, *previous_word, *current_word;
+  PG_Widget *nonnull, *current_morph, *previous_word, *current_word;
   const MorphemeList &morphemes = this->m_recognition->get_hypothesis();
   Sint32 min_x = 0;
 
   this->remove_hypothesis();
 
   // Start where recognition ends.
+//  previous_morph = NULL;
+  nonnull = NULL;
   current_morph = this->m_last_recog_morph;
   current_word = this->m_last_recog_word;
   
   for (MorphemeList::const_iterator iter = morphemes.begin();
        iter != morphemes.end();
        iter++) {
-        
-    if (!current_word && current_morph) {
-      current_morph->GetUserData(&min_x);
-      min_x += current_morph->my_width + 2;
+
+    // Save latest non-null widget (word/separator).
+    if (current_word)
+      nonnull = current_word;
+    else if (current_morph)
+      nonnull = current_morph;
+
+    if (!current_word && nonnull) {
+      nonnull->GetUserData(&min_x);
+      min_x += nonnull->my_width + 2;
     }
-/*
-      previous_morph = current_word
-    else
-      previous_morph = current_morph;
-      
-    if (previous_morph)
-      min_x = previous_morph->my_xpos + previous_morph->my_width + 2;
-    else
-      min_x = 0;
-//*/
+
     previous_word = current_word;
-//    previous_morph = current_morph;
     
     // Add the morpheme.
     current_morph = this->add_morpheme_widget(*iter,
@@ -286,6 +302,7 @@ WidgetRecognitionText::handle_morpheme_widget(PG_MessageObject *widget,
   x = (unsigned long)(x * multiplier);
   w = (unsigned long)(w * multiplier);
 //  fprintf(stderr, "Morpheme pressed... Playing %d, %d.\n", x, w);
+  this->m_audio_input->stop_playback();
   this->m_audio_input->start_playback(x, w);
   return true;
 }
