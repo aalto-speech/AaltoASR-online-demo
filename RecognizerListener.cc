@@ -11,7 +11,8 @@ RecognizerListener::RecognizerListener(msg::InQueue *in_queue,
   this->m_stop = false;
   this->m_enabled = true;
   this->m_thread_created = false;
-  this->m_wait_ready = 0;
+//  this->m_wait_ready = 0;
+  this->m_wait_ready = false;
   pthread_mutex_init(&this->m_disable_lock, NULL);
 }
 
@@ -115,14 +116,17 @@ RecognizerListener::run() throw(msg::ExceptionBrokenPipe)
       if (!this->m_in_queue->empty()) {
         message = this->m_in_queue->queue.front();
         // Check ready message.
-        if (message.type() == msg::M_READY && this->m_wait_ready > 0) {
-          this->m_wait_ready--;
-          fprintf(stderr, "Got ready, waiting for %d readys.\n", this->m_wait_ready);
+//        if (message.type() == msg::M_READY && this->m_wait_ready > 0) {
+        if (message.type() == msg::M_READY && this->m_wait_ready) {
+//          this->m_wait_ready--;
+//          fprintf(stderr, "Got ready, waiting for %d readys.\n", this->m_wait_ready);
+          this->m_wait_ready = false;
         }
         if (!this->m_wait_ready) {
           // Read recognition message if not waiting for ready.
           if (message.type() == msg::M_RECOG) {
             // Pass recognition message forward.
+            fprintf(stderr, "RECOG: %s\n", message.data_str().c_str());
             this->m_recognition->lock();
             this->m_recognition->parse(message.buf.substr(msg::header_size));
             this->m_recognition->unlock();

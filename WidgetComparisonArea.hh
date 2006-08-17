@@ -15,7 +15,7 @@ public:
   WidgetComparisonArea(Window &parent,
                        const PG_Rect &rect,
                        RecognitionParser *recognition);
-  virtual ~WidgetComparisonArea() { }
+  virtual ~WidgetComparisonArea();
   
 protected:
 

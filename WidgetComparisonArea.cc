@@ -4,6 +4,7 @@
 #include "WindowSaveTextFile.hh"
 #include "WindowComparison.hh"
 #include "WindowTextEdit.hh"
+#include "Exception.hh"
 #include "scrap.h"
 #include <pglabel.h>
 
@@ -90,6 +91,18 @@ WidgetComparisonArea::WidgetComparisonArea(Window &parent,
   button = new PG_Button(this, PG_Rect(x, this->my_height - 50, compare_width, 40), "<- Compare ->");
   button->sigClick.connect(slot(*this, &WidgetComparisonArea::handle_compare_button));
 
+  // Initialize clipboard.
+  if (init_scrap() < 0) {
+    fprintf(stderr, "WidgetComparisonArea constructor: Failed to initialize clipboard\n");
+    throw Exception("Clipboard initialization failed.\n");
+  }
+
+}
+
+WidgetComparisonArea::~WidgetComparisonArea()
+{
+  // Uninitialize clipboard
+  lost_scrap();
 }
 
 bool

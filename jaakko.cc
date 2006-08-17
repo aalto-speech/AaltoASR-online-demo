@@ -8,8 +8,8 @@ int main(int argc, char* argv[])
 {
   conf::Config config;
 
-//  conf("", "beam", "arg", "", "Beam value for recognizer.");
-//  conf("", "lmscale", "arg", "", "Language model scale value for recognizer.");
+  config(0, "beam", "arg", "", "Beam value for recognizer.");
+  config(0, "lmscale", "arg", "", "Language model scale value for recognizer.");
   config(0, "help", "", "", "Help text.");
   config('w', "width", "arg", "1024", "Window width.");
   config('h', "height", "arg", "768", "Window height.");
@@ -38,17 +38,32 @@ int main(int argc, char* argv[])
   
   Application app;
   int ret_val = EXIT_SUCCESS;
-  bool ok;
+  bool ok = false;
 
   if (config['d'].specified) {
     ok = app.initialize(config["width"].get_int(),
                         config["height"].get_int());
   }  
   else {
-    ok = app.initialize(config["width"].get_int(),
-                        config["height"].get_int(),
-                        config["cluster"].get_str(),
-                        config["script"].get_str());
+    if (!config["beam"].specified) {
+      fprintf(stderr, "Beam must be specified by \"--beam\"\n");
+    }
+    else if (!config["lmscale"].specified) {
+      fprintf(stderr, "LM-scale must be specified by \"--lmscale\"\n");
+    }
+    else {
+      try {
+        ok = app.initialize(config["width"].get_int(),
+                            config["height"].get_int(),
+                            config["cluster"].get_str(),
+                            config["script"].get_str(),
+                            (unsigned)config["beam"].get_int(),
+                            (unsigned)config["lmscale"].get_int());
+      }
+      catch (Exception exception) {
+        fprintf(stderr, "%s\n", exception.what());
+      }
+    }
   }
   
   if (ok) {

@@ -1,11 +1,9 @@
 
 #include "Application.hh"
 #include "WindowStartProcess.hh"
-#include "WindowMain.hh"
 #include "WindowRecognizer.hh"
-//#include "WindowFileRecognizer.hh"
-//#include "WindowMicrophoneRecognizer.hh"
-#include "scrap.h"
+#include "WindowSettings.hh"
+//#include "scrap.h"
 
 
 
@@ -62,12 +60,6 @@ Application::initialize(unsigned int width, unsigned int height)
   this->m_app->RedrawBackground(PG_Rect(0, 0, this->m_app->GetScreenWidth(), this->m_app->GetScreenHeight()));
   this->m_app->FlipPage();
 
-  // Initialize clipboard.
-  if (init_scrap() < 0) {
-    fprintf(stderr, "Failed to initialize clipboard\n");
-    return false;
-  }
-
   /*
   // Initialize windows.
   this->m_startprocess_window = new WindowStartProcess(NULL, this->m_recognizer);
@@ -89,10 +81,12 @@ bool
 Application::initialize(unsigned int width,
                         unsigned int height,
                         const std::string &ssh_to,
-                        const std::string &script_file)
+                        const std::string &script_file,
+                        unsigned int beam,
+                        unsigned int lmscale) throw(Exception)
 {
   // Create the recognizer.
-  this->m_recognizer = new RecognizerProcess(ssh_to, script_file);
+  this->m_recognizer = new RecognizerProcess(ssh_to, script_file, beam, lmscale);
 
   return this->initialize(width, height);
 }
@@ -116,11 +110,23 @@ Application::run()
   return;
 //*/
   try {
-    // Run recognizer starting window.
-    Window *start_window = new WindowStartProcess(NULL, this->m_recognizer);
-    start_window->initialize();
-    int ret_val = start_window->run_modal();
-    delete start_window;
+    int ret_val = 1;
+    if (this->m_recognizer) {
+      // Run recognizer starting window.
+      Window *start_window = new WindowStartProcess(NULL, this->m_recognizer);
+      start_window->initialize();
+      ret_val = start_window->run_modal();
+      delete start_window;
+      /* These lines may be run if settings window is wanted to show in startup.
+      if (ret_val != 0) {
+        // Run settings window.
+        Window *settings_window = new WindowSettings(NULL, this->m_recognizer);
+        settings_window->initialize();
+        ret_val = settings_window->run_modal();
+        delete settings_window;
+      }
+      //*/
+    }
     
     // If application is not finished, run actual recognizer window.
     if (ret_val != 0) {
@@ -138,6 +144,9 @@ Application::run()
   }
   catch (msg::ExceptionBrokenPipe exception) {
     fprintf(stderr, "Error: Unhandled broken pipe exception. Program exits.\n");
+  }
+  catch (Exception exception) {
+    fprintf(stderr, "Error: Unhandled exception: %s\n", exception.what());
   }
   catch (std::exception exception) {
     fprintf(stderr, "Error: Unhandled exception: %s\n", exception.what());
@@ -160,8 +169,6 @@ Application::clean()
 //  this->m_microphone_window = NULL;
 //*/
 
-  // Uninitialize clipboard
-  lost_scrap();
 
   // Finish and clean recognizer process.
   if (this->m_recognizer) {

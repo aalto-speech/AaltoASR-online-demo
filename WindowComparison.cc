@@ -152,7 +152,7 @@ WindowComparison::construct_numeric_label(unsigned int column,
 PG_Label*
 WindowComparison::construct_percentage_label(unsigned int column,
                                              unsigned int row,
-                                             unsigned int value,
+                                             long value,
                                              unsigned int total)
 {
   float percent = 0;

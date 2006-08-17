@@ -27,6 +27,7 @@ WidgetRecognitionText::initialize()
 {
   this->m_last_recognition_count = 0;
   this->m_last_recog_word = NULL;
+  this->m_last_recog_morph = NULL;
   this->m_last_recognition_frame = 0;
 
 //  this->m_recognition->lock();
@@ -64,22 +65,32 @@ WidgetRecognitionText::reset()
 PG_Widget*
 WidgetRecognitionText::add_morpheme_widget(const Morpheme &morpheme,
                                            const PG_Color &color,
-                                           PG_Widget *&word_widget)
+                                           PG_Widget *&word_widget,
+                                           Sint32 min_x)
 {
   // Calculate recognizer pixels per recognizer frame.
   double multiplier = this->m_pixels_per_second /
                       (double)RecognitionParser::frames_per_second;
                       
   unsigned int w = (int)(morpheme.duration * multiplier);
-  PG_Rect rect(0, 0, w, this->my_height);
   Sint32 x = (Sint32)(morpheme.time * multiplier);
-  PG_Widget *morph_widget = NULL;
-//  PG_Widget *new_word_widget = NULL;
   
   // Word break.
   if (morpheme.data == " " || morpheme.data == "." || morpheme.data == "")
     word_widget = NULL;
+
+  // min_x is used to force word breaks.    
+  if (x < min_x) {
+    x = min_x;
+    if ((Sint32)w + x > min_x)
+      w -= min_x - x;
+    else
+      w = 1;
+  }
   
+  PG_Rect rect(0, 0, w, this->my_height);
+  PG_Widget *morph_widget = NULL;
+
   if (morpheme.data != " " && morpheme.data != "") {
     if (morpheme.data == ".") {
       // One pixel wide separator for sentence breaks.
@@ -90,7 +101,7 @@ WidgetRecognitionText::add_morpheme_widget(const Morpheme &morpheme,
                    color.MapRGB(morph_widget->GetWidgetSurface()->format));
       morph_widget->SetUserData(&x, sizeof(Sint32));
       this->AddChild(morph_widget);
-      morph_widget->BringToFront();
+//      morph_widget->BringToFront();
       morph_widget->SetVisible(true);
     }
     else {
@@ -98,7 +109,6 @@ WidgetRecognitionText::add_morpheme_widget(const Morpheme &morpheme,
         word_widget = new WidgetContainer(NULL, 0, 0, PG_Color(90, 90, 90));
         word_widget->SetUserData(&x, sizeof(Sint32));
         this->AddChild(word_widget);
-//        word_widget->SendToBack();
         word_widget->SetVisible(true);
       }
       /*
@@ -165,68 +175,83 @@ void
 WidgetRecognitionText::update_recognition()
 {
   const MorphemeList &morphemes = this->m_recognition->get_recognized();
+  Sint32 min_x = 0;
+  // Update if new morphemes has been recognized.
   if (morphemes.size() > this->m_last_recognition_count) {
     MorphemeList::const_iterator iter = morphemes.begin();
-  
+    
+    // Find the position of last recognized morpheme.
     for (unsigned int ind = 0; ind < this->m_last_recognition_count; ind++)
       iter++;
       
+    // Add new recognized morphemes.
     for (; iter != morphemes.end(); iter++) {
-//      fprintf(stderr, "Add recog morpheme 1: \"%s\"\n", iter->data.data());
-      this->add_morpheme_widget(*iter, PG_Color(255, 255, 255), this->m_last_recog_word);
-//      fprintf(stderr, "Add recog morpheme 2\n");
+
+      if (!this->m_last_recog_word && this->m_last_recog_morph) {
+        this->m_last_recog_morph->GetUserData(&min_x);
+        min_x += this->m_last_recog_morph->my_width + 2;
+      }
+
+      this->m_last_recog_morph =
+        this->add_morpheme_widget(*iter,
+                                  PG_Color(255, 255, 255),
+                                  this->m_last_recog_word,
+                                  min_x);
     }
   }
   this->m_last_recognition_count = morphemes.size();
-  
-/*
-  for (unsigned int ind = 0;
-       ind + this->m_last_recognition_count < morphemes.size();
-       ind++) {
-        
-    fprintf(stderr, "Add recog morpheme %u.1: \"%s\"\n", ind, iter->data.data());
-    this->add_morpheme_widget(*iter, PG_Color(255, 255, 255), this->m_last_recog_word);
-    fprintf(stderr, "Add recog morpheme %u.2\n", ind);
-    iter++;
-  }
-  this->m_last_recognition_count = morphemes.size();
-//*/
-/*
-  for (; this->m_recognized_iter != morphemes.end(); this->m_recognized_iter++) {
-        
-    fprintf(stderr, "Add recog morpheme 1: \"%s\"\n", this->m_recognized_iter->data.data());
-    this->add_morpheme_widget(*this->m_recognized_iter, PG_Color(255, 255, 255), this->m_last_recog_word);
-    fprintf(stderr, "Add recog morpheme 2\n");
-  }
-  this->m_last_recognition_count = morphemes.size();
-//*/
 }
 
 void
 WidgetRecognitionText::update_hypothesis()
 {//*
-  PG_Widget *morph_widget, *previous_word, *current_word;
+  PG_Widget *current_morph, *previous_word, *current_word;
   const MorphemeList &morphemes = this->m_recognition->get_hypothesis();
+  Sint32 min_x = 0;
 
   this->remove_hypothesis();
 
+  // Start where recognition ends.
+  current_morph = this->m_last_recog_morph;
   current_word = this->m_last_recog_word;
+  
   for (MorphemeList::const_iterator iter = morphemes.begin();
        iter != morphemes.end();
        iter++) {
-
+        
+    if (!current_word && current_morph) {
+      current_morph->GetUserData(&min_x);
+      min_x += current_morph->my_width + 2;
+    }
+/*
+      previous_morph = current_word
+    else
+      previous_morph = current_morph;
+      
+    if (previous_morph)
+      min_x = previous_morph->my_xpos + previous_morph->my_width + 2;
+    else
+      min_x = 0;
+//*/
     previous_word = current_word;
-    morph_widget = this->add_morpheme_widget(*iter, PG_Color(255, 255, 0), current_word);
+//    previous_morph = current_morph;
+    
+    // Add the morpheme.
+    current_morph = this->add_morpheme_widget(*iter,
+                                              PG_Color(255, 255, 0),
+                                              current_word,
+                                              min_x);
+    
     if (current_word == NULL) {
       // Possible sentence break widget.
-      if (morph_widget)
-        this->m_hypothesis_widgets.push_back(morph_widget);
+      if (current_morph)
+        this->m_hypothesis_widgets.push_back(current_morph);
     }
     else {
       if (current_word == this->m_last_recog_word) {
         // Hypothesis morpheme continues recognized word.
-        if (morph_widget)
-          this->m_hypothesis_widgets.push_back(morph_widget);
+        if (current_morph)
+          this->m_hypothesis_widgets.push_back(current_morph);
       }
       else if (current_word != previous_word) {
         // New word, completely hypothesis.
@@ -234,15 +259,7 @@ WidgetRecognitionText::update_hypothesis()
       }
     }
   }
-    //*/
 }
-    /*
-    if (morph_widget)
-      this->m_hypothesis_widgets.push_back(morph_widget);
-    if (current_word != NULL && current_word != previous_word)
-      this->m_hypothesis_widgets.push_back(current_word);
-    previous_word = current_word;
-    //*/
 
 void
 WidgetRecognitionText::remove_hypothesis()

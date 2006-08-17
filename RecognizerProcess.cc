@@ -8,15 +8,22 @@ const unsigned int RecognizerProcess::MIN_LMSCALE = 1;
 const unsigned int RecognizerProcess::MAX_LMSCALE = 100;
 
 RecognizerProcess::RecognizerProcess(const std::string &computer,
-                                   const std::string &script)
+                                     const std::string &script,
+                                     unsigned int beam,
+                                     unsigned int lmscale) throw(Exception)
 {
   this->m_computer = computer;
   this->m_script = script;
   
   // Try to read default settings from the script file.
-  if (!this->read_settings()) {
-    this->m_beam = MAX_BEAM;
-    this->m_lmscale = MAX_LMSCALE;
+  if (!this->set_beam(beam)) {
+    throw Exception(str::fmt(100, "Beam value %u is not in range %u-%u",
+                             beam, MIN_BEAM, MAX_BEAM));
+  }
+
+  if (!this->set_lmscale(lmscale)) {
+    throw Exception(str::fmt(100, "LM-scale value %u is not in range %u-%u",
+                             lmscale, MIN_LMSCALE, MAX_LMSCALE));
   }
 }
 
@@ -121,7 +128,7 @@ RecognizerProcess::send_parameter(const std::string &name, unsigned int value)
   message.append(buffer);
   this->m_out_queue.add_message(message);
 }
-
+/*
 bool
 RecognizerProcess::read_settings()
 {
@@ -173,4 +180,4 @@ RecognizerProcess::read_settings()
   
   return read_settings;
 }
-
+//*/

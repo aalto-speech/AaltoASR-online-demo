@@ -4,6 +4,7 @@
 
 #include "Process.hh"
 #include "msg.hh"
+#include "Exception.hh"
 
 /** Class for the recognizer process. Starts and finishes the process and
  * stores the communication queues. Also stores some parameters for the
@@ -21,8 +22,13 @@ public:
   
   /** Constructs the object.
    * \param computer SSH connection will be established to this computer.
-   * \param script This file will be run on the computer. */
-  RecognizerProcess(const std::string &computer, const std::string &script);
+   * \param script This file will be run on the computer.
+   * \param beam Beam value.
+   * \param lmscale LM-scale value. */
+  RecognizerProcess(const std::string &computer,
+                    const std::string &script,
+                    unsigned int beam,
+                    unsigned int lmscale) throw(Exception);
   /** Destructs the object. */
   ~RecognizerProcess() { }
   
@@ -48,7 +54,7 @@ public:
   void send_settings();
   /** Reads parameter values from the script file that launched the recognizer.
    * \return false if failed to read the parameter values. */
-  bool read_settings();
+//  bool read_settings();
 
   /** Tries to set the computer which the ssh connection is established to.
    * \param computer SSH connection will be established to this computer.

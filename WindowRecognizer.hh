@@ -29,7 +29,7 @@ public:
   
 protected:
 
-  enum Status { END_OF_AUDIO, LISTENING };
+//  enum Status { END_OF_AUDIO, LISTENING };
 
   virtual void do_opening();
   virtual void do_running();
@@ -50,21 +50,22 @@ protected:
   bool handle_pause_button();
   bool handle_back_button();
 //  bool handle_play_button();
-//  bool handle_reset_button();
+  bool handle_reset_button();
 //  bool handle_resetrecog_button();
-  bool handle_enablerecog_button();
+  bool handle_pauserecog_button();
 //  bool handle_endaudio_button();
   bool handle_settings_button();
   bool handle_adapt_button();
   bool handle_resetadaptation_button();
   bool handle_save_button();
   bool handle_open_button();
+  bool handle_showadvanced_button();
   bool handle_key_event(const SDL_KeyboardEvent *key);
   
   void open_audio_file();
 
-  void set_status(Status status);
-  inline Status get_status() const { return this->m_status; }
+//  void set_status(Status status);
+//  inline Status get_status() const { return this->m_status; }
   
   virtual void pause_audio_input(bool pause);
   virtual void reset(bool reset_audio);
@@ -90,14 +91,16 @@ private:
 
 //  PG_Button *m_play_button;
 //  PG_Button *m_endaudio_button;
-  PG_Button *m_enablerecog_button;
+  PG_Button *m_pauserecog_button;
   PG_Button *m_adapt_button;
-  
+  PG_Button *m_resetadapt_button;
+  PG_Button *m_showadvanced_button;
   PG_Button *m_record_button;
   PG_Button *m_recognize_button;
   PG_Button *m_stop1_button;
   PG_Button *m_stop2_button;
   PG_Button *m_pause_button;
+  PG_Button *m_reset_button;
   
   PG_Label *m_status_label;
   
@@ -105,7 +108,7 @@ private:
   
   AudioInputController *m_audio_input;
 
-  Status m_status;
+//  Status m_status;
 };
 
 #endif /*WINDOWRECOGNIZER_HH_*/

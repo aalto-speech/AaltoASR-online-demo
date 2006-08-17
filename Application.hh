@@ -31,11 +31,15 @@ public:
    * \param height Application window height.
    * \param ssh_to Computer which should run the recognizer.
    * \param script_file File that should be run in the ssh computer.
+   * \param beam Beam value.
+   * \param lmscale LM-scale value.
    * \return false if ParaGUI initialization failed. */
   bool initialize(unsigned int width,
                   unsigned int height,
                   const std::string &ssh_to,
-                  const std::string &script_file);
+                  const std::string &script_file,
+                  unsigned int beam,
+                  unsigned int lmscale) throw(Exception);
   
   /** Cleans memory allocations. */
   void clean();

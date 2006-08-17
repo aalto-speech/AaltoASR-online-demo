@@ -32,7 +32,7 @@ protected:
   
   PG_Label* construct_percentage_label(unsigned int column,
                                        unsigned int row,
-                                       unsigned int value,
+                                       long value,
                                        unsigned int total);
 
   PG_Label* construct_label(unsigned int column,

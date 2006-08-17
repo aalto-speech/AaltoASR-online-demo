@@ -32,7 +32,10 @@ protected:
   
   void remove_hypothesis();
 
-  PG_Widget* add_morpheme_widget(const Morpheme &morpheme, const PG_Color &color, PG_Widget *&word_widget);
+  PG_Widget* add_morpheme_widget(const Morpheme &morpheme,
+                                 const PG_Color &color,
+                                 PG_Widget *&word_widget,
+                                 Sint32 min_x);
   bool handle_morpheme_widget(PG_MessageObject *widget,
                               const SDL_MouseButtonEvent *event,
                               void *user_data);
@@ -49,6 +52,7 @@ private:
   
   AudioInputController *m_audio_input;
   PG_Widget *m_last_recog_word;
+  PG_Widget *m_last_recog_morph;
 };
 
 #endif /*WIDGETRECOGNITIONTEXTS_HH_*/

@@ -64,7 +64,10 @@ private:
   pthread_t m_thread; //!< Thread structure.
   pthread_mutex_t m_disable_lock; //!< Lock to make disabling safe.
   
-  unsigned int m_wait_ready;
+  // This waiting should be done with an ID. An ID of the ready message that
+  // should be waited is given. This prevents some reseting bugs.
+//  unsigned int m_wait_ready;
+  bool m_wait_ready;
 
 };
 
@@ -78,7 +81,8 @@ void
 RecognizerListener::wait_for_ready()
 {
   pthread_mutex_lock(&this->m_disable_lock);
-  this->m_wait_ready++;
+//  this->m_wait_ready++;
+  this->m_wait_ready = true;
   pthread_mutex_unlock(&this->m_disable_lock);
 }
 

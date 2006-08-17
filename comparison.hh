@@ -4,6 +4,7 @@
 
 #include <string>
 #include "Process.hh"
+#include "Exception.hh"
 
 // A simple process executor is declared here to make the actual comparing
 // class a bit simpler. This class could be moved to a file of its own but
@@ -32,20 +33,6 @@ private:
 };
 
 // Few exception classes declared here.
-
-/** Base exception class derived from std::exception with a constructor that
- * allows to define the error message. */
-class Exception  :  public std::exception
-{
-public:
-  Exception(const std::string &error) throw() : m_error(error) { }
-  virtual ~Exception() throw() { }
-  virtual const char* what() const throw() {
-    return this->m_error.data();
-  }
-private:
-  std::string m_error;
-};
 
 /** Exception class for case if an error occured when writing temporary
  * files. */
