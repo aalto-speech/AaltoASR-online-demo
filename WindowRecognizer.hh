@@ -88,7 +88,7 @@ protected:
 //  msg::OutQueue *m_out_queue;
   RecognizerProcess *m_recognizer;
   RecognitionParser m_recognition;
-  RecognizerStatus m_recog_status;
+//  RecognizerStatus m_recog_status;
   RecognizerListener m_queue;
 
   WidgetRecognitionArea *m_recognition_area;
@@ -110,7 +110,8 @@ private:
   PG_Button *m_reset_button;
   PG_CheckButton *m_adapt_check;
   
-  PG_Label *m_status_label;
+  PG_Label *m_rec_status_label;
+  PG_Label *m_ada_status_label;
   
   bool m_broken_pipe;
   

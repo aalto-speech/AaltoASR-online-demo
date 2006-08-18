@@ -1,4 +1,4 @@
-
+/*
 #include "RecognizerStatus.hh"
 #include <stdio.h>
 
@@ -54,15 +54,6 @@ RecognizerStatus::reset_adaptation()
   this->m_adapted = false;
 }
 
-/*
-void
-RecognizerStatus::reset_recognition()
-{
-  // Back to old adaptation status.
-  this->m_recognition_status = RESETTING;
-}
-//*/
-
 void
 RecognizerStatus::recognition_end()
 {
@@ -80,3 +71,4 @@ RecognizerStatus::get_adaptation_status() const
 {
   return this->m_adaptation_status;
 }
+//*/

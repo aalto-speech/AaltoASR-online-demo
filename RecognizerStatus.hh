@@ -5,6 +5,7 @@
 /** TODO: This class is a very fast implementation to add some new features. It
  * should be refactored into the architecture.
  * TODO: This class should be locked because it used by two threads. */
+ /*
 class RecognizerStatus
 {
 
@@ -34,5 +35,6 @@ private:
   bool m_was_adapting_when_reseted;
   
 };
+//*/
 
 #endif /*RECOGNIZERSTATUS_HH_*/

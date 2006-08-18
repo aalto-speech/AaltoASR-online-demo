@@ -11,8 +11,7 @@
 
 WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
   : m_queue(recognizer ? recognizer->get_in_queue() : NULL,
-            &m_recognition,
-            &m_recog_status)
+            &m_recognition)
 {
 //  fprintf(stderr, "WR constructor1\n");
   this->m_audio_input = NULL;
@@ -31,7 +30,8 @@ WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
   this->m_pauserecog_button = NULL;
   this->m_reset_button = NULL;
 
-  this->m_status_label = NULL;
+  this->m_rec_status_label = NULL;
+  this->m_ada_status_label = NULL;
 
   this->m_recognition_area = NULL;
   this->m_texts_area = NULL;
@@ -91,13 +91,17 @@ WindowRecognizer::initialize()
   this->m_window->sigKeyUp.connect(slot(*this, &WindowRecognizer::handle_key_event));
   this->m_window->sigKeyDown.connect(slot(*this, &WindowRecognizer::handle_key_event));
   
-  this->m_status_label = new PG_Label(this->m_window,
+  this->m_rec_status_label = new PG_Label(this->m_window,
                                       PG_Rect(10,
                                               this->m_window->Height() - 25,
                                               this->m_window->Width() - 10,
-                                              20),
-                                      "Recognizer status: ");
+                                              20));
 
+  this->m_ada_status_label = new PG_Label(this->m_window,
+                                      PG_Rect(350,
+                                              this->m_window->Height() - 25,
+                                              this->m_window->Width() - 10,
+                                              20));
 }
 
 void
@@ -113,7 +117,7 @@ WindowRecognizer::do_opening()
   // These constants are used to construct the following areas.
   const unsigned int top = 140;
   const unsigned int space = 5;
-  const unsigned int bottom = 50;
+  const unsigned int bottom = 35;
   const unsigned int height = this->m_window->Height() - (top + space + bottom);
   const float text_part = 0.4;
   const float recognizer_part = 1.0 - text_part;
@@ -184,32 +188,30 @@ WindowRecognizer::do_running()
     this->m_recognition_area->update();
 //    fprintf(stderr, "running1\n");
     std::string rec_stat, ada_stat;
-    switch (this->m_recog_status.get_recognition_status()) {
-    case RecognizerStatus::READY:
+    switch (this->m_recognition.get_recognition_status()) {
+    case RecognitionParser::READY:
       rec_stat = "Recognizer status: Ready";
       break;
-    case RecognizerStatus::RECOGNIZING:
+    case RecognitionParser::RECOGNIZING:
       rec_stat = "Recognizer status: Recognizing";
       break;
-    case RecognizerStatus::RESETTING:
+    case RecognitionParser::RESETTING:
       rec_stat = "Recognizer status: Resetting";
       break;
     }
-    switch (this->m_recog_status.get_adaptation_status()) {
-    case RecognizerStatus::NONE:
+    switch (this->m_recognition.get_adaptation_status()) {
+    case RecognitionParser::NONE:
       ada_stat = "Adaptation status: None";
       break;
-    case RecognizerStatus::ADAPTING:
+    case RecognitionParser::ADAPTING:
       ada_stat = "Adaptation status: Adapting";
       break;
-    case RecognizerStatus::ADAPTED:
+    case RecognitionParser::ADAPTED:
       ada_stat = "Adaptation status: Adapted";
       break;
     }
-    this->m_status_label->SetText(str::fmt(150,
-                                           "%-035s %s",
-                                           rec_stat.c_str(),
-                                           ada_stat.c_str()).c_str());
+    this->m_rec_status_label->SetText(rec_stat.c_str());
+    this->m_ada_status_label->SetText(ada_stat.c_str());
 //    fprintf(stderr, "running2\n");
   }
   
@@ -364,8 +366,8 @@ WindowRecognizer::reset(bool reset_audio)
 //  }
 
 //  this->handle_stop_button();
-//  this->m_recog_status.reset_recognition();
-  this->m_recog_status.reset_recognition();
+//  this->m_recognition.reset_recognition();
+  this->m_recognition.reset_recognition();
   this->handle_pauserecog_button();
 }
 
@@ -457,7 +459,7 @@ WindowRecognizer::handle_record_button()
       this->flush_out_queue();
     }
     this->m_adapt_check->EnableReceiver(false);
-    this->m_recog_status.start_adapting();
+    this->m_recognition.start_adapting();
   }
   return true;
 }
@@ -487,7 +489,7 @@ WindowRecognizer::handle_recognize_button()
       this->flush_out_queue();
     }
     this->m_adapt_check->EnableReceiver(false);
-    this->m_recog_status.start_adapting();
+    this->m_recognition.start_adapting();
   }
   return true;
 }
@@ -601,7 +603,7 @@ WindowRecognizer::handle_resetadaptation_button()
     this->m_recognizer->get_out_queue()->add_message(message);
     this->flush_out_queue();
   }
-  this->m_recog_status.reset_adaptation();
+  this->m_recognition.reset_adaptation();
   
   return true;
 }

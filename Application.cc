@@ -36,13 +36,13 @@ Application::initialize(unsigned int width, unsigned int height)
 {
   this->m_app = new PG_Application;
   
-  if (width < 1000) {
-    fprintf(stderr, "Width must be at least 1000.\n", width, height);
+  if (width < 950) {
+    fprintf(stderr, "Width must be at least 950.\n", width, height);
     return false;
   }
   
-  if (height < 700) {
-    fprintf(stderr, "Width must be at least 700.\n", width, height);
+  if (height < 600) {
+    fprintf(stderr, "Width must be at least 600.\n", width, height);
     return false;
   }
 

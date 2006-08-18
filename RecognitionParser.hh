@@ -27,6 +27,29 @@ class RecognitionParser
   
 public:
 
+  enum RecognitionStatus { READY, RECOGNIZING, RESETTING };
+  enum AdaptationStatus { NONE, ADAPTING, ADAPTED };
+
+  // recog->reset, reset<->ready, ready->recog
+  void reset_recognition();
+  void set_ready();
+  void received_recognition();
+  RecognitionStatus get_recognition_status() const;
+
+  void start_adapting();
+  void reset_adaptation();
+  void recognition_end();
+  AdaptationStatus get_adaptation_status() const;
+  
+private:
+
+  RecognitionStatus m_recognition_status;
+  AdaptationStatus m_adaptation_status;
+  bool m_adapted;
+  bool m_was_adapting_when_reseted;
+
+public:
+
   /** Constant telling how many (recognition) frames in second. */
   static const unsigned int frames_per_second;
   

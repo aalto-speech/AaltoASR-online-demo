@@ -4,8 +4,98 @@
 
 const unsigned int RecognitionParser::frames_per_second = 125;
 
-RecognitionParser::RecognitionParser()
+
+
+/// STARTS HERE
+//#include "RecognizerStatus.hh"
+#include <stdio.h>
+
+
+void
+RecognitionParser::reset_recognition()
 {
+  this->lock();
+  this->m_recognition_status = RESETTING;
+  this->m_was_adapting_when_reseted = this->m_adaptation_status == ADAPTING;
+  this->unlock();
+}
+
+void
+RecognitionParser::set_ready()
+{
+  this->lock();
+  if (this->m_recognition_status == RESETTING)
+    this->m_recognition_status = READY;
+
+  if (this->m_adaptation_status == ADAPTING && this->m_was_adapting_when_reseted) {
+    this->m_adaptation_status = this->m_adapted ? ADAPTED : NONE;
+  }
+  this->unlock();
+}
+
+void
+RecognitionParser::received_recognition()
+{
+  this->lock();
+  if (this->m_recognition_status == READY)
+    this->m_recognition_status = RECOGNIZING;
+  this->unlock();
+}
+
+RecognitionParser::RecognitionStatus
+RecognitionParser::get_recognition_status() const
+{
+  return this->m_recognition_status;
+}
+
+void
+RecognitionParser::start_adapting()
+{
+  this->m_adaptation_status = ADAPTING;
+}
+
+void
+RecognitionParser::reset_adaptation()
+{
+  this->lock();
+  this->m_adaptation_status = NONE;
+  this->m_adapted = false;
+  this->unlock();
+}
+
+void
+RecognitionParser::recognition_end()
+{
+  this->lock();
+  if (this->m_adaptation_status == ADAPTING) {
+    this->m_adaptation_status = ADAPTED;
+    this->m_adapted = true;
+  }
+  // When end of audio, be "ready".
+  if (this->m_recognition_status == RECOGNIZING)
+    this->m_recognition_status = READY;
+  this->unlock();
+}
+
+RecognitionParser::AdaptationStatus
+RecognitionParser::get_adaptation_status() const
+{
+  return this->m_adaptation_status;
+}
+
+// ENDS HERE
+
+
+
+
+
+
+RecognitionParser::RecognitionParser()
+  : m_recognition_status(READY), m_adaptation_status(NONE)
+{
+//  fprintf(stderr, "RS constructor\n");
+  this->m_adapted = false;
+  this->m_was_adapting_when_reseted = false;
   pthread_mutex_init(&this->m_lock, NULL);
 }
 

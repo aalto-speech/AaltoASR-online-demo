@@ -4,12 +4,11 @@
 
 
 RecognizerListener::RecognizerListener(msg::InQueue *in_queue,
-                                       RecognitionParser *recognition,
-                                       RecognizerStatus *status)
+                                       RecognitionParser *recognition)
 {
   this->m_in_queue = in_queue;
   this->m_recognition = recognition;
-  this->m_status = status;
+//  this->m_status = status;
   this->m_stop = false;
   this->m_enabled = true;
   this->m_thread_created = false;
@@ -124,21 +123,21 @@ RecognizerListener::run() throw(msg::ExceptionBrokenPipe)
 //          fprintf(stderr, "Got ready, waiting for %d readys.\n", this->m_wait_ready);
           if (this->m_wait_ready)
             this->m_wait_ready = false;
-          this->m_status->set_ready();
+          this->m_recognition->set_ready();
         }
         // This has to be read because it might mean adaptation finished.
         if (message.type() == msg::M_RECOG_END) {
-          this->m_status->recognition_end();
+          this->m_recognition->recognition_end();
         }
         if (!this->m_wait_ready) {
           // Read recognition message if not waiting for ready.
           if (message.type() == msg::M_RECOG) {
             // Pass recognition message forward.
-            fprintf(stderr, "RECOG: %s\n", message.data_str().c_str());
+//            fprintf(stderr, "RECOG: %s\n", message.data_str().c_str());
             this->m_recognition->lock();
             this->m_recognition->parse(message.buf.substr(msg::header_size));
             this->m_recognition->unlock();
-            this->m_status->received_recognition();
+            this->m_recognition->received_recognition();
           }
         }
         this->m_in_queue->queue.pop_front();
