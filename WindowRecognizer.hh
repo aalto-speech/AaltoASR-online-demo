@@ -11,6 +11,7 @@
 #include "RecognizerListener.hh"
 //#include "msg.hh"
 #include "RecognizerProcess.hh"
+#include "RecognizerStatus.hh"
 #include <pgbutton.h>
 #include <pglabel.h>
 #include <pgcheckbutton.h>
@@ -87,6 +88,7 @@ protected:
 //  msg::OutQueue *m_out_queue;
   RecognizerProcess *m_recognizer;
   RecognitionParser m_recognition;
+  RecognizerStatus m_recog_status;
   RecognizerListener m_queue;
 
   WidgetRecognitionArea *m_recognition_area;

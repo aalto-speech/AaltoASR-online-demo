@@ -18,6 +18,9 @@ typedef std::list<Morpheme> MorphemeList;
 
 /** Data structure containing a morpheme lists both for recognized part and
  * hypothesis part. Recognitions are passed as a message to parse function.
+ * TODO: Rename to something like RecognizerStatus???
+ * TODO: Poista lock ja unlock funktiot. Huolehdi lukoista luokan sisällä.
+ *       Palauta vain kopioita luokan dataan, ei suoria viittauksia. (???)
  *  */
 class RecognitionParser
 {
@@ -31,6 +34,13 @@ public:
   RecognitionParser();
   /** Destructs the object. */
   ~RecognitionParser();
+  
+//  void parse_message(const msg::Message &message);
+//  void wait_for_reset();
+//  get_recognition_status();
+//  start_adapting()
+//  recognition_end()
+//  get_adaptation_status();
   
   /**
    * Takes a recognition message as a parameter and updates recognized text

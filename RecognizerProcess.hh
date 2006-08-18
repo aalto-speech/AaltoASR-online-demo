@@ -94,7 +94,7 @@ private:
   Process m_process; //!< The process for recognizer.
   msg::InQueue m_in_queue; //!< In queue from recognizer.
   msg::OutQueue m_out_queue; //!< Out queue to recognizer.
-
+  
   std::string m_computer; //!< SSH connection will be established to this.
   std::string m_script; //!< Script file used to launch the recognizer.
   int m_beam; //!< Beam parameter value.

@@ -10,8 +10,11 @@
 #include "str.hh"
 
 WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
-  : m_queue(recognizer ? recognizer->get_in_queue() : NULL, &m_recognition)
+  : m_queue(recognizer ? recognizer->get_in_queue() : NULL,
+            &m_recognition,
+            &m_recog_status)
 {
+//  fprintf(stderr, "WR constructor1\n");
   this->m_audio_input = NULL;
   
   // Normal buttons
@@ -37,6 +40,7 @@ WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
   
   this->m_broken_pipe = false;
   
+//  fprintf(stderr, "WR constructor2\n");
 }
 
 WindowRecognizer::~WindowRecognizer()
@@ -48,6 +52,7 @@ void
 WindowRecognizer::initialize()
 {
   Window::initialize();
+//  fprintf(stderr, "WR init\n");
 
   this->m_pauserecog_button =
     this->construct_button("Pause recognizer", 3, 2, slot(*this, &WindowRecognizer::handle_pauserecog_button));
@@ -98,6 +103,7 @@ WindowRecognizer::initialize()
 void
 WindowRecognizer::do_opening()
 {
+//  fprintf(stderr, "WR do_opening1\n");
   this->m_audio_input = new AudioInputController(this->m_recognizer ? this->m_recognizer->get_out_queue() : NULL);
   if (!this->m_audio_input->initialize()) {
     this->error("Audio input controller initialization failed. Try closing all other programs.", ERROR_CLOSE);
@@ -148,7 +154,7 @@ WindowRecognizer::do_opening()
   // Hide advanced buttons.
   this->m_showadvanced_button->SetPressed(false);
   this->handle_showadvanced_button();
-  
+//  fprintf(stderr, "WR do_opening2\n");
 }
 
 void
@@ -176,6 +182,35 @@ WindowRecognizer::do_running()
     this->m_audio_input->operate();
     this->flush_out_queue();
     this->m_recognition_area->update();
+//    fprintf(stderr, "running1\n");
+    std::string rec_stat, ada_stat;
+    switch (this->m_recog_status.get_recognition_status()) {
+    case RecognizerStatus::READY:
+      rec_stat = "Recognizer status: Ready";
+      break;
+    case RecognizerStatus::RECOGNIZING:
+      rec_stat = "Recognizer status: Recognizing";
+      break;
+    case RecognizerStatus::RESETTING:
+      rec_stat = "Recognizer status: Resetting";
+      break;
+    }
+    switch (this->m_recog_status.get_adaptation_status()) {
+    case RecognizerStatus::NONE:
+      ada_stat = "Adaptation status: None";
+      break;
+    case RecognizerStatus::ADAPTING:
+      ada_stat = "Adaptation status: Adapting";
+      break;
+    case RecognizerStatus::ADAPTED:
+      ada_stat = "Adaptation status: Adapted";
+      break;
+    }
+    this->m_status_label->SetText(str::fmt(150,
+                                           "%-035s %s",
+                                           rec_stat.c_str(),
+                                           ada_stat.c_str()).c_str());
+//    fprintf(stderr, "running2\n");
   }
   
 }
@@ -320,15 +355,17 @@ WindowRecognizer::reset(bool reset_audio)
   //*/
 
   // End adaptation.  
-  if (this->m_adapt_check->GetPressed()) {
+//  if (this->m_adapt_check->GetPressed()) {
     if (this->m_recognizer) {
       msg::Message message(msg::M_ADAPT_OFF);
       this->m_recognizer->get_out_queue()->add_message(message);
       this->flush_out_queue();
     }
-  }
+//  }
 
 //  this->handle_stop_button();
+//  this->m_recog_status.reset_recognition();
+  this->m_recog_status.reset_recognition();
   this->handle_pauserecog_button();
 }
 
@@ -420,6 +457,7 @@ WindowRecognizer::handle_record_button()
       this->flush_out_queue();
     }
     this->m_adapt_check->EnableReceiver(false);
+    this->m_recog_status.start_adapting();
   }
   return true;
 }
@@ -449,6 +487,7 @@ WindowRecognizer::handle_recognize_button()
       this->flush_out_queue();
     }
     this->m_adapt_check->EnableReceiver(false);
+    this->m_recog_status.start_adapting();
   }
   return true;
 }
@@ -562,6 +601,7 @@ WindowRecognizer::handle_resetadaptation_button()
     this->m_recognizer->get_out_queue()->add_message(message);
     this->flush_out_queue();
   }
+  this->m_recog_status.reset_adaptation();
   
   return true;
 }
