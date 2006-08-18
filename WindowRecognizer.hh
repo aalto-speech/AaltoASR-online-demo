@@ -13,6 +13,8 @@
 #include "RecognizerProcess.hh"
 #include <pgbutton.h>
 #include <pglabel.h>
+#include <pgcheckbutton.h>
+//#include "WidgetCheckButton.hh"
 
 class WindowRecognizer  :  public Window
 {
@@ -37,6 +39,9 @@ protected:
   
 //  virtual AudioInputController* get_audio_input() = 0;
   
+  PG_Rect calculate_button_rect(unsigned int column_index,
+                                unsigned int row_index);
+                              
   PG_Button* construct_button(const std::string &label,
                               unsigned int column_index,
                               unsigned int row_index,
@@ -50,12 +55,12 @@ protected:
   bool handle_pause_button();
   bool handle_back_button();
 //  bool handle_play_button();
-  bool handle_reset_button();
-//  bool handle_resetrecog_button();
+//  bool handle_reset_button();
+  bool handle_resetrecog_button();
   bool handle_pauserecog_button();
 //  bool handle_endaudio_button();
   bool handle_settings_button();
-  bool handle_adapt_button();
+//  bool handle_adapt_check();
   bool handle_resetadaptation_button();
   bool handle_save_button();
   bool handle_open_button();
@@ -92,7 +97,7 @@ private:
 //  PG_Button *m_play_button;
 //  PG_Button *m_endaudio_button;
   PG_Button *m_pauserecog_button;
-  PG_Button *m_adapt_button;
+//  PG_Button *m_adapt_button;
   PG_Button *m_resetadapt_button;
   PG_Button *m_showadvanced_button;
   PG_Button *m_record_button;
@@ -101,6 +106,7 @@ private:
   PG_Button *m_stop2_button;
   PG_Button *m_pause_button;
   PG_Button *m_reset_button;
+  PG_CheckButton *m_adapt_check;
   
   PG_Label *m_status_label;
   

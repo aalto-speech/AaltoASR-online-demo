@@ -23,7 +23,7 @@ WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
   
   // Advanced buttons.
   this->m_showadvanced_button = NULL;
-  this->m_adapt_button = NULL;
+  this->m_adapt_check = NULL;
   this->m_resetadapt_button = NULL;
   this->m_pauserecog_button = NULL;
   this->m_reset_button = NULL;
@@ -62,12 +62,14 @@ WindowRecognizer::initialize()
   this->m_stop2_button =
     this->construct_button("STOP", 0, 1, slot(*this, &WindowRecognizer::handle_stop_button));
   this->m_reset_button =
-  this->construct_button("Reset", 3, 3, slot(*this, &WindowRecognizer::handle_reset_button));
-//    this->construct_button("Reset recognizer", 3, 3, slot(*this, &WindowRecognizer::handle_resetrecog_button));
+//  this->construct_button("Reset", 3, 3, slot(*this, &WindowRecognizer::handle_reset_button));
+    this->construct_button("Reset recognizer", 3, 3, slot(*this, &WindowRecognizer::handle_resetrecog_button));
   this->construct_button("Settings..", 2, 0, slot(*this, &WindowRecognizer::handle_settings_button));
   this->construct_button("Exit", 1, 2, slot(*this, &WindowRecognizer::handle_back_button));
-  this->m_adapt_button =
-    this->construct_button("Adapt speaker", 3, 0, slot(*this, &WindowRecognizer::handle_adapt_button));
+  this->m_adapt_check = new PG_CheckButton(this->m_window,
+                                              this->calculate_button_rect(3, 0),
+                                              "Adapt speaker");
+    //this->construct_button("Adapt speaker", 3, 0, slot(*this, &WindowRecognizer::handle_adapt_button));
   this->m_resetadapt_button =
     this->construct_button("Reset adaptation", 3, 1, slot(*this, &WindowRecognizer::handle_resetadaptation_button));
   this->construct_button("Load audio", 1, 0, slot(*this, &WindowRecognizer::handle_open_button));
@@ -76,10 +78,11 @@ WindowRecognizer::initialize()
     this->construct_button("Show advanced", 2, 2, slot(*this, &WindowRecognizer::handle_showadvanced_button));
 
   this->m_pauserecog_button->SetToggle(true);
-  this->m_adapt_button->SetToggle(true);
+//  this->m_adapt_button->SetToggle(true);
   this->m_pause_button->SetToggle(true);
   this->m_showadvanced_button->SetToggle(true);
   
+//  this->m_adapt_check->sigClick.connect(slot(*this, &WindowRecognizer::handle_adapt_check));
   this->m_window->sigKeyUp.connect(slot(*this, &WindowRecognizer::handle_key_event));
   this->m_window->sigKeyDown.connect(slot(*this, &WindowRecognizer::handle_key_event));
   
@@ -227,7 +230,8 @@ WindowRecognizer::handle_broken_pipe()
   if (ret_val != 0) {
     this->reset(false);
     this->m_recognizer->get_out_queue()->clear();
-    this->handle_adapt_button();
+//    this->handle_adapt_button();
+    // TODO: this->handle_stop_button(); ???
     this->m_broken_pipe = false;
 
     // Now re-open the audio stream (look at the note above).
@@ -315,7 +319,16 @@ WindowRecognizer::reset(bool reset_audio)
   this->pause_window_functionality(false);
   //*/
 
-  this->handle_stop_button();
+  // End adaptation.  
+  if (this->m_adapt_check->GetPressed()) {
+    if (this->m_recognizer) {
+      msg::Message message(msg::M_ADAPT_OFF);
+      this->m_recognizer->get_out_queue()->add_message(message);
+      this->flush_out_queue();
+    }
+  }
+
+//  this->handle_stop_button();
   this->handle_pauserecog_button();
 }
 
@@ -395,8 +408,19 @@ WindowRecognizer::handle_record_button()
   this->m_record_button->Hide(false);
   this->m_recognize_button->Hide(false);
   this->m_stop2_button->Hide(false);
-  
+
+  // Unpause automatically.  
   this->pause_audio_input(false);
+
+  // Start adaptation if requested.
+  if (this->m_adapt_check->GetPressed()) {
+    if (this->m_recognizer) {
+      msg::Message message(msg::M_ADAPT_ON);
+      this->m_recognizer->get_out_queue()->add_message(message);
+      this->flush_out_queue();
+    }
+    this->m_adapt_check->EnableReceiver(false);
+  }
   return true;
 }
 
@@ -414,7 +438,18 @@ WindowRecognizer::handle_recognize_button()
   this->m_pause_button->Show(false);
   this->m_stop1_button->Hide(false);
   
+  // Unpause automatically.
   this->pause_audio_input(false);
+
+  // Start adaptation if requested.
+  if (this->m_adapt_check->GetPressed()) {
+    if (this->m_recognizer) {
+      msg::Message message(msg::M_ADAPT_ON);
+      this->m_recognizer->get_out_queue()->add_message(message);
+      this->flush_out_queue();
+    }
+    this->m_adapt_check->EnableReceiver(false);
+  }
   return true;
 }
 
@@ -442,9 +477,14 @@ WindowRecognizer::handle_stop_button()
   this->m_pause_button->Hide(false);
   
   this->end_of_audio();
+
+  // Set Adapt check button state.
+  this->m_adapt_check->SetUnpressed();
+  this->m_adapt_check->EnableReceiver(true);
+  
   return true;
 }
-//*
+/*
 bool
 WindowRecognizer::handle_reset_button()
 {
@@ -452,11 +492,13 @@ WindowRecognizer::handle_reset_button()
   return true;
 }
 //*/
-/*
+//*
 bool
 WindowRecognizer::handle_resetrecog_button()
 {
+  this->m_audio_input->set_mode(AudioInputController::PLAY);
   this->reset(false);
+  this->handle_stop_button();
   return true;
 }
 //*/
@@ -477,7 +519,7 @@ WindowRecognizer::handle_back_button()
   this->end_running(1);
   return true;
 }
-
+/*
 bool
 WindowRecognizer::handle_adapt_button()
 {
@@ -500,7 +542,17 @@ WindowRecognizer::handle_adapt_button()
   
   return true;
 }
-
+//*/
+/*
+bool
+WindowRecognizer::handle_adapt_check()
+{
+  // ParaGUI check button doesn't (for some reason) uncheck when pressed.
+  if (this->m_adapt_check->GetPressed())
+    this->m_adapt_check->SetUnpressed();
+  return true;
+}
+//*/
 bool
 WindowRecognizer::handle_resetadaptation_button()
 {
@@ -526,15 +578,10 @@ WindowRecognizer::handle_open_button()
 
   if (ret_val == 1) {
     this->handle_stop_button();
-//    this->pause_audio_input(true);
     this->m_recognition_area->set_scroll_position(0);
     this->m_audio_input->set_mode(AudioInputController::PLAY);
     // Run reset window without reseting audio.
     this->reset(false);
-
-//    if (!this->m_audio_input->is_eof()) {
-//      this->set_status(LISTENING);
-//    }
   }
   this->pause_window_functionality(false);
   return true;
@@ -564,14 +611,14 @@ bool
 WindowRecognizer::handle_showadvanced_button()
 {
   if (this->m_showadvanced_button->GetPressed()) {
-    this->m_adapt_button->Show(false);
+    this->m_adapt_check->Show(false);
     this->m_resetadapt_button->Show(false);
     this->m_pauserecog_button->Show(false);
     this->m_reset_button->Show(false);
   }
   else {
     this->m_pauserecog_button->Hide(false);
-    this->m_adapt_button->Hide(false);
+    this->m_adapt_check->Hide(false);
     this->m_resetadapt_button->Hide(false);
     this->m_reset_button->Hide(false);
   }
@@ -593,11 +640,9 @@ WindowRecognizer::handle_key_event(const SDL_KeyboardEvent *key)
   return false;
 }
 
-PG_Button*
-WindowRecognizer::construct_button(const std::string &label,
-                                   unsigned int column_index,
-                                   unsigned int row_index,
-                                   const SigC::Slot0<bool> &callback)
+PG_Rect
+WindowRecognizer::calculate_button_rect(unsigned int column_index,
+                                        unsigned int row_index)
 {
   const int width = 150;
   const int height = column_index == 3 ? 30 : 40;
@@ -608,12 +653,21 @@ WindowRecognizer::construct_button(const std::string &label,
   const int top_margin = 10;
   
   // Calculate rect.
-  PG_Rect rect(left_margin + column_index * (horizontal_space + width),
-               top_margin + row_index * (vertical_space + height),
-               width,
-               height);
+  return PG_Rect(left_margin + column_index * (horizontal_space + width),
+                 top_margin + row_index * (vertical_space + height),
+                 width,
+                 height);
+}
 
+
+PG_Button*
+WindowRecognizer::construct_button(const std::string &label,
+                                   unsigned int column_index,
+                                   unsigned int row_index,
+                                   const SigC::Slot0<bool> &callback)
+{
   // Create button and connect it with the window.               
+  PG_Rect rect = this->calculate_button_rect(column_index, row_index);
   PG_Button *button = new PG_Button(this->m_window, rect, label.data());
   button->sigClick.connect(callback);
 
