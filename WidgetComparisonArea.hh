@@ -4,7 +4,7 @@
 
 #include <pgwidget.h>
 #include "WidgetMultiLineEdit.hh"
-#include "RecognitionParser.hh"
+#include "RecognizerStatus.hh"
 #include "Window.hh"
 
 class WidgetComparisonArea  :  public PG_Widget
@@ -14,7 +14,7 @@ public:
 
   WidgetComparisonArea(Window &parent,
                        const PG_Rect &rect,
-                       RecognitionParser *recognition);
+                       RecognizerStatus *recognition);
   virtual ~WidgetComparisonArea();
   
 protected:
@@ -31,7 +31,7 @@ protected:
 private:
 
   Window &m_parent;
-  RecognitionParser *m_recognition;
+  RecognizerStatus *m_recognition;
   WidgetMultiLineEdit *m_original_text;
   WidgetMultiLineEdit *m_recognition_text;
   

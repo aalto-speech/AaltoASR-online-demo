@@ -4,7 +4,7 @@
 
 
 RecognizerListener::RecognizerListener(msg::InQueue *in_queue,
-                                       RecognitionParser *recognition)
+                                       RecognizerStatus *recognition)
 {
   this->m_in_queue = in_queue;
   this->m_recognition = recognition;

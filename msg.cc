@@ -189,8 +189,12 @@ namespace msg {
           if (errno == EINTR) // interrupted by signal
             continue;
           perror("flush_send(): write() failed");
-          if (errno == EPIPE) {
-            //exit(1);
+          // Throw broken pipe exception.
+          if (errno == EPIPE || errno == EINVAL) {
+            if (errno == EINVAL) {
+              fprintf(stderr, "Got EINVAL=%d, but throwing broken pipe "
+                              "exception.\n", errno);
+            }
             throw ExceptionBrokenPipe(fd);
           }
           exit(1);

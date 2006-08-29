@@ -43,7 +43,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	WidgetWave.cc \
 	WindowReset.cc WindowRecognizer.cc \
 	WidgetRecognitionArea.cc str.cc WidgetRecognitionText.cc \
-	RecognitionParser.cc WidgetScrollArea.cc WindowFile.cc WindowMessageBox.cc \
+	WidgetScrollArea.cc WindowFile.cc WindowMessageBox.cc \
 	WidgetSpectrogram.cc WindowChild.cc WindowSettings.cc \
 	RecognizerListener.cc WindowStartProcess.cc WindowWaitRecognizer.cc \
 	WidgetScrollBar.cc WindowSaveFile.cc WindowOpenFile.cc \
@@ -51,7 +51,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	WindowSaveAudioFile.cc WindowOpenTextFile.cc WindowSaveTextFile.cc \
 	WidgetMultiLineEdit.cc conf.cc RecognizerProcess.cc WidgetAudioView.cc \
 	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc \
-	scrap.cc RecognizerStatus.cc
+	scrap.cc RecognizerStatus.cc WidgetStatus.cc
 
 jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype -lfftw3
 jaakko: $(jaakko_srcs:%.cc=%.o)

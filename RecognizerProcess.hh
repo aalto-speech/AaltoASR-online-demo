@@ -27,13 +27,12 @@ public:
    * \param script This file will be run on the computer.
    * \param beam Beam value.
    * \param lmscale LM-scale value. */
-  RecognizerProcess(const std::string *route,
-                    const std::string &cluster,
+  RecognizerProcess(const std::string &connect,
                     const std::string &script,
                     unsigned int beam,
                     unsigned int lmscale) throw(Exception);
   /** Destructs the object. */
-  ~RecognizerProcess();
+  ~RecognizerProcess() { }
   
   /** Starts a new process for the recognizer and constructs the communication
    * queues.
@@ -62,11 +61,11 @@ public:
   /** Tries to set the computer which the ssh connection is established to.
    * \param computer SSH connection will be established to this computer.
    * \return false if process is started. */
-  bool set_computer(const std::string &computer);
+//  bool set_computer(const std::string &computer);
   /** Tries to set the script file which is run on the ssh computer.
    * \param script The file to launch the recognizer.
    * \return false if process is started. */
-  bool set_script(const std::string &script);
+//  bool set_script(const std::string &script);
   /** Tries to set the beam parameter. Puts the message into out queue but
    * doesn't flush.
    * \param beam Beam value.
@@ -79,9 +78,9 @@ public:
   bool set_lmscale(unsigned int lmscale);
 
   /** \return SSH connection is established to this computer. */
-  inline const std::string& get_computer() const;
+//  inline const std::string& get_computer() const;
   /** \return This script file is run to launch the recognizer. */
-  inline const std::string& get_script() const;
+//  inline const std::string& get_script() const;
   /** \return Beam value. */
   inline unsigned int get_beam() const;
   /** \return LM-scale value. */
@@ -98,8 +97,7 @@ private:
   msg::InQueue m_in_queue; //!< In queue from recognizer.
   msg::OutQueue m_out_queue; //!< Out queue to recognizer.
   
-  std::string *m_route;
-  std::string m_cluster; //!< SSH connection will be established to this.
+  std::string m_connect; //!< Optional SSH connection command.
   std::string m_script; //!< Script file used to launch the recognizer.
   int m_beam; //!< Beam parameter value.
   int m_lmscale; //!< LM-scale parameter value.
@@ -116,7 +114,7 @@ RecognizerProcess::get_out_queue()
 {
   return &this->m_out_queue;
 }
-
+/*
 const std::string&
 RecognizerProcess::get_computer() const
 {
@@ -128,7 +126,7 @@ RecognizerProcess::get_script() const
 {
   return this->m_script;
 }
-
+//*/
 unsigned int
 RecognizerProcess::get_beam() const
 {

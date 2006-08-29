@@ -29,17 +29,15 @@ public:
   /** Initializes the application with recognizer.
    * \param width Application window width.
    * \param height Application window height.
-   * \param route Optional computer to which the first SSH connection is made,
-   *              and then connects to cluster computer.
-   * \param cluster Computer which should run the recognizer.
+   * \param connect Optional SSH connection command,
+   *                e.g. "ssh pyramid.hut.fi ssh itl-cl3".
    * \param script_file File that should be run in the ssh computer.
    * \param beam Beam value.
    * \param lmscale LM-scale value.
    * \return false if ParaGUI initialization failed. */
   bool initialize(unsigned int width,
                   unsigned int height,
-                  const std::string *route,
-                  const std::string &cluster,
+                  const std::string &connect,
                   const std::string &script_file,
                   unsigned int beam,
                   unsigned int lmscale) throw(Exception);

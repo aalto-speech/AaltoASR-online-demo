@@ -5,7 +5,7 @@
 #include <vector>
 #include "AudioInputController.hh"
 #include "WidgetScrollArea.hh"
-#include "RecognitionParser.hh"
+#include "RecognizerStatus.hh"
 
 class WidgetRecognitionText  :  public WidgetScrollArea
 {
@@ -15,7 +15,7 @@ public:
   WidgetRecognitionText(PG_Widget *parent,
                          const PG_Rect &rect,
                          AudioInputController *audio_input,
-                         RecognitionParser *recognition,
+                         RecognizerStatus *recognition,
                          unsigned int pixels_per_second);
   virtual ~WidgetRecognitionText();
   
@@ -43,7 +43,7 @@ protected:
 private:
 
   const unsigned int m_pixels_per_second;
-  RecognitionParser *m_recognition;
+  RecognizerStatus *m_recognition;
   std::vector<PG_Widget*> m_hypothesis_widgets;
   unsigned int m_last_recognition_count;
   unsigned long m_last_recognition_frame;

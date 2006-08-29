@@ -3,7 +3,7 @@
 #include "str.hh"
 
 WindowSettings::WindowSettings(const PG_Widget *parent, RecognizerProcess *recognizer)
-  : WindowChild(parent, "Settings", 350, 300, true, "OK", "Cancel")
+  : WindowChild(parent, "Settings", 350, 300, true, true, "OK", "Cancel")
 {
   this->m_beam_edit = NULL;
   this->m_lmscale_edit = NULL;

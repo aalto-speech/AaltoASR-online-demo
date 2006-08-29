@@ -7,7 +7,7 @@
 WidgetRecognitionText::WidgetRecognitionText(PG_Widget *parent,
                                                const PG_Rect &rect,
                                                AudioInputController *audio_input,
-                                               RecognitionParser *recognition,
+                                               RecognizerStatus *recognition,
                                                unsigned int pixels_per_second)
   : WidgetScrollArea(parent, rect),
     m_pixels_per_second(pixels_per_second)
@@ -70,7 +70,7 @@ WidgetRecognitionText::add_morpheme_widget(const Morpheme &morpheme,
 {
   // Calculate recognizer pixels per recognizer frame.
   double multiplier = this->m_pixels_per_second /
-                      (double)RecognitionParser::frames_per_second;
+                      (double)RecognizerStatus::frames_per_second;
                       
   unsigned int w = (int)(morpheme.duration * multiplier);
   Sint32 x = (Sint32)(morpheme.time * multiplier);

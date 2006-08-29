@@ -5,7 +5,7 @@
 WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                              const PG_Rect &rect,
                                              AudioInputController *audio_input,
-                                             RecognitionParser *recognition,
+                                             RecognizerStatus *recognition,
                                              unsigned int pixels_per_second)
   : PG_Widget(parent, rect, false),
     m_pixels_per_second(pixels_per_second),

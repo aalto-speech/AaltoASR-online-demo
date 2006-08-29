@@ -4,7 +4,7 @@
 
 #include <pgradiobutton.h>
 #include "WidgetScrollBar.hh"
-#include "RecognitionParser.hh"
+#include "RecognizerStatus.hh"
 #include "AudioInputController.hh"
 #include "WidgetRecognitionText.hh"
 #include "WidgetWave.hh"
@@ -22,7 +22,7 @@ public:
   WidgetRecognitionArea(PG_Widget *parent,
                         const PG_Rect &rect,
                         AudioInputController *audio_input,
-                        RecognitionParser *recognition,
+                        RecognizerStatus *recognition,
                         unsigned int pixels_per_second);
   virtual ~WidgetRecognitionArea();
 
@@ -59,7 +59,7 @@ private:
   PG_RadioButton *m_disablescroll_radio; //!< Disable auto scroll radio.
 
   AudioInputController *m_audio_input; //!< Audio input controller.
-  RecognitionParser *m_recognition; //!< Recognition texts.
+  RecognizerStatus *m_recognition; //!< Recognition texts.
 
   const unsigned int m_pixels_per_second; //!< Scale of the view.
   const double m_frames_per_pixel; //!< Audio samples per one pixel.
@@ -83,7 +83,7 @@ WidgetRecognitionArea::get_recognizer_cursor() const
 {
   return (unsigned long)(this->m_pixels_per_second *
                          this->m_recognition->get_recognition_frame() /
-                         RecognitionParser::frames_per_second);
+                         RecognizerStatus::frames_per_second);
 }
 
 unsigned long 

@@ -7,18 +7,12 @@ const unsigned int RecognizerProcess::MAX_BEAM = 200;
 const unsigned int RecognizerProcess::MIN_LMSCALE = 1;
 const unsigned int RecognizerProcess::MAX_LMSCALE = 100;
 
-RecognizerProcess::RecognizerProcess(const std::string *route,
-                                     const std::string &cluster,
+RecognizerProcess::RecognizerProcess(const std::string &connect,
                                      const std::string &script,
                                      unsigned int beam,
                                      unsigned int lmscale) throw(Exception)
 {
-  this->m_route = NULL;
-  if (route) {
-    this->m_route = new std::string;
-    *this->m_route = *route;
-  }
-  this->m_cluster = cluster;
+  this->m_connect = connect;
   this->m_script = script;
   
   // Try to read default settings from the script file.
@@ -33,27 +27,42 @@ RecognizerProcess::RecognizerProcess(const std::string *route,
   }
 }
 
-RecognizerProcess::~RecognizerProcess()
-{
-  delete this->m_route;
-}
-
 void
 RecognizerProcess::start()
 {
   // Fork a child process.
   if (this->m_process.create() == 0) {
-//    fcloseall();
-    exit(1);
     // Child process enters here.
-    int ret;
-    if (this->m_route) {
+//    int ret;
+//    if (this->m_route) {
       //*
-      std::string connect = "ssh pyramid.hut.fi ssh itl-cl1";
-      ret = execlp("sssh",//connect.c_str(),
-                   "ssh",
-                   this->m_script.data(),
-                   (char*)NULL);
+//      std::string connect = "ssh pyramida.hut.fi ssh itl-cl1";
+      std::vector<std::string> args;
+      str::split(&this->m_connect, " ", true, &args);
+      char **arg_array = new char*[args.size()+3];
+      if (args.size() > 0) {
+        arg_array[0] = new char[args.at(0).size()+1];
+        strcpy(arg_array[0], args.at(0).c_str());
+        arg_array[args.size()+1] = new char[this->m_script.size()+1];
+        strcpy(arg_array[args.size()+1], this->m_script.c_str());
+      }
+      else {
+        // If no command given, the script file is the execution command.
+        arg_array[0] = new char[this->m_script.size()+1];
+        strcpy(arg_array[0], this->m_script.c_str());
+      }
+      // Second parameter for exec does not matter.
+      arg_array[1] = new char[1];
+      strcpy(arg_array[1], "");
+
+      // Copy the parameters into the array.      
+      for (unsigned int ind = 1; ind < args.size(); ind++) {
+        arg_array[ind+1] = new char[args.at(ind).size()+1];
+        strcpy(arg_array[ind+1], args.at(ind).c_str());
+      }
+      arg_array[args.size()+2] = NULL;
+      
+      int ret = execvp(arg_array[0], &arg_array[1]);
                    //*/
                    /*
       ret = execlp("ssh",
@@ -65,6 +74,7 @@ RecognizerProcess::start()
                    this->m_script.data(),
                    (char*)NULL);
                    //*/
+                   /*
     }
     else {
       ret = execlp("ssh",
@@ -73,10 +83,12 @@ RecognizerProcess::start()
                    this->m_script.data(),
                    (char*)NULL);
     }     
+    //*/
                     
     if (ret < 0) {
       perror("Recognizer process failed exec()");
-      exit(1);                                    
+      // NOTE: Must use _exit NOT exit so Xlib will work properly!
+      _exit(-1);                                    
     }
     // Child process never gets here.
     assert(false);
@@ -105,7 +117,7 @@ RecognizerProcess::finish()
     this->m_out_queue.disable();
   }
 }
-
+/*
 bool
 RecognizerProcess::set_computer(const std::string &computer)
 {
@@ -125,7 +137,7 @@ RecognizerProcess::set_script(const std::string &script)
   }
   return false;
 }
-
+//*/
 bool
 RecognizerProcess::set_beam(unsigned int beam)
 //throw(msg::ExceptionBrokenPipe)

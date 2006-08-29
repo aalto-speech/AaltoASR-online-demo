@@ -10,7 +10,7 @@
 
 WidgetComparisonArea::WidgetComparisonArea(Window &parent,
                                            const PG_Rect &rect,
-                                           RecognitionParser *recognition)
+                                           RecognizerStatus *recognition)
   : PG_Widget(parent.get_widget(), rect, false),
     m_parent(parent),
     m_recognition(recognition)

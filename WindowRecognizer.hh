@@ -3,19 +3,16 @@
 #define WINDOWRECOGNIZER_HH_
 
 #include "Window.hh"
-//#include "Process.hh"
-#include "RecognitionParser.hh"
 #include "AudioInputController.hh"
 #include "WidgetRecognitionArea.hh"
 #include "WidgetComparisonArea.hh"
+#include "WidgetStatus.hh"
 #include "RecognizerListener.hh"
-//#include "msg.hh"
 #include "RecognizerProcess.hh"
 #include "RecognizerStatus.hh"
 #include <pgbutton.h>
 #include <pglabel.h>
 #include <pgcheckbutton.h>
-//#include "WidgetCheckButton.hh"
 
 class WindowRecognizer  :  public Window
 {
@@ -83,35 +80,29 @@ protected:
   
   bool handle_broken_pipe();
 
-//  Process *m_process;
-//  msg::InQueue *m_in_queue;
-//  msg::OutQueue *m_out_queue;
-  RecognizerProcess *m_recognizer;
-  RecognitionParser m_recognition;
-//  RecognizerStatus m_recog_status;
-  RecognizerListener m_queue;
+  RecognizerProcess *m_recog_proc;
+  RecognizerStatus m_recog_status;
+  RecognizerListener m_recog_listener;
 
   WidgetRecognitionArea *m_recognition_area;
-  WidgetComparisonArea *m_texts_area;
+  WidgetComparisonArea *m_comparison_area;
+  WidgetStatus *m_status_bar;
   
 private:
 
-//  PG_Button *m_play_button;
-//  PG_Button *m_endaudio_button;
-  PG_Button *m_pauserecog_button;
-//  PG_Button *m_adapt_button;
-  PG_Button *m_resetadapt_button;
-  PG_Button *m_showadvanced_button;
   PG_Button *m_record_button;
   PG_Button *m_recognize_button;
   PG_Button *m_stop1_button;
   PG_Button *m_stop2_button;
   PG_Button *m_pause_button;
-  PG_Button *m_reset_button;
+  PG_Button *m_showadvanced_button;
   PG_CheckButton *m_adapt_check;
+  PG_Button *m_resetadapt_button;
+  PG_Button *m_pauserecog_button;
+  PG_Button *m_reset_button;
   
-  PG_Label *m_rec_status_label;
-  PG_Label *m_ada_status_label;
+//  PG_Label *m_rec_status_label;
+//  PG_Label *m_ada_status_label;
   
   bool m_broken_pipe;
   

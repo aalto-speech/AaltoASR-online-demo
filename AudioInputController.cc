@@ -12,6 +12,8 @@ AudioInputController::AudioInputController(msg::OutQueue *out_queue)
   this->m_output_cursor = 0;
   
   this->m_audio_data.clear();
+  
+  this->m_mute = false;
 
   this->m_paused = true;
   this->m_playback = false;
@@ -125,16 +127,34 @@ AudioInputController::set_mode(Mode mode)
 }
 
 void
+AudioInputController::set_mute(bool mute)
+{
+  if (mute) {
+    this->m_audio_stream.set_output_buffer(NULL);
+  }
+  else {
+    if (this->m_paused)
+      this->m_audio_stream.set_output_buffer(&this->m_playback_buffer);
+    else
+      this->m_audio_stream.set_output_buffer(&this->m_output_buffer);
+  }
+  this->m_mute = mute;
+}
+
+
+void
 AudioInputController::pause_listening(bool pause)
 {
   if (pause) {
     this->m_audio_stream.set_input_buffer(NULL);
-    this->m_audio_stream.set_output_buffer(&this->m_playback_buffer);
+    if (!this->m_mute)
+      this->m_audio_stream.set_output_buffer(&this->m_playback_buffer);
   }
   else {
     if (this->m_mode == PLAY) {
       this->m_audio_stream.set_input_buffer(NULL);
-      this->m_audio_stream.set_output_buffer(&this->m_output_buffer);
+      if (!this->m_mute)
+        this->m_audio_stream.set_output_buffer(&this->m_output_buffer);
     }
     else { // this->m_mode == RECORD
       this->m_audio_stream.set_input_buffer(&this->m_input_buffer);

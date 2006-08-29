@@ -123,6 +123,10 @@ WidgetSpectrogram::calculate_output_values()
       unsigned int index = this->m_window_width - ind;
       this->m_data_out[ind] += this->m_data_out[index] * this->m_data_out[index];
     }
+    
+    // Root. The exponent is the FIRST parameter for the spectrogram. You can
+    // adjust it to change the appearance of the spectrogram.
+    this->m_data_out[ind] = pow(this->m_data_out[ind], 0.3);
 //    if (this->m_data_out[ind] < min)
 //      min = this->m_data_out[ind];
 //    if (this->m_data_out[ind] > max)
@@ -131,8 +135,14 @@ WidgetSpectrogram::calculate_output_values()
 
   // Do normalization (values into range 0.0-1.0), and use some non-linear
   // function (e.g. ^0.1) to make spectrogram clearer.
-  for (unsigned int ind = 0; ind < range; ind++)
-    this->m_data_out[ind] = 1 - pow(0.999999999, this->m_data_out[ind]);
+  for (unsigned int ind = 0; ind < range; ind++) {
+//    fprintf(stderr, "%f ", (float)this->m_data_out[ind]);
+    // The base number is the SECOND parameter for the spectrogram. You can
+    // adjust it to change the appearance of the spectrogram.
+    this->m_data_out[ind] = 1 - pow(0.9965, this->m_data_out[ind]);
+  }
+//  fprintf(stderr, "\n");
+//    this->m_data_out[ind] = 1 - pow(0.999999999, this->m_data_out[ind]);
 //    this->m_data_out[ind] = 1 - log(1 / this->m_data_out[ind]);
   /*
   //double min = *std::min_element(this->m_data_out, this->m_data_out + range);
@@ -152,16 +162,16 @@ WidgetSpectrogram::get_color_by_value(double value)
   char g = 0;
   char b = 0;
   
-  if (value <= 0.001) {
-    b = (char)(value / 0.001 * 128);
+  if (value <= 0.25) {
+    b = (char)(value / 0.25 * 128);
   }
-  else if (value > 0.001 && value <= 0.95) {
-    r = (char)((value - 0.001) / (0.95-0.001) * 255);
-    b = (char)((0.95 - value) / (0.95-0.001) * 128);
+  else if (value > 0.25 && value <= 0.50) {
+    r = (char)((value - 0.25) / (0.50-0.25) * 255);
+    b = (char)((0.50 - value) / (0.50-0.25) * 128);
   }
-  else if (value > 0.95 && value <= 1.0) {
+  else if (value > 0.50 && value <= 1.0) {
     r = 255;
-    g = (char)((value - 0.95) / 0.05 * 255);
+    g = (char)((value - 0.50) / (1.0 - 0.50) * 255);
   }
   
 /* This color mapping is from the old demo.
@@ -221,12 +231,29 @@ WidgetSpectrogram::create_y_axis()
   this->m_y_axis = new double[this->my_height];
 
   for (unsigned int ind = 0; ind < this->my_height; ind++) {
-    // Linear y-axis in range [0,1]. (Also base for the logarithmic axis.)
+    // Linear y-axis in range [0,1]. (Also base for the other axises.)
     this->m_y_axis[ind] = (double)ind / (this->my_height - 1);
     
+    //  Half logarithmic and half linear y-axis. Range (0,1].
+    // (These code lines may be commented out if linear y-axis is wanted.)
+    //*
+    const double lin2log_index = 0.7;
+    const double lin_size = 0.15;
+    if (this->m_y_axis[ind] < lin2log_index) {
+      this->m_y_axis[ind] = this->m_y_axis[ind] / lin2log_index * lin_size;
+    }
+    else {
+      const double max_value = 1.0;
+      const double min_value = lin_size;
+      this->m_y_axis[ind] = min_value *
+                              pow(max_value / min_value,
+                                  (this->m_y_axis[ind] - lin2log_index) / (1.0 - lin2log_index));
+    }
+    //*/
+
     //  Logarithmic y-axis. Range (0,1]. (These code lines may be commented out
     // if linear y-axis is wanted.)
-    //*
+    /*
     const double max_value = 1.0;
     const double min_value = 0.01;
     this->m_y_axis[ind] = min_value * pow(max_value / min_value, this->m_y_axis[ind]);

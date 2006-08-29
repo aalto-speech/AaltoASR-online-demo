@@ -23,6 +23,9 @@ public:
 
   /** Set mode. */  
   void set_mode(Mode mode);
+  
+  /** \param mute When mute is set to true, no output is played whatsoever. */
+  void set_mute(bool mute);
 
   /** Constructs an audio input controller.
    * \param out_queue The out queue which the audio messages should be sent
@@ -115,8 +118,10 @@ private:
   Mode m_mode;
 
   bool m_paused;
+  bool m_mute;
 
 };
+
 //*
 bool
 AudioInputController::is_eof() const

@@ -80,14 +80,13 @@ Application::initialize(unsigned int width, unsigned int height)
 bool
 Application::initialize(unsigned int width,
                         unsigned int height,
-                        const std::string *route,
-                        const std::string &cluster,
+                        const std::string &connect,
                         const std::string &script_file,
                         unsigned int beam,
                         unsigned int lmscale) throw(Exception)
 {
   // Create the recognizer.
-  this->m_recognizer = new RecognizerProcess(route, cluster, script_file, beam, lmscale);
+  this->m_recognizer = new RecognizerProcess(connect, script_file, beam, lmscale);
 
   return this->initialize(width, height);
 }

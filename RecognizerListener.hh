@@ -3,7 +3,6 @@
 #define RECOGNIZERLISTENER_HH_
 
 #include <pthread.h>
-#include "RecognitionParser.hh"
 #include "RecognizerStatus.hh"
 #include "msg.hh"
 
@@ -17,7 +16,7 @@ public:
   /** Constructs a new in queue listener.
    * \param in_queue In queue to listen.
    * \param recognition Recognition messages are passed to this object. */
-  RecognizerListener(msg::InQueue *in_queue, RecognitionParser *recognition);
+  RecognizerListener(msg::InQueue *in_queue, RecognizerStatus *recognition);
   /** Destructs the object. */
   ~RecognizerListener();
 
@@ -54,7 +53,7 @@ private:
    * thread and raise a broken pipe flag. */
   void run() throw(msg::ExceptionBrokenPipe);
 
-  RecognitionParser *m_recognition; //!< Object for recognition message parsing.
+  RecognizerStatus *m_recognition; //!< Object for recognition message parsing.
   msg::InQueue *m_in_queue; //!< The in queue to read.
 
   bool m_stop; //!< Flag telling when to quit the thread.

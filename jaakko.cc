@@ -13,11 +13,11 @@ int main(int argc, char* argv[])
   config(0, "help", "", "", "Help text.");
   config('w', "width", "arg", "1024", "Window width.");
   config('h', "height", "arg", "768", "Window height.");
-  config(0, "host", "arg", "itl-cl1", "Recognizer is run on this computer via SSH.");
+  config(0, "host", "arg", "", "Recognizer is run on this computer via SSH.");
   config(0, "script", "arg", "rec.sh", "Script file that starts recognizer.");
   config('b', "", "", "", "Allow less than 4 byte int.");
   config('d', "", "", "", "Disables the recognizer.");
-  config(0, "route", "arg", "", "SSH connection to this computer which establishes SSH connection to cluster.");
+  config(0, "connect", "arg", "", "SSH connection command, e.g. \"ssh pyramid.hut.fi ssh itl-cl1\".");
 
   config.default_parse(argc, argv);
   
@@ -46,19 +46,28 @@ int main(int argc, char* argv[])
                         config["height"].get_int());
   }  
   else {
+    // Check that parameters are specified in a correct way.
     if (!config["beam"].specified) {
       fprintf(stderr, "Beam must be specified by \"--beam\"\n");
     }
     else if (!config["lmscale"].specified) {
       fprintf(stderr, "LM-scale must be specified by \"--lmscale\"\n");
     }
+    else if (config["host"].specified && config["connect"].specified) {
+      fprintf(stderr, "You cannot specify both host and connect parameters.\n");
+    }
     else {
       try {
-        std::string route = config["route"].get_str();
+        // Set the connection parameter.
+        std::string connect; 
+        if (config["host"].specified)
+          connect = "ssh " + config["host"].get_str();
+        else if (config["connect"].specified)
+          connect = config["connect"].get_str();
+          
         ok = app.initialize(config["width"].get_int(),
                             config["height"].get_int(),
-                            config["route"].specified ? &route : NULL,
-                            config["host"].get_str(),
+                            connect,
                             config["script"].get_str(),
                             (unsigned)config["beam"].get_int(),
                             (unsigned)config["lmscale"].get_int());
