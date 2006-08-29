@@ -21,16 +21,19 @@ public:
   static const unsigned int MAX_LMSCALE; //!< Maximum LM-scale value.
   
   /** Constructs the object.
-   * \param computer SSH connection will be established to this computer.
+   * \param route Optional computer to which the first SSH connection is made,
+   *              and then connects to cluster computer.
+   * \param cluster Recognizer is run on this computer via SSH.
    * \param script This file will be run on the computer.
    * \param beam Beam value.
    * \param lmscale LM-scale value. */
-  RecognizerProcess(const std::string &computer,
+  RecognizerProcess(const std::string *route,
+                    const std::string &cluster,
                     const std::string &script,
                     unsigned int beam,
                     unsigned int lmscale) throw(Exception);
   /** Destructs the object. */
-  ~RecognizerProcess() { }
+  ~RecognizerProcess();
   
   /** Starts a new process for the recognizer and constructs the communication
    * queues.
@@ -95,7 +98,8 @@ private:
   msg::InQueue m_in_queue; //!< In queue from recognizer.
   msg::OutQueue m_out_queue; //!< Out queue to recognizer.
   
-  std::string m_computer; //!< SSH connection will be established to this.
+  std::string *m_route;
+  std::string m_cluster; //!< SSH connection will be established to this.
   std::string m_script; //!< Script file used to launch the recognizer.
   int m_beam; //!< Beam parameter value.
   int m_lmscale; //!< LM-scale parameter value.
@@ -116,7 +120,7 @@ RecognizerProcess::get_out_queue()
 const std::string&
 RecognizerProcess::get_computer() const
 {
-  return this->m_computer;
+  return this->m_cluster;
 }
 
 const std::string&

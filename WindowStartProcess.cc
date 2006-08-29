@@ -29,25 +29,22 @@ WindowStartProcess::do_opening()
   }
   
   // Finish old process and start a new one.
+//  fprintf(stderr, "WindowStartProcess 1\n");
   this->m_recognizer->finish();
   this->m_recognizer->start();
+//  fprintf(stderr, "WindowStartProcess 2\n");
   
-/*
-  this->finish_process_and_queues();
-
-  this->start_process();
-  this->start_queues();
-  //*/
   WindowWaitRecognizer::do_opening();
+//  fprintf(stderr, "WindowStartProcess 3\n");
   
   try {
     this->m_recognizer->send_settings();
     this->m_recognizer->get_out_queue()->flush();
-//    Settings::send_settings(this->m_out_queue);
   }
   catch (msg::ExceptionBrokenPipe) {
     this->handle_broken_pipe();
   }
+//  fprintf(stderr, "WindowStartProcess 4\n");
 }
 
 void

@@ -6,7 +6,7 @@ WindowMessageBox::WindowMessageBox(const PG_Widget *parent,
                                    const std::string &title,
                                    const std::string &message,
                                    const std::string &button)
-  : WindowChild(parent, title, 300, 200, false, button)
+  : WindowChild(parent, title, 300, 200, false, true, button)
 {
   this->m_message = message;
 }
@@ -16,7 +16,7 @@ WindowMessageBox::WindowMessageBox(const PG_Widget *parent,
                                    const std::string &message,
                                    const std::string &button1,
                                    const std::string &button2)
-  : WindowChild(parent, title, 300, 200, false, button1, button2)
+  : WindowChild(parent, title, 300, 200, false, true, button1, button2)
 {
   this->m_message = message;
 }

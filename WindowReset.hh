@@ -1,4 +1,4 @@
-
+/*
 #ifndef WINDOWRESET_HH_
 #define WINDOWRESET_HH_
 
@@ -23,3 +23,4 @@ protected:
 };
 
 #endif /*WINDOWRESET_HH_*/
+//*/

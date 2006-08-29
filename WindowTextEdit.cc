@@ -6,7 +6,7 @@ WindowTextEdit::WindowTextEdit(const PG_Widget *parent,
                                Uint16 width,
                                Uint16 height,
                                std::string *text)
-  : WindowChild(parent, title, width, height, true, "OK", "Cancel")
+  : WindowChild(parent, title, width, height, true, false, "OK", "Cancel")
 {
   this->m_text = text;
   this->m_text_area = NULL;

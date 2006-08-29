@@ -31,6 +31,7 @@ WindowWaitRecognizer::handle_broken_pipe()
 void
 WindowWaitRecognizer::do_running()// throw(msg::ExceptionBrokenPipe)
 {
+//  fprintf(stderr, "WindowWaitRecognizer 1\n");
   if (this->m_in_queue->get_eof()) {
     fprintf(stderr, "Warning: WindowWaitRecognizer got eof from input!\n");
     this->handle_broken_pipe();
@@ -38,6 +39,7 @@ WindowWaitRecognizer::do_running()// throw(msg::ExceptionBrokenPipe)
     //throw msg::ExceptionBrokenPipe(this->m_in_queue->get_fd());
   }
   
+//  fprintf(stderr, "WindowWaitRecognizer 2\n");
   this->m_in_queue->flush();
   if (!this->m_in_queue->empty()) {
     msg::Message message = this->m_in_queue->queue.front();
@@ -47,5 +49,6 @@ WindowWaitRecognizer::do_running()// throw(msg::ExceptionBrokenPipe)
     }
     this->m_in_queue->queue.pop_front();
   }
+//  fprintf(stderr, "WindowWaitRecognizer 3\n");
 }
 

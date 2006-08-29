@@ -20,12 +20,14 @@ public:
               Uint16 width,
               Uint16 height,
               bool close,
+              bool enter_as_ok,
               const std::string &ok_text);
   WindowChild(const PG_Widget *parent,
               const std::string &title,
               Uint16 width,
               Uint16 height,
               bool close,
+              bool enter_as_ok,
               const std::string &ok_text,
               const std::string &cancel_text);
               
@@ -54,7 +56,8 @@ private:
   const Uint16 m_width;
   const Uint16 m_height;
   bool m_close;
-  
+  bool m_enter_as_ok;
+    
   int m_button_count;
   std::string m_ok_text;
   std::string m_cancel_text;

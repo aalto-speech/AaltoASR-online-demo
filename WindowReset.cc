@@ -1,4 +1,4 @@
-
+/*
 #include "WindowReset.hh"
 
 WindowReset::WindowReset(const PG_Widget *parent,
@@ -28,3 +28,4 @@ WindowReset::do_opening()
   }
   WindowWaitRecognizer::do_opening();
 }
+//*/

@@ -13,10 +13,11 @@ int main(int argc, char* argv[])
   config(0, "help", "", "", "Help text.");
   config('w', "width", "arg", "1024", "Window width.");
   config('h', "height", "arg", "768", "Window height.");
-  config(0, "cluster", "arg", "itl-cl1", "Computer to take ssh connection and run recognizer.");
+  config(0, "host", "arg", "itl-cl1", "Recognizer is run on this computer via SSH.");
   config(0, "script", "arg", "rec.sh", "Script file that starts recognizer.");
   config('b', "", "", "", "Allow less than 4 byte int.");
   config('d', "", "", "", "Disables the recognizer.");
+  config(0, "route", "arg", "", "SSH connection to this computer which establishes SSH connection to cluster.");
 
   config.default_parse(argc, argv);
   
@@ -29,8 +30,8 @@ int main(int argc, char* argv[])
   // the necessary ParaGUI source code files into this project, rename the
   // classes and convert ints to Sint32/Uint32.
   if (!config['b'].specified && sizeof(int) < 4) {
-    fprintf(stdout, "This program assumes that system uses 4 bytes for int. "
-                    "Your system uses only %d.\nProgram will exit.\n",
+    fprintf(stdout, "This program assumes that system uses at least 4 bytes "
+                    "for int. Your system uses only %d.\nProgram will exit.\n",
                     "To ignore this error start application with -b flag.\n",
                     sizeof(int));
     return EXIT_FAILURE;
@@ -53,9 +54,11 @@ int main(int argc, char* argv[])
     }
     else {
       try {
+        std::string route = config["route"].get_str();
         ok = app.initialize(config["width"].get_int(),
                             config["height"].get_int(),
-                            config["cluster"].get_str(),
+                            config["route"].specified ? &route : NULL,
+                            config["host"].get_str(),
                             config["script"].get_str(),
                             (unsigned)config["beam"].get_int(),
                             (unsigned)config["lmscale"].get_int());

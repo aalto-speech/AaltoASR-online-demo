@@ -80,13 +80,14 @@ Application::initialize(unsigned int width, unsigned int height)
 bool
 Application::initialize(unsigned int width,
                         unsigned int height,
-                        const std::string &ssh_to,
+                        const std::string *route,
+                        const std::string &cluster,
                         const std::string &script_file,
                         unsigned int beam,
                         unsigned int lmscale) throw(Exception)
 {
   // Create the recognizer.
-  this->m_recognizer = new RecognizerProcess(ssh_to, script_file, beam, lmscale);
+  this->m_recognizer = new RecognizerProcess(route, cluster, script_file, beam, lmscale);
 
   return this->initialize(width, height);
 }
@@ -135,12 +136,6 @@ Application::run()
       recognizer_window->run_modal();
       delete recognizer_window;
     }
-    /*
-    while (this->m_current_window) {
-      int ret_val = this->m_current_window->run_modal();
-      this->next_window(ret_val);
-    }
-    //*/
   }
   catch (msg::ExceptionBrokenPipe exception) {
     fprintf(stderr, "Error: Unhandled broken pipe exception. Program exits.\n");

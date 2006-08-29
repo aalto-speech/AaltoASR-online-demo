@@ -107,11 +107,22 @@ WindowRecognizer::initialize()
 void
 WindowRecognizer::do_opening()
 {
-//  fprintf(stderr, "WR do_opening1\n");
+  // Initialize audio input.
   this->m_audio_input = new AudioInputController(this->m_recognizer ? this->m_recognizer->get_out_queue() : NULL);
-  if (!this->m_audio_input->initialize()) {
-    this->error("Audio input controller initialization failed. Try closing all other programs.", ERROR_CLOSE);
-    return;
+  while (!this->m_audio_input->initialize()) {
+    // Audio input initialization may fail if audio device is already in use.
+    this->m_audio_input->terminate();
+    WindowMessageBox message(this->m_window,
+                             "Audio initialization error",
+                             "Audio input controller initialization failed. Try closing all other programs.",
+                             "Retry",
+                             "Exit");
+    message.initialize();
+    // Show the window and quit the program if Retry was not pressed.
+    if (this->run_child_window(&message) != 1) {
+      this->end_running(0);
+      return;
+    }
   }
 
   // These constants are used to construct the following areas.
@@ -317,10 +328,6 @@ WindowRecognizer::pause_window_functionality(bool pause)
 void
 WindowRecognizer::reset(bool reset_audio)
 {
-  WindowReset window(this->m_window,
-                     this->m_recognizer ? this->m_recognizer->get_in_queue() : NULL,
-                     this->m_recognizer ? this->m_recognizer->get_out_queue() : NULL);
-
   // Window functionality will be paused and unpaused when running a child
   // window but we want to do these pauses before running the child window
   // because we are resetting some shared resources.
@@ -338,8 +345,12 @@ WindowRecognizer::reset(bool reset_audio)
   this->m_recognition_area->reset();
   this->m_recognition_area->update();
 
-  window.initialize();
   /*
+  WindowReset window(this->m_window,
+                     this->m_recognizer ? this->m_recognizer->get_in_queue() : NULL,
+                     this->m_recognizer ? this->m_recognizer->get_out_queue() : NULL);
+
+  window.initialize();
   if (this->run_child_window(&window) == -1) {
     this->m_broken_pipe = true;
     return;

@@ -5,7 +5,7 @@
 // This is to fasten debugging..
 
 WindowFile::WindowFile(const PG_Widget *parent, const std::string &title)
-  : WindowChild(parent, title, 400, 200, true, "OK", "Cancel")
+  : WindowChild(parent, title, 400, 200, true, true, "OK", "Cancel")
 {
   this->m_filename_textbox = NULL;
 }

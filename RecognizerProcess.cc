@@ -7,12 +7,18 @@ const unsigned int RecognizerProcess::MAX_BEAM = 200;
 const unsigned int RecognizerProcess::MIN_LMSCALE = 1;
 const unsigned int RecognizerProcess::MAX_LMSCALE = 100;
 
-RecognizerProcess::RecognizerProcess(const std::string &computer,
+RecognizerProcess::RecognizerProcess(const std::string *route,
+                                     const std::string &cluster,
                                      const std::string &script,
                                      unsigned int beam,
                                      unsigned int lmscale) throw(Exception)
 {
-  this->m_computer = computer;
+  this->m_route = NULL;
+  if (route) {
+    this->m_route = new std::string;
+    *this->m_route = *route;
+  }
+  this->m_cluster = cluster;
   this->m_script = script;
   
   // Try to read default settings from the script file.
@@ -27,17 +33,46 @@ RecognizerProcess::RecognizerProcess(const std::string &computer,
   }
 }
 
+RecognizerProcess::~RecognizerProcess()
+{
+  delete this->m_route;
+}
+
 void
 RecognizerProcess::start()
 {
   // Fork a child process.
   if (this->m_process.create() == 0) {
+//    fcloseall();
+    exit(1);
     // Child process enters here.
-    int ret = execlp("ssh",
-                     "ssh",
-                     this->m_computer.data(),
-                     this->m_script.data(),
-                     (char*)NULL);
+    int ret;
+    if (this->m_route) {
+      //*
+      std::string connect = "ssh pyramid.hut.fi ssh itl-cl1";
+      ret = execlp("sssh",//connect.c_str(),
+                   "ssh",
+                   this->m_script.data(),
+                   (char*)NULL);
+                   //*/
+                   /*
+      ret = execlp("ssh",
+                   "ssh",
+                   "-t",
+                   this->m_route->data(),
+                   "ssh",
+                   this->m_cluster.data(),
+                   this->m_script.data(),
+                   (char*)NULL);
+                   //*/
+    }
+    else {
+      ret = execlp("ssh",
+                   "ssh",
+                   this->m_cluster.data(),
+                   this->m_script.data(),
+                   (char*)NULL);
+    }     
                     
     if (ret < 0) {
       perror("Recognizer process failed exec()");
@@ -48,13 +83,17 @@ RecognizerProcess::start()
   }
   // Parent process continues here.
   
+//  fprintf(stderr, "RecognizerProcess start 1\n");
   msg::set_non_blocking(this->m_process.read_fd);
   msg::set_non_blocking(this->m_process.write_fd);
   
+//  fprintf(stderr, "RecognizerProcess start 2\n");
   this->m_in_queue.enable(this->m_process.read_fd);
   this->m_out_queue.enable(this->m_process.write_fd);
 
-  this->send_settings();  
+//  fprintf(stderr, "RecognizerProcess start 3\n");
+  this->send_settings();
+//  fprintf(stderr, "RecognizerProcess start 4\n");
 }
 
 void
@@ -71,7 +110,7 @@ bool
 RecognizerProcess::set_computer(const std::string &computer)
 {
   if (!this->m_process.is_created()) {
-    this->m_computer = computer;
+    this->m_cluster = computer;
     return true;
   }
   return false;

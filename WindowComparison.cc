@@ -5,7 +5,7 @@
 WindowComparison::WindowComparison(PG_Widget *parent,
                                    const std::string &reference,
                                    const std::string &hypothesis)
-  : WindowChild(parent, "Comparison results", 300, 530, true, "OK"),
+  : WindowChild(parent, "Comparison results", 300, 530, true, true, "OK"),
     m_reference(reference),
     m_hypothesis(hypothesis)
 {

@@ -99,14 +99,18 @@ TextComparer::compare(const std::string &reference,
 bool
 TextComparer::write_temp_file(std::string &filename, const std::string &content)
 {
-  char file[] = "tempXXXXXX";
+  char file[] = "/tmp/tempXXXXXX";
   bool ok = false;
   int fd = mkstemp(file);
   if (write(fd, content.data(), content.size()) == (long)content.size() &&
       fsync(fd) == 0) {
-        
+    
     filename = file;
     ok = true;
+  }
+  else {
+    std::string error = str::fmt(50, "Failed to write temporary file \"%s\"", file);
+    perror(error.c_str());
   }
   close(fd);
   return ok;

@@ -11,6 +11,7 @@ WindowChild::WindowChild(const PG_Widget *parent,
 {
   this->m_title = title;
   this->m_close = close;
+  this->m_enter_as_ok = false;
   this->m_button_count = 0;
 }
 
@@ -19,11 +20,13 @@ WindowChild::WindowChild(const PG_Widget *parent,
                          Uint16 width,
                          Uint16 height,
                          bool close,
+                         bool enter_as_ok,
                          const std::string &ok_text)
   : m_parent(parent), m_width(width), m_height(height)
 {
   this->m_title = title;
   this->m_close = close;
+  this->m_enter_as_ok = enter_as_ok;
   this->m_ok_text = ok_text;
   this->m_button_count = 1;
 }
@@ -33,12 +36,14 @@ WindowChild::WindowChild(const PG_Widget *parent,
                          Uint16 width,
                          Uint16 height,
                          bool close,
+                         bool enter_as_ok,
                          const std::string &ok_text,
                          const std::string &cancel_text)
   : m_parent(parent), m_width(width), m_height(height)
 {
   this->m_title = title;
   this->m_close = close;
+  this->m_enter_as_ok = enter_as_ok;
   this->m_ok_text = ok_text;
   this->m_cancel_text = cancel_text;
   this->m_button_count = 2;
@@ -144,7 +149,7 @@ bool
 WindowChild::handle_key_pressed(const SDL_KeyboardEvent *key)
 {
   if (key->keysym.sym == SDLK_RETURN) {
-    if (this->m_button_count > 0) {
+    if (this->m_enter_as_ok) {
       this->handle_ok_button();
       return true;
     }
