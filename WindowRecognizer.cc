@@ -131,9 +131,9 @@ WindowRecognizer::do_opening()
 
   // Create area for original and recognized texts.
   this->m_comparison_area = new WidgetComparisonArea(*this,
-                                           PG_Rect(0,
+                                           PG_Rect(10,
                                                    top,
-                                                   this->m_window->Width(),
+                                                   this->m_window->Width() - 20,
                                                    (int)(text_part * height)),
                                            &this->m_recog_status);
                                            

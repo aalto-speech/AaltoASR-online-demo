@@ -12,10 +12,9 @@
 	<type value="Background"/>
 	<object>
 	    <name value="Background"/>
-	    <!-- filename name="background" value="theme/background.png"/ -->
-	    <!-- property name="backmode" value="TILE"/ -->
 	    <filename name="background" value="theme/background.png"/>
 	    <property name="backmode" value="TILE"/>
+	    <!-- color name="backcolor" value="0x66666F66"/ -->
 	</object>
     </widget>
     
@@ -30,9 +29,9 @@
 	<type value="ThemeWidget"/>
 	<object>
 	    <name value="ThemeWidget"/>
-	    <filename name="background" value="theme/back.bmp"/>
+	    <!-- filename name="background" value="theme/back.bmp"/ -->
 	    <property name="backmode" value="TILE"/>
-	    <gradient name="gradient" color0="0x00B0B1B6" color1="0x0083838D" color2="0x007B7B83" color3="0x00585765"/>
+	    <gradient name="gradient" color0="0x00A0A1A6" color1="0x0083838D" color2="0x007B7B83" color3="0x00585765"/>
 	    <property name="blend" value="200"/>
 	</object>
     </widget>
