@@ -98,19 +98,6 @@ WindowRecognizer::initialize()
                                                 this->m_window->Width() - 20,
                                                 20),
                                         &this->m_recog_status);
-  /*
-  this->m_rec_status_label = new PG_Label(this->m_window,
-                                      PG_Rect(10,
-                                              this->m_window->Height() - 25,
-                                              this->m_window->Width() - 10,
-                                              20));
-
-  this->m_ada_status_label = new PG_Label(this->m_window,
-                                      PG_Rect(350,
-                                              this->m_window->Height() - 25,
-                                              this->m_window->Width() - 10,
-                                              20));
-  //*/
 }
 
 void
@@ -139,7 +126,7 @@ WindowRecognizer::do_opening()
   const unsigned int space = 5;
   const unsigned int bottom = 35;
   const unsigned int height = this->m_window->Height() - (top + space + bottom);
-  const float text_part = 0.4;
+  const float text_part = 0.45;
   const float recognizer_part = 1.0 - text_part;
 
   // Create area for original and recognized texts.

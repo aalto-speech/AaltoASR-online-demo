@@ -6,7 +6,7 @@
     <author value="Jaakko Luttinen"/>
     <email value="jluttine@cis.hut.fi"/>
 
-    <font name="default" value="theme/Vera.ttf" size="16"/>
+    <font name="default" value="theme/Vera.ttf" size="15"/>
 
     <widget>
 	<type value="Background"/>
