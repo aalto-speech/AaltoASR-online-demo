@@ -3,27 +3,11 @@
 #include "WindowStartProcess.hh"
 #include "WindowRecognizer.hh"
 #include "WindowSettings.hh"
-//#include "scrap.h"
-
-
-
-//Application* Application::app = NULL;
 
 Application::Application()
 {
   this->m_recognizer = NULL;
-//  this->m_out_queue = NULL;
-//  this->m_in_queue = NULL;
-  
-//  this->m_current_window = NULL;
-//  this->m_startprocess_window = NULL;
-//  this->m_main_window = NULL;
-//  this->m_recognizer_window = NULL;
-//  this->m_microphone_window = NULL;
-  
   this->m_app = NULL;
-  
-//  Application::app = this;
 }
 
 Application::~Application()
@@ -54,7 +38,7 @@ Application::initialize(unsigned int width, unsigned int height)
   }
 //  this->m_app->EnableAppIdleCalls(); 
 //  this->m_app->SetEmergencyQuit(true);
-  this->m_app->LoadTheme("default");
+  this->m_app->LoadTheme("demo", true, "./");
   this->m_app->SetCaption("Online-demo", NULL);
 //  this->m_app->DeleteBackground();
   this->m_app->RedrawBackground(PG_Rect(0, 0, this->m_app->GetScreenWidth(), this->m_app->GetScreenHeight()));

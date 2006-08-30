@@ -2,6 +2,7 @@
 #ifndef APPLICATION_HH_
 #define APPLICATION_HH_
 
+//#include <pgapplication.h>
 #include <pgapplication.h>
 #include "RecognizerProcess.hh"
 #include "Window.hh"
@@ -62,13 +63,6 @@ private:
   // Recognizer process
   RecognizerProcess *m_recognizer;
   
-  // Windowing system
-//  Window *m_current_window;
-//  Window *m_startprocess_window;
-//  Window *m_main_window;
-//  Window *m_recognizer_window;
-//  Window *m_microphone_window;
-
   // ParaGUI
   PG_Application *m_app;
   
