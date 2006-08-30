@@ -31,7 +31,7 @@ public:
    * \param height Application window height.
    * \param connect Optional SSH connection command,
    *                e.g. "ssh pyramid.hut.fi ssh itl-cl3".
-   * \param script_file File that should be run in the ssh computer.
+   * \param script_file File that should be run in the ssh computer or locally.
    * \param beam Beam value.
    * \param lmscale LM-scale value.
    * \return false if ParaGUI initialization failed. */

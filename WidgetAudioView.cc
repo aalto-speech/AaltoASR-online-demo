@@ -22,9 +22,6 @@ WidgetAudioView::WidgetAudioView(PG_Widget *parent,
   
   this->m_background_color = 0;
 
-//  SDL_Surface *surface = this->GetWidgetSurface();
-//  this->m_foreground_color = SDL_MapRGB(surface->format, 255, 255, 0);
-//  this->m_background_color = this->get_background_color(surface->format);//SDL_MapRGB(surface->format, 10, 100, 20);
 }
 
 WidgetAudioView::~WidgetAudioView()
@@ -49,10 +46,7 @@ WidgetAudioView::initialize()
                                                     surface->format->Amask);
 
   SDL_FillRect(surface, NULL, this->m_background_color);
-  
-  // This filling is just for debuging purposes. Blue should not be seen at anytime!
-//  SDL_FillRect(this->m_surface_backbuffer, NULL, SDL_MapRGB(surface->format,
-//                                                            0, 0, 255));
+
 }
 
 void

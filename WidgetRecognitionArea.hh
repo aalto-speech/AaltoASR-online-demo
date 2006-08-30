@@ -30,6 +30,8 @@ public:
   void update();
   
   void set_scroll_position(unsigned long page);
+  
+  inline WidgetSpectrogram* get_spectrogram();
 
 protected:
   
@@ -70,6 +72,12 @@ private:
   Autoscroll m_autoscroll; //!< Auto scrolling status.
   
 };
+
+WidgetSpectrogram*
+WidgetRecognitionArea::get_spectrogram()
+{
+  return this->m_spectrogram;
+}
 
 unsigned long
 WidgetRecognitionArea::get_audio_cursor() const

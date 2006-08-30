@@ -40,6 +40,20 @@ WidgetSpectrogram::~WidgetSpectrogram()
 }
 
 void
+WidgetSpectrogram::set_magnitude_exponent(double exponent)
+{
+  this->m_magnitude_exponent = exponent;
+  this->m_force_redraw = true;
+}
+
+void
+WidgetSpectrogram::set_magnitude_suppressor(double suppressor)
+{
+  this->m_magnitude_suppressor = suppressor;
+  this->m_force_redraw = true;
+}
+
+void
 WidgetSpectrogram::create_y_axis(double linear_height, double linear_data)
 {
   // Check that parameters are valid.

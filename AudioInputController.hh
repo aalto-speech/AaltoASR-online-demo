@@ -117,8 +117,8 @@ private:
   AudioBuffer m_input_buffer;
   Mode m_mode;
 
-  bool m_paused;
-  bool m_mute;
+  bool m_paused; //!< When paused, only playback may be played.
+  bool m_mute; //!< When muted, no output is played whatsoever.
 
 };
 

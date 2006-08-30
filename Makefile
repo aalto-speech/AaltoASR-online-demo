@@ -41,7 +41,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	AudioInputController.cc \
 	Application.cc Window.cc \
 	WidgetWave.cc \
-	WindowReset.cc WindowRecognizer.cc \
+	WindowRecognizer.cc \
 	WidgetRecognitionArea.cc str.cc WidgetRecognitionText.cc \
 	WidgetScrollArea.cc WindowFile.cc WindowMessageBox.cc \
 	WidgetSpectrogram.cc WindowChild.cc WindowSettings.cc \

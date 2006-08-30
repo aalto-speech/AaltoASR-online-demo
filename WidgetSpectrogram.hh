@@ -3,10 +3,9 @@
 #define WIDGETSPECTROGRAM_HH_
 
 #include <fftw3.h>
-//#include "WidgetWave.hh"
 #include "WidgetAudioView.hh"
 
-class WidgetSpectrogram  :  public WidgetAudioView//WidgetWave
+class WidgetSpectrogram  :  public WidgetAudioView
 {
 
 public:
@@ -48,10 +47,13 @@ public:
    *                    view shows data starting from this value. It must be
    *                    more than zero. */
   void create_y_axis(double linear_height, double linear_data);
+  
+  inline double get_magnitude_exponent() const;
+  inline double get_magnitude_suppressor() const;
+  void set_magnitude_exponent(double exponent);
+  void set_magnitude_suppressor(double suppressor);
 
 protected:
-
-//  virtual Uint32 get_background_color(SDL_PixelFormat *format) const;
 
   virtual void fix_oldview_size(unsigned int oldview_from,
                                 unsigned int &oldview_size);
@@ -83,5 +85,17 @@ private:
 //  double *m_screen_vector_values;
   
 };
+
+double
+WidgetSpectrogram::get_magnitude_exponent() const
+{
+  return this->m_magnitude_exponent;
+}
+
+double
+WidgetSpectrogram::get_magnitude_suppressor() const
+{
+  return this->m_magnitude_suppressor;
+}
 
 #endif /*WIDGETSPECTROGRAM_HH_*/

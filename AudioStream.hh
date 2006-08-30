@@ -17,7 +17,8 @@ const unsigned long SAMPLE_RATE = 16000;
 // This definition makes a bit nicer code.
 typedef Buffer<AUDIO_FORMAT> AudioBuffer;
 
-// I define these functions here because they need to know the audio format.
+// I define these functions here because they need to know the audio format
+// and do some own definitions acoording to that.
 // Everything that has this kind of audio format dependency should be
 // defined here to make it easier to change the audio format.
 namespace audio

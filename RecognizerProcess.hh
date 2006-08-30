@@ -54,18 +54,6 @@ public:
    * Note: Doesn't flush because making sure the messages are really flushed
    *       could block the thread. */
   void send_settings();
-  /** Reads parameter values from the script file that launched the recognizer.
-   * \return false if failed to read the parameter values. */
-//  bool read_settings();
-
-  /** Tries to set the computer which the ssh connection is established to.
-   * \param computer SSH connection will be established to this computer.
-   * \return false if process is started. */
-//  bool set_computer(const std::string &computer);
-  /** Tries to set the script file which is run on the ssh computer.
-   * \param script The file to launch the recognizer.
-   * \return false if process is started. */
-//  bool set_script(const std::string &script);
   /** Tries to set the beam parameter. Puts the message into out queue but
    * doesn't flush.
    * \param beam Beam value.
@@ -77,10 +65,6 @@ public:
    * \return false if parameter value was invalid. */
   bool set_lmscale(unsigned int lmscale);
 
-  /** \return SSH connection is established to this computer. */
-//  inline const std::string& get_computer() const;
-  /** \return This script file is run to launch the recognizer. */
-//  inline const std::string& get_script() const;
   /** \return Beam value. */
   inline unsigned int get_beam() const;
   /** \return LM-scale value. */

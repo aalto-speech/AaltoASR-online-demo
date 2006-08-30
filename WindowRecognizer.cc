@@ -151,6 +151,8 @@ WindowRecognizer::do_opening()
                                            &this->m_recog_status);
                                            
   // Create area for wave, spectrogram and recognition text.
+  // You may adjust the last parameter (pixels_per_second) to change the
+  // time resolution!
   this->m_recognition_area =
     new WidgetRecognitionArea(this->m_window,
                               PG_Rect(0,
@@ -194,48 +196,17 @@ WindowRecognizer::do_running()
   // Check broken pipe flags.
   if (this->m_broken_pipe || this->m_recog_listener.is_broken_pipe()) {
     this->m_recog_listener.stop();
-//    this->m_queue.disable();
     this->handle_broken_pipe();
     this->m_recog_listener.start();
   }
   else {
     if (this->m_audio_input->is_eof() && this->m_record_button->IsHidden())
       this->handle_stop_button();
-//    unsigned long read_size = this->get_audio_input()->operate();
 
     this->m_audio_input->operate();
     this->flush_out_queue();
     this->m_recognition_area->update();
     this->m_status_bar->update();
-//    fprintf(stderr, "running1\n");
-/*
-    std::string rec_stat, ada_stat;
-    switch (this->m_recog_status.get_recognition_status()) {
-    case RecognizerStatus::READY:
-      rec_stat = "Recognizer status: Ready";
-      break;
-    case RecognizerStatus::RECOGNIZING:
-      rec_stat = "Recognizer status: Recognizing";
-      break;
-    case RecognizerStatus::RESETTING:
-      rec_stat = "Recognizer status: Resetting";
-      break;
-    }
-    switch (this->m_recog_status.get_adaptation_status()) {
-    case RecognizerStatus::NONE:
-      ada_stat = "Adaptation status: None";
-      break;
-    case RecognizerStatus::ADAPTING:
-      ada_stat = "Adaptation status: Adapting";
-      break;
-    case RecognizerStatus::ADAPTED:
-      ada_stat = "Adaptation status: Adapted";
-      break;
-    }
-    this->m_rec_status_label->SetText(rec_stat.c_str());
-    this->m_ada_status_label->SetText(ada_stat.c_str());
-//    fprintf(stderr, "running2\n");
- //*/
   }
   
 }
@@ -574,7 +545,9 @@ WindowRecognizer::handle_resetrecog_button()
 bool
 WindowRecognizer::handle_settings_button()
 {
-  WindowSettings window(this->m_window, this->m_recog_proc);
+  WindowSettings window(this->m_window,
+                        this->m_recog_proc,
+                        this->m_recognition_area->get_spectrogram());
   window.initialize();
   if (this->run_child_window(&window) == -1) {
     this->m_broken_pipe = true;
@@ -588,44 +561,10 @@ WindowRecognizer::handle_back_button()
   this->end_running(1);
   return true;
 }
-/*
-bool
-WindowRecognizer::handle_adapt_button()
-{
-  msg::Message message(msg::M_ADAPT_ON);//, true);
-  
-  if (this->m_adapt_button->GetPressed()) {
-    message.set_type(msg::M_ADAPT_ON);
-//    this->reset(false);
-  }
-  else {
-    message.set_type(msg::M_ADAPT_OFF);
-//    if (this->m_status != END_OF_AUDIO)
-//      this->end_of_audio();
-  }
 
-  if (this->m_recognizer) {
-    this->m_recognizer->get_out_queue()->add_message(message);
-    this->flush_out_queue();
-  }
-  
-  return true;
-}
-//*/
-/*
-bool
-WindowRecognizer::handle_adapt_check()
-{
-  // ParaGUI check button doesn't (for some reason) uncheck when pressed.
-  if (this->m_adapt_check->GetPressed())
-    this->m_adapt_check->SetUnpressed();
-  return true;
-}
-//*/
 bool
 WindowRecognizer::handle_resetadaptation_button()
 {
-//  this->error("Reset adaptation not implemented.", ERROR_NORMAL);
   if (this->m_recog_proc) {
     msg::Message message(msg::M_ADAPT_RESET, true);
     this->m_recog_proc->get_out_queue()->add_message(message);

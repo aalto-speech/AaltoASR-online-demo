@@ -18,6 +18,11 @@ typedef std::list<Morpheme> MorphemeList;
 
 /** Data structure containing a morpheme lists both for recognized part and
  * hypothesis part. Recognitions are passed as a message to parse function.
+ * Also this class stores the information about the status of the recognizer.
+ * The status information should be read some other way, but this was simple
+ * and good enough, and didn't force major changes to the recognizer.
+ * This class system is a bit messy, sorry. Did not have time to plan it
+ * properly.
  * TODO: Poista lock ja unlock funktiot. Huolehdi lukoista luokan sisällä.
  *       Palauta vain kopioita luokan dataan, ei suoria viittauksia. Olisiko
  *       tällaisissa muutoksissa järkeä..(??)
@@ -37,16 +42,24 @@ public:
   RecognizerStatus();
   /** Destructs the object. */
   ~RecognizerStatus();
-  
-  // recog->reset, reset<->ready, ready->recog
+
+  /** Call when the recognizer has been reseted. Note, this doesn't reset the
+   * recognition data, it just affects the status. */  
   void reset_recognition();
+  /** Call when M_READY message is received from the recognizer. */
   void set_ready();
+  /** Call if any M_RECOG message is received from the recognizer. */
   void received_recognition();
+  /** \return Returns the status of the recognizer. */
   RecognitionStatus get_recognition_status() const;
 
+  /** Call when recognition with adaptation is started. */
   void start_adapting();
+  /** Call when adaptation is reseted. */
   void reset_adaptation();
+  /** Call when M_RECOG_END is received. */
   void recognition_end();
+  /** \return The adaptation status of the recognizer. */
   AdaptationStatus get_adaptation_status() const;
   
   /**
@@ -113,7 +126,7 @@ private:
   
   RecognitionStatus m_recognition_status;
   AdaptationStatus m_adaptation_status;
-  bool m_adapted;
+  bool m_adapted; //!< Has the recognizer been adapted at the time.
   bool m_was_adapting_when_reseted;
 
 };

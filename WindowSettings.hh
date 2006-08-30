@@ -4,31 +4,38 @@
 
 #include <pglineedit.h>
 #include "WindowChild.hh"
-//#include "msg.hh"
 #include "RecognizerProcess.hh"
+#include "WidgetSpectrogram.hh"
 
 class WindowSettings  :  public WindowChild
 {
 public:
 
-  WindowSettings(const PG_Widget *parent, RecognizerProcess *recognizer);
+  WindowSettings(const PG_Widget *parent,
+                 RecognizerProcess *recognizer,
+                 WidgetSpectrogram *spectrogram);
   virtual ~WindowSettings() { }
 
   virtual void initialize();
   
 protected:
 
-  long read_value(PG_LineEdit *line_edit, long min, long max, bool *ok);
+  // min and max not allowed
+  float read_float_value(PG_LineEdit *line_edit, float min, float max, bool *ok);
+  // min and max allowed
+  long read_long_value(PG_LineEdit *line_edit, long min, long max, bool *ok);
   
   virtual bool do_ok();
 
 private:
 
-//  msg::OutQueue *m_out_queue;
   RecognizerProcess *m_recognizer;
+  WidgetSpectrogram *m_spectrogram;
 
   PG_LineEdit *m_beam_edit;
   PG_LineEdit *m_lmscale_edit;
+  PG_LineEdit *m_exponent_edit;
+  PG_LineEdit *m_suppressor_edit;
 };
 
 #endif /*WINDOWSETTINGS_HH_*/
