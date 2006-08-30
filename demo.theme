@@ -6,13 +6,13 @@
     <author value="Jaakko Luttinen"/>
     <email value="jluttine@cis.hut.fi"/>
 
-    <font name="default" value="theme/Vera.ttf" size="15"/>
+    <font name="default" value="Vera.ttf" size="15"/>
 
     <widget>
 	<type value="Background"/>
 	<object>
 	    <name value="Background"/>
-	    <filename name="background" value="theme/background.png"/>
+	    <filename name="background" value="background.png"/>
 	    <property name="backmode" value="TILE"/>
 	    <!-- color name="backcolor" value="0x66666F66"/ -->
 	</object>
@@ -22,14 +22,14 @@
 	<type value="Pointer"/>
 	<object>
 		<name value="Pointer"/>
-		<filename name="normal" value="theme/pointer.png"/>
+		<filename name="normal" value="pointer.png"/>
 	</object>
     </widget>
     <widget>
 	<type value="ThemeWidget"/>
 	<object>
 	    <name value="ThemeWidget"/>
-	    <!-- filename name="background" value="theme/back.bmp"/ -->
+	    <!-- filename name="background" value="back.bmp"/ -->
 	    <property name="backmode" value="TILE"/>
 	    <gradient name="gradient" color0="0x00A0A1A6" color1="0x0083838D" color2="0x007B7B83" color3="0x00585765"/>
 	    <property name="blend" value="200"/>
@@ -66,13 +66,13 @@
 	    <filename name="iconup" value="none"/>
   		<filename name="icondown" value="none"/>
 
-      <filename name="apply_icon" value="theme/button_apply_icon.png"/>
-      <filename name="cancel_icon" value="theme/button_cancel_icon.png"/>
-      <filename name="close_icon" value="theme/button_close_icon.png"/>
-      <filename name="no_icon" value="theme/button_no_icon.png"/>
-      <filename name="ok_icon" value="theme/button_ok_icon.png"/>
-      <filename name="yes_icon" value="theme/button_yes_icon.png"/>
-      <filename name="help_icon" value="theme/button_help_icon.png"/>
+      <filename name="apply_icon" value="button_apply_icon.png"/>
+      <filename name="cancel_icon" value="button_cancel_icon.png"/>
+      <filename name="close_icon" value="button_close_icon.png"/>
+      <filename name="no_icon" value="button_no_icon.png"/>
+      <filename name="ok_icon" value="button_ok_icon.png"/>
+      <filename name="yes_icon" value="button_yes_icon.png"/>
+      <filename name="help_icon" value="button_help_icon.png"/>
     </object>
   </widget>
     
@@ -86,14 +86,14 @@
 	<object>
 	    <name value="ScrollbarV"/>
 	    <property name="width" value="16"/>
-	    <filename name="background" value="theme/sb_backv.png"/>
+	    <filename name="background" value="sb_backv.png"/>
 	    <property name="backmode" value="3TILEV"/>
 	    <property name="blend" value="0"/>
 	</object>
 	<object>
 	    <name value="ScrollbarH"/>
 	    <property name="height" value="16"/>
-	    <filename name="background" value="theme/sb_backh.png"/>
+	    <filename name="background" value="sb_backh.png"/>
 	    <property name="backmode" value="3TILEH"/>
 	    <property name="blend" value="0"/>
 	</object>
@@ -117,8 +117,8 @@
 	    <property name="transparency0" value="0"/>
 	    <property name="transparency1" value="0"/>
 	    <property name="transparency2" value="0"/>
-	    <filename name="iconup" value="theme/sb_left.bmp" colorkey="0x000000FF"/>
-	    <filename name="icondown" value="theme/sb_left.bmp" colorkey="0x000000FF"/>
+	    <filename name="iconup" value="sb_left.bmp" colorkey="0x000000FF"/>
+	    <filename name="icondown" value="sb_left.bmp" colorkey="0x000000FF"/>
 	</object>
 	<object>
 	    <name value="ScrollbarRight"/>
@@ -140,8 +140,8 @@
 	    <property name="transparency0" value="0"/>
 	    <property name="transparency1" value="0"/>
 	    <property name="transparency2" value="0"/>
-	    <filename name="iconup" value="theme/sb_right.bmp" colorkey="0x000000FF"/>
-	    <filename name="icondown" value="theme/sb_right.bmp" colorkey="0x000000FF"/>
+	    <filename name="iconup" value="sb_right.bmp" colorkey="0x000000FF"/>
+	    <filename name="icondown" value="sb_right.bmp" colorkey="0x000000FF"/>
 	</object>
 	<object>
 	    <name value="ScrollbarUp"/>
@@ -163,8 +163,8 @@
 	    <property name="transparency0" value="0"/>
 	    <property name="transparency1" value="0"/>
 	    <property name="transparency2" value="0"/>
-	    <filename name="iconup" value="theme/sb_up.bmp" colorkey="0x000000FF"/>
-	    <filename name="icondown" value="theme/sb_up.bmp" colorkey="0x000000FF"/>
+	    <filename name="iconup" value="sb_up.bmp" colorkey="0x000000FF"/>
+	    <filename name="icondown" value="sb_up.bmp" colorkey="0x000000FF"/>
 	</object>
 	<object>
 	    <name value="ScrollbarDown"/>
@@ -186,8 +186,8 @@
 	    <property name="transparency0" value="0"/>
 	    <property name="transparency1" value="0"/>
 	    <property name="transparency2" value="0"/>
-	    <filename name="iconup" value="theme/sb_down.bmp" colorkey="0x000000FF"/>
-	    <filename name="icondown" value="theme/sb_down.bmp" colorkey="0x000000FF"/>
+	    <filename name="iconup" value="sb_down.bmp" colorkey="0x000000FF"/>
+	    <filename name="icondown" value="sb_down.bmp" colorkey="0x000000FF"/>
 	</object>
 	<object>
 	    <name value="ScrollbarDrag"/>
@@ -200,23 +200,23 @@
 	    <property name="transparency0" value="0"/>
 	    <property name="transparency1" value="0"/>
 	    <property name="transparency2" value="0"/>
-	    <filename name="iconup" value="theme/sb_drag.bmp" colorkey="0x000000FF"/>
-	    <filename name="icondown" value="theme/sb_drag.bmp" colorkey="0x000000FF"/>
+	    <filename name="iconup" value="sb_drag.bmp" colorkey="0x000000FF"/>
+	    <filename name="icondown" value="sb_drag.bmp" colorkey="0x000000FF"/>
 	</object>
 	<object>
 	    <name value="ScrollbarDragV"/>
-	    <filename name="background0" value="theme/sb_dragv.png"/>
-	    <filename name="background1" value="theme/sb_dragv.png"/>
-	    <filename name="background2" value="theme/sb_dragv.png"/>
+	    <filename name="background0" value="sb_dragv.png"/>
+	    <filename name="background1" value="sb_dragv.png"/>
+	    <filename name="background2" value="sb_dragv.png"/>
 	    <property name="backmode0" value="3TILEV"/>
 	    <property name="backmode1" value="3TILEV"/>
 	    <property name="backmode2" value="3TILEV"/>
 	</object>
 	<object>
 	    <name value="ScrollbarDragH"/>
-	    <filename name="background0" value="theme/sb_dragh.png"/>
-	    <filename name="background1" value="theme/sb_dragh.png"/>
-	    <filename name="background2" value="theme/sb_dragh.png"/>
+	    <filename name="background0" value="sb_dragh.png"/>
+	    <filename name="background1" value="sb_dragh.png"/>
+	    <filename name="background2" value="sb_dragh.png"/>
 	    <property name="backmode0" value="3TILEH"/>
 	    <property name="backmode1" value="3TILEH"/>
 	    <property name="backmode2" value="3TILEH"/>
@@ -246,8 +246,8 @@
 	    <property name="transparency1" value="255"/>
 	    <property name="transparency2" value="255"/>
 	    <property name="shift" value="0"/>
-	    <filename name="iconup" value="theme/rb_off.bmp" colorkey="0x000000FF"/>
-	    <filename name="icondown" value="theme/rb_on.bmp" colorkey="0x000000FF"/>
+	    <filename name="iconup" value="rb_off.bmp" colorkey="0x000000FF"/>
+	    <filename name="icondown" value="rb_on.bmp" colorkey="0x000000FF"/>
 	</object>
 	<object>
 	    <name value="RadioButton"/>
@@ -263,14 +263,14 @@
 	<type value="Window"/>
 	<object>
 	    <name value="Window"/>
-	    <filename name="background" value="theme/back.bmp"/>
+	    <filename name="background" value="back.bmp"/>
 	    <property name="backmode" value="TILE"/>
 	    <property name="blend" value="100"/>
 	    <property name="bordersize" value="1"/>
 	</object>
 	<object>
 	    <name value="Titlebar"/>
-	    <filename name="background" value="theme/back.bmp"/>
+	    <filename name="background" value="back.bmp"/>
 	    <gradient name="gradient" color0="0x00CFAFFF" color1="0x00DCC8FF" color2="0x00DCC8FF" color3="0x00F5E1FF"/>
 	    <property name="backmode" value="STRETCH"/>
 	    <property name="blend" value="120"/>
@@ -285,14 +285,14 @@
 	    <property name="blend0" value="255"/>
 	    <property name="blend1" value="255"/>
 	    <property name="blend2" value="255"/>
-	    <filename name="iconup" value="theme/wnd_close.bmp" colorkey="0x000000FF"/>
-	    <filename name="icondown" value="theme/wnd_close.bmp" colorkey="0x000000FF"/>
+	    <filename name="iconup" value="wnd_close.bmp" colorkey="0x000000FF"/>
+	    <filename name="icondown" value="wnd_close.bmp" colorkey="0x000000FF"/>
 	</object>
 	<object>
 	    <name value="MinimizeButton"/>
 	    <property name="shift" value="1"/>
-	    <filename name="iconup" value="theme/drop_down.bmp" colorkey="0x000000FF"/>
-	    <filename name="icondown" value="theme/drop_down.bmp" colorkey="0x000000FF"/>
+	    <filename name="iconup" value="drop_down.bmp" colorkey="0x000000FF"/>
+	    <filename name="icondown" value="drop_down.bmp" colorkey="0x000000FF"/>
 	</object>
     </widget>    
 
@@ -301,8 +301,8 @@
 		<object>
 			<name value="CheckWidget"/>
 			<property name="shift" value="0"/>
-			<filename name="iconup" value="theme/rb_off.bmp" colorkey="0x000000FF"/>
-			<filename name="icondown" value="theme/rb_on.bmp" colorkey="0x000000FF"/>
+			<filename name="iconup" value="rb_off.bmp" colorkey="0x000000FF"/>
+			<filename name="icondown" value="rb_on.bmp" colorkey="0x000000FF"/>
 		</object>
 	</widget>
 
@@ -311,7 +311,7 @@
 		<object>
 			<name value="LineEdit"/>
 			<property name="bordersize" value="1"/>
-			<filename name="textcursor" value="theme/editcurs.bmp" colorkey="0x000000FF"/>
+			<filename name="textcursor" value="editcurs.bmp" colorkey="0x000000FF"/>
 		</object>
 	</widget>
     
@@ -347,7 +347,7 @@
 		<object>
 			<name value="SliderH"/>
 			<property name="height" value="16"/>
-			<filename name="background" value="theme/slider_back.png"/>
+			<filename name="background" value="slider_back.png"/>
 			<property name="backmode" value="3TILEH"/>
 			<property name="blend" value="0"/>
 		</object>
@@ -369,7 +369,7 @@
 		<type value="DropDown"/>
 		<object>
 			<name value="Button"/>
-			<filename name="iconup" value="theme/drop_down.bmp" colorkey="0x000000FF"/>
+			<filename name="iconup" value="drop_down.bmp" colorkey="0x000000FF"/>
 		</object>
 		<object>
 			<name value="ListBox"/>
@@ -390,7 +390,7 @@
 	<object>
 	    <type value="ThemeWidget"/>
 	    <name value="PopupMenu"/>
-	    <filename name="background" value="theme/back.bmp"/>
+	    <filename name="background" value="back.bmp"/>
 	    <property name="backmode" value="TILE"/>
 	    <property name="blend" value="100"/>
 	    <property name="bordersize" value="0"/>
@@ -434,13 +434,13 @@
 		<type value="SpinnerBox"/>
 		<object>
 			<name value="ButtonUp"/>
-			<filename name="iconup" value="theme/spin_up.bmp" colorkey="0x000000FF"/>
-			<filename name="icondown" value="theme/spin_up.bmp" colorkey="0x000000FF"/>
+			<filename name="iconup" value="spin_up.bmp" colorkey="0x000000FF"/>
+			<filename name="icondown" value="spin_up.bmp" colorkey="0x000000FF"/>
 		</object>
 		<object>
 			<name value="ButtonDown"/>
-			<filename name="iconup" value="theme/spin_down.bmp" colorkey="0x000000FF"/>
-			<filename name="icondown" value="theme/spin_down.bmp" colorkey="0x000000FF"/>
+			<filename name="iconup" value="spin_down.bmp" colorkey="0x000000FF"/>
+			<filename name="icondown" value="spin_down.bmp" colorkey="0x000000FF"/>
 		</object>
 	</widget>
 
