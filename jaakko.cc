@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
   config(0, "host", "arg", "", "Recognizer is run on this computer via SSH.");
   config(0, "script", "arg", "rec.sh", "Script file that starts recognizer.");
   config('b', "", "", "", "Allow less than 4 byte int.");
-  config('d', "", "", "", "Disables the recognizer.");
+  config('d', "disable_recog", "", "", "Disables the recognizer.");
   config(0, "connect", "arg", "", "SSH connection command, e.g. \"ssh pyramid.hut.fi ssh itl-cl1\".");
 
   config.default_parse(argc, argv);
@@ -64,6 +64,10 @@ int main(int argc, char* argv[])
           connect = "ssh " + config["host"].get_str();
         else if (config["connect"].specified)
           connect = config["connect"].get_str();
+        else // No host or connect flag specified!
+          fprintf(stderr, "Warning: You are trying to run the recognizer "
+                          "locally. You may want to specify either host- or "
+                          "connect-flag.\n");
           
         ok = app.initialize(config["width"].get_int(),
                             config["height"].get_int(),

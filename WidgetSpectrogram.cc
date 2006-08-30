@@ -5,18 +5,23 @@
 WidgetSpectrogram::WidgetSpectrogram(PG_Widget *parent,
                                      const PG_Rect &rect,
                                      AudioInputController *audio_input,
-                                     unsigned int pixels_per_second)
-  : WidgetAudioView(parent, rect, audio_input, pixels_per_second)
+                                     unsigned int pixels_per_second,
+                                     double magnitude_exponent,
+                                     double magnitude_suppressor)
+  : WidgetAudioView(parent, rect, audio_input, pixels_per_second),
+    m_magnitude_exponent(magnitude_exponent),
+    m_magnitude_suppressor(magnitude_suppressor)
 {
   this->m_window_width = 256;//1000;//256;//2 * this->my_height;//
   this->m_data_in = new double[this->m_window_width];
   this->m_data_out = new double[this->m_window_width+1];
   this->m_data_out[this->m_window_width] = 0;
+  
+  // Linear y-axis by default.
   this->m_y_axis = NULL;
+  this->create_y_axis(1.0, 1.0);
 
-//  SDL_Surface *surface = this->GetWidgetSurface();
-//  this->m_background_color = SDL_MapRGB(surface->format, 0, 0, 0);
-
+  // Initialize fast fourier transformation.
   this->m_coeffs = fftw_plan_r2r_1d(this->m_window_width,
                                     this->m_data_in,
                                     this->m_data_out,
@@ -29,32 +34,56 @@ WidgetSpectrogram::~WidgetSpectrogram()
   fftw_destroy_plan(this->m_coeffs);
   delete [] this->m_data_in;
   delete [] this->m_data_out;
-}
-
-void
-WidgetSpectrogram::initialize()
-{
-  WidgetAudioView::initialize();
-
-  SDL_FillRect(this->GetWidgetSurface(), NULL, 0);
-  this->create_y_axis();
-}
-
-void
-WidgetSpectrogram::terminate()
-{
-  WidgetAudioView::terminate();
 
   delete [] this->m_y_axis;
   this->m_y_axis = NULL;
 }
-/*
-Uint32
-WidgetSpectrogram::get_background_color(SDL_PixelFormat *format) const
+
+void
+WidgetSpectrogram::create_y_axis(double linear_height, double linear_data)
 {
-  return SDL_MapRGB(surface->format, 0, 0, 0);
+  // Check that parameters are valid.
+  assert(this->my_height > 1);
+  assert(linear_height >= 0.0 && linear_height <= 1.0);
+  assert(linear_data > 0.0 && linear_data <= 1.0);
+
+  delete [] this->m_y_axis;
+  this->m_y_axis = new double[this->my_height];
+
+  for (unsigned int ind = 0; ind < this->my_height; ind++) {
+    // Linear y-axis in range [0,1]. (Also base for the other axises.)
+    this->m_y_axis[ind] = (double)ind / (this->my_height - 1);
+    
+    //  Part linear and part logarithmic y-axis.
+    // (These code lines may be commented out if linear y-axis is wanted.)
+    //*
+    if (this->m_y_axis[ind] < linear_height || linear_height >= 1.0) {
+      this->m_y_axis[ind] = this->m_y_axis[ind] / linear_height * linear_data;
+    }
+    else {
+      const double max_value = 1.0;
+      const double min_value = linear_data;
+      double exponent = (this->m_y_axis[ind] - linear_height) / (1.0 - linear_height);
+      this->m_y_axis[ind] = min_value * pow(max_value / min_value, exponent);
+    }
+    //*/
+
+    //  Logarithmic y-axis. Range (0,1]. (These code lines may be commented out
+    // if linear y-axis is wanted.)
+    /*
+    const double max_value = 1.0;
+    const double min_value = 0.01;
+    this->m_y_axis[ind] = min_value * pow(max_value / min_value, this->m_y_axis[ind]);
+    //*/
+    
+    // Now scale the axis so that it will point to fftw data_out indexes.
+    this->m_y_axis[ind] = this->m_y_axis[ind] * (this->m_window_width / 2 - 1);
+  }
+
+  // When axis is modified, we need to redraw the entire view.
+  this->m_force_redraw = true;
 }
-//*/
+
 void
 WidgetSpectrogram::fix_oldview_size(unsigned int oldview_from,
                                     unsigned int &oldview_size)
@@ -112,8 +141,6 @@ WidgetSpectrogram::write_data_in(unsigned int audio_pixel)
 void
 WidgetSpectrogram::calculate_output_values()
 {
-//  static double min = 1e99;
-//  static double max = -1e99;
   unsigned int range = this->m_window_width / 2;
   
   for (unsigned int ind = 0; ind < range; ind++) {
@@ -126,33 +153,18 @@ WidgetSpectrogram::calculate_output_values()
     
     // Root. The exponent is the FIRST parameter for the spectrogram. You can
     // adjust it to change the appearance of the spectrogram.
-    this->m_data_out[ind] = pow(this->m_data_out[ind], 0.3);
-//    if (this->m_data_out[ind] < min)
-//      min = this->m_data_out[ind];
-//    if (this->m_data_out[ind] > max)
-//      max = this->m_data_out[ind];
+    this->m_data_out[ind] = pow(this->m_data_out[ind],
+                                this->m_magnitude_exponent);
   }
 
   // Do normalization (values into range 0.0-1.0), and use some non-linear
   // function (e.g. ^0.1) to make spectrogram clearer.
   for (unsigned int ind = 0; ind < range; ind++) {
-//    fprintf(stderr, "%f ", (float)this->m_data_out[ind]);
     // The base number is the SECOND parameter for the spectrogram. You can
     // adjust it to change the appearance of the spectrogram.
-    this->m_data_out[ind] = 1 - pow(0.9965, this->m_data_out[ind]);
+    this->m_data_out[ind] = 1 - pow(this->m_magnitude_suppressor,
+                                    this->m_data_out[ind]);
   }
-//  fprintf(stderr, "\n");
-//    this->m_data_out[ind] = 1 - pow(0.999999999, this->m_data_out[ind]);
-//    this->m_data_out[ind] = 1 - log(1 / this->m_data_out[ind]);
-  /*
-  //double min = *std::min_element(this->m_data_out, this->m_data_out + range);
-  //double max = *std::max_element(this->m_data_out, this->m_data_out + range);
-  for (unsigned int ind = 0; ind < range; ind++) {
-    this->m_data_out[ind] = (this->m_data_out[ind] - min) / max;
-    this->m_data_out[ind] = pow(this->m_data_out[ind], 0.1);
-  }
-  fprintf(stderr, "min: %f, max: %f\n", (float)min, (float)max);
-  //*/
 }
 
 Uint32
@@ -219,48 +231,6 @@ WidgetSpectrogram::do_drawing(SDL_Surface *surface, unsigned int x)
     
     // Draw the pixel.
     this->draw_pixel(surface, x, (this->my_height - 1) - ynd, color);
-  }
-}
-
-void
-WidgetSpectrogram::create_y_axis()
-{
-  assert(this->my_height > 1);
-
-  delete [] this->m_y_axis;
-  this->m_y_axis = new double[this->my_height];
-
-  for (unsigned int ind = 0; ind < this->my_height; ind++) {
-    // Linear y-axis in range [0,1]. (Also base for the other axises.)
-    this->m_y_axis[ind] = (double)ind / (this->my_height - 1);
-    
-    //  Half logarithmic and half linear y-axis. Range (0,1].
-    // (These code lines may be commented out if linear y-axis is wanted.)
-    //*
-    const double lin2log_index = 0.7;
-    const double lin_size = 0.15;
-    if (this->m_y_axis[ind] < lin2log_index) {
-      this->m_y_axis[ind] = this->m_y_axis[ind] / lin2log_index * lin_size;
-    }
-    else {
-      const double max_value = 1.0;
-      const double min_value = lin_size;
-      this->m_y_axis[ind] = min_value *
-                              pow(max_value / min_value,
-                                  (this->m_y_axis[ind] - lin2log_index) / (1.0 - lin2log_index));
-    }
-    //*/
-
-    //  Logarithmic y-axis. Range (0,1]. (These code lines may be commented out
-    // if linear y-axis is wanted.)
-    /*
-    const double max_value = 1.0;
-    const double min_value = 0.01;
-    this->m_y_axis[ind] = min_value * pow(max_value / min_value, this->m_y_axis[ind]);
-    //*/
-    
-    // Now scale the axis so that it will point to fftw data_out indexes.
-    this->m_y_axis[ind] = this->m_y_axis[ind] * (this->m_window_width / 2 - 1);
   }
 }
 

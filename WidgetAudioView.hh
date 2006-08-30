@@ -28,7 +28,7 @@ public:
   virtual void initialize();
   virtual void terminate();
   
-  inline void force_clear();
+//  inline void force_clear();
   
 protected:
 
@@ -74,9 +74,9 @@ protected:
   unsigned long m_last_scroll_pos;
   unsigned long m_last_audio_data_size;
   
-private:  
-  
   bool m_force_redraw;
+  
+private:  
   
   Uint32 m_background_color;
 
