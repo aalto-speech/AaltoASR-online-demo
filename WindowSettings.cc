@@ -32,21 +32,21 @@ WindowSettings::initialize()
   
   // Text edit boxes.
   this->m_beam_edit = new PG_LineEdit(this->m_window,
-                                      PG_Rect(200, 100, 90, 20),
+                                      PG_Rect(200, 100, 50, 20),
                                       "LineEdit",
                                       3);
   this->m_lmscale_edit = new PG_LineEdit(this->m_window,
-                                         PG_Rect(200, 140, 90, 20),
+                                         PG_Rect(200, 140, 50, 20),
                                          "LineEdit",
                                          3);
   this->m_exponent_edit = new PG_LineEdit(this->m_window,
-                                          PG_Rect(200, 180, 90, 20),
+                                          PG_Rect(200, 180, 100, 20),
                                           "LineEdit",
-                                          7);
+                                          8);
   this->m_suppressor_edit = new PG_LineEdit(this->m_window,
-                                            PG_Rect(200, 220, 90, 20),
+                                            PG_Rect(200, 220, 100, 20),
                                             "LineEdit",
-                                            7);
+                                            8);
   
   if (this->m_recognizer) {
     // Write current settings into line edits.  
@@ -72,13 +72,13 @@ WindowSettings::do_ok()
   
   exponent = this->read_float_value(this->m_exponent_edit, 0, 1, &ok);
   if (!ok) {
-    this->error("Spectrogram exponent must be a float in range (0,1).",
+    this->error("Spectrogram contrast must be a float in range (0,1).",
                 ERROR_NORMAL);
     return false;
   }  
   suppressor = this->read_float_value(this->m_suppressor_edit, 0, 1, &ok);
   if (!ok) {
-    this->error("Spectrogram suppressor must be a float in range (0,1).",
+    this->error("Spectrogram gamma must be a float in range (0,1).",
                 ERROR_NORMAL);
     return false;
   }  
