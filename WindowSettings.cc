@@ -27,8 +27,8 @@ WindowSettings::initialize()
   text = str::fmt(40, "LM-scale (%u-%u):", RecognizerProcess::MIN_LMSCALE,
                                            RecognizerProcess::MAX_LMSCALE);
   new PG_Label(this->m_window, PG_Rect(10, 140, 180, 20), text.data());
-  new PG_Label(this->m_window, PG_Rect(10, 180, 180, 20), "Spectrum exponent:");
-  new PG_Label(this->m_window, PG_Rect(10, 220, 180, 20), "Spectrum suppressor:");
+  new PG_Label(this->m_window, PG_Rect(10, 180, 180, 20), "Spectrum contrast:");
+  new PG_Label(this->m_window, PG_Rect(10, 220, 180, 20), "Spectrum gamma:");
   
   // Text edit boxes.
   this->m_beam_edit = new PG_LineEdit(this->m_window,
