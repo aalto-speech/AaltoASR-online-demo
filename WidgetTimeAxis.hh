@@ -23,12 +23,14 @@ public:
   
 protected:
 
+  /** Adds a time tick.
+   * \param time Time to add. */
   void add_time_label(unsigned int time);
   
 private:
 
   const unsigned int m_pixels_per_second; //!< Time resolution.
-  unsigned int m_last_time;
+  unsigned int m_last_time; //!< Time length in last update.
 
 };
 

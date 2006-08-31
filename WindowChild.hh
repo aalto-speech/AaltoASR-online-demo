@@ -13,11 +13,26 @@ class WindowChild  :  public Window
   
 public:
 
+  /** Creates a pop up child window.
+   * \param parent Parent widget.
+   * \param title Title of the window.
+   * \param width Width of the window.
+   * \param height Height of the window.
+   * \param close true if close box and close on ESC should be enabled. */
   WindowChild(const PG_Widget *parent,
               const std::string &title,
               Uint16 width,
               Uint16 height,
               bool close);
+  /** Creates a pop up child window.
+   * \param parent Parent widget.
+   * \param title Title of the window.
+   * \param width Width of the window.
+   * \param height Height of the window.
+   * \param close true if close box and close on ESC should be enabled.
+   * \param enter_as_ok true if Pressing enter means the same as pressing the
+   *                    ok button.
+   * \param ok_text Text label for OK button. */ 
   WindowChild(const PG_Widget *parent,
               const std::string &title,
               Uint16 width,
@@ -67,16 +82,16 @@ protected:
     
 private:
 
-  const PG_Widget *m_parent;
-  std::string m_title;
-  const Uint16 m_width;
-  const Uint16 m_height;
-  bool m_close;
-  bool m_enter_as_ok;
+  const PG_Widget *m_parent; //!< Parent widget. Used to calculate the position.
+  std::string m_title; //!< Title of the window.
+  const Uint16 m_width; //!< Width of the window.
+  const Uint16 m_height; //!< Height of the window.
+  bool m_close; //!< Whether to close on ESC and show Close button.
+  bool m_enter_as_ok; //!< Should Enter be considered as OK button.
     
-  int m_button_count;
-  std::string m_ok_text;
-  std::string m_cancel_text;
+  int m_button_count; //!< Number of buttons.
+  std::string m_ok_text; //!< Label of OK button.
+  std::string m_cancel_text; //!< Label of cancel button.
 };
 
 #endif /*WINDOWCHILD_HH_*/

@@ -67,38 +67,47 @@ protected:
   unsigned int blit_old();
 
   /** Calculates the area that should be drawn and that has audio data to
-   * draw. */
+   * draw.
+   * \param old_size Size of the area which can be blitted from backbuffer.
+   * \param newaudio_from Sample where the drawing should begin is stored here.
+   * \param newaudio_size Number of samples to draw is stored here. */
   void calculate_new(unsigned long old_size,
                      unsigned long &newaudio_from,
                      unsigned long &newaudio_size);
 
-  /** Draws the new area by drawing pixel wide vectors. */
+  /** Draws the new area by drawing pixel wide vectors.
+   * \param x Screen coordinate of the view where to start the drawing.
+   * \param newaudio_from Sample where the drawing should begin.
+   * \param newaudio_size Number of samples to draw. */
   void draw_new(unsigned int x,
                 unsigned long newaudio_from,
                 unsigned long newaudio_size);
 
-  /** Draws a pixel vector. */
+  /** Draws a pixel vector.
+   * \param surface */
   virtual void draw_screen_vector(SDL_Surface *surface, unsigned int x) = 0;
   
   virtual bool eventMouseButtonUp(const SDL_MouseButtonEvent *button);
   
   inline void set_background_color(Uint32 color);
 
-  AudioInputController *m_audio_input;
-  SDL_Surface *m_surface_backbuffer;
+  AudioInputController *m_audio_input; //!< Source of audio data.
+  /** Updated view is stored here so it can be used in next update if the
+   * next view position collides with the previous. */
+  SDL_Surface *m_surface_backbuffer; 
   
-  const unsigned int m_pixels_per_second;
-  const double m_samples_per_pixel;
+  const unsigned int m_pixels_per_second; //!< Time resolution.
+  const double m_samples_per_pixel; //!< Audio samples per pixel.
   
-  unsigned long m_scroll_pos;
-  unsigned long m_last_scroll_pos;
-  unsigned long m_last_audio_data_size;
+  unsigned long m_scroll_pos; //!< Current scroll position.
+  unsigned long m_last_scroll_pos; //!< Scroll position in last update.
+  unsigned long m_last_audio_data_size; //!< Audio data size in last update.
   
-  bool m_force_redraw;
+  bool m_force_redraw; //!< Force redrawing of the entire view.
   
 private:  
   
-  Uint32 m_background_color;
+  Uint32 m_background_color; //!< Background color.
 
 };
 

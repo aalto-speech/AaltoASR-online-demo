@@ -2,7 +2,6 @@
 #ifndef APPLICATION_HH_
 #define APPLICATION_HH_
 
-//#include <pgapplication.h>
 #include <pgapplication.h>
 #include "RecognizerProcess.hh"
 #include "Window.hh"
@@ -50,21 +49,10 @@ public:
    * finished. */
   void run();
   
-protected:
-
-  /** Selects next window to run according to current window and its return
-   * value
-   * \param ret_val Return value of run modal function of the current window.
-   */
-//  void next_window(int ret_val);
-  
 private:
 
-  // Recognizer process
-  RecognizerProcess *m_recognizer;
-  
-  // ParaGUI
-  PG_Application *m_app;
+  RecognizerProcess *m_recognizer; //!< Recognizer process.
+  PG_Application *m_app; //!< ParaGUI application.
   
 };
 

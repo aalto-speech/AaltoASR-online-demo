@@ -42,7 +42,14 @@ namespace audio
 
 /** Class for creating one audio stream using PortAudio inside. Only one stream
  * can be opened at a time so it is recommended to use only one instance
- * of this class in a program. */
+ * of this class in a program.
+ * 
+ * Stream uses buffers for both input and output. The stream runs after start
+ * call until close is called. During that time it writes audio input into input
+ * buffer and reads output buffer to output. If a stream is wanted to pause,
+ * the buffer(s) should be disconnected (set to NULL). Thus input/output won't
+ * communicate with the buffer anymore. Also the buffers can be changed at
+ * anytime. */
 class AudioStream
 {
   
@@ -117,16 +124,14 @@ protected:
 
 private:
 
-  // PortAudio audio stream
-  PaStream *m_stream; 
+  PaStream *m_stream; //!< PortAudio audio stream.
 
-  // Pointers to buffers
-  AudioBuffer *m_input_buffer;
-  AudioBuffer *m_output_buffer;
+  AudioBuffer *m_input_buffer; //!< Pointer to input buffer.
+  AudioBuffer *m_output_buffer; //!< Pointer to output buffer.
   
   // Locks to prevent buffer change while writing/reading the buffer.
-  pthread_mutex_t m_inputbuffer_lock;
-  pthread_mutex_t m_outputbuffer_lock;
+  pthread_mutex_t m_inputbuffer_lock; //!< Lock for input buffer changes.
+  pthread_mutex_t m_outputbuffer_lock; //!< Lock for output buffer changes.
 
 };
 

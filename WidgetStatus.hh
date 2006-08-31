@@ -16,6 +16,7 @@ public:
                const PG_Rect &rect,
                const RecognizerStatus *recog_status);
   
+  /** Updates the status texts. */
   void update();
   
 private:

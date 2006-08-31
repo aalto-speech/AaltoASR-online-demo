@@ -104,18 +104,20 @@ private:
 
   /** Index of the last audio sample sent as an audio message. */
   unsigned long m_recognizer_cursor;
+  /** Cursor for output in PLAY-mode. Tells how much audio has been written
+   * to output buffer. Note that it doesn't mean that it all has played yet! */
   unsigned long m_output_cursor;
 
   // Variables for playback.
-  AudioBuffer m_playback_buffer;
+  AudioBuffer m_playback_buffer; //!< Audio output buffer for playback.
   bool m_playback; //!< Tells if we are playing playback.
-  unsigned long m_playback_from;
-  unsigned long m_playback_length;
-  unsigned long m_playback_played; //!< Frames written to output buffer.
+  unsigned long m_playback_from; //!< Index of the sample to start playback.
+  unsigned long m_playback_length; //!< Number of samples to playback.
+  unsigned long m_playback_played; //!< Samples written to output buffer.
 
-  AudioBuffer m_output_buffer;
-  AudioBuffer m_input_buffer;
-  Mode m_mode;
+  AudioBuffer m_output_buffer; //!< Audio output buffer for recognition.
+  AudioBuffer m_input_buffer; //!< Audio input buffer for recognition.
+  Mode m_mode; //!< Mode: play or record (microphone).
 
   bool m_paused; //!< When paused, only playback may be played.
   bool m_mute; //!< When muted, no output is played whatsoever.

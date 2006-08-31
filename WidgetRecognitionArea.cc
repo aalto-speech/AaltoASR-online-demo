@@ -66,8 +66,8 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
   this->m_wave->initialize();
   
   // Create spectrogram.
-  // The last two parameters affect the magnitudes. You can adjust them to
-  // get better visualization.
+  // ADJUST: The last two parameters affect the magnitudes. You can adjust them
+  // to get better visualization.
   this->m_spectrogram = new WidgetSpectrogram(this,
                                               PG_Rect(0,
                                                       top + wave_height,
@@ -78,7 +78,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                               0.35,
                                               0.9985);
   this->m_spectrogram->initialize();
-  // Map the y axis! You may adjust these values to modify the y axis.
+  // ADJUST: Map the y axis! You may adjust these values to modify the y axis.
   // It is part logarithmic part linear axis.
   this->m_spectrogram->create_y_axis(0.63, 0.21); 
                                                 

@@ -129,7 +129,7 @@ WindowRecognizer::do_opening()
                                            &this->m_recog_status);
                                            
   // Create area for wave, spectrogram and recognition text.
-  // You may adjust the last parameter (pixels_per_second) to change the
+  // ADJUST: You may adjust the last parameter (pixels_per_second) to change the
   // time resolution!
   this->m_recognition_area =
     new WidgetRecognitionArea(this->m_window,

@@ -165,7 +165,8 @@ WidgetSpectrogram::calculate_output_values()
       this->m_data_out[ind] += this->m_data_out[index] * this->m_data_out[index];
     }
     
-    // Root. The exponent is the FIRST parameter for the spectrogram. You can
+    // Root.
+    // ADJUST: The exponent is the FIRST parameter for the spectrogram. You can
     // adjust it to change the appearance of the spectrogram.
     this->m_data_out[ind] = pow(this->m_data_out[ind],
                                 this->m_magnitude_exponent);
@@ -174,8 +175,8 @@ WidgetSpectrogram::calculate_output_values()
   // Do normalization (values into range 0.0-1.0), and use some non-linear
   // function (e.g. ^0.1) to make spectrogram clearer.
   for (unsigned int ind = 0; ind < range; ind++) {
-    // The base number is the SECOND parameter for the spectrogram. You can
-    // adjust it to change the appearance of the spectrogram.
+    // ADJUST: The base number is the SECOND parameter for the spectrogram. You
+    // can adjust it to change the appearance of the spectrogram.
     this->m_data_out[ind] = 1 - pow(this->m_magnitude_suppressor,
                                     this->m_data_out[ind]);
   }
@@ -187,7 +188,8 @@ WidgetSpectrogram::get_color_by_value(double value)
   char r = 0;
   char g = 0;
   char b = 0;
-  
+
+  // Color mapping.  
   if (value <= 0.25) {
     b = (char)(value / 0.25 * 128);
   }
@@ -200,19 +202,6 @@ WidgetSpectrogram::get_color_by_value(double value)
     g = (char)((value - 0.50) / (1.0 - 0.50) * 255);
   }
   
-/* This color mapping is from the old demo.
-  if (value <= 0.25) {
-    b = (char)(value / 0.25 * 128);
-  }
-  else if (value > 0.25 && value <= 0.50) {
-    r = (char)((value - 0.25) / 0.25 * 255);
-    b = (char)((0.50 - value) / 0.25 * 128);
-  }
-  else if (value > 0.50 && value <= 1.0) {
-    r = 255;
-    g = (char)((value - 0.50) / 0.50 * 255);
-  }
-//*/
   return SDL_MapRGB(this->GetWidgetSurface()->format, r, g, b);
 }
 

@@ -15,7 +15,7 @@ public:
     return this->m_error.data();
   }
 private:
-  std::string m_error;
+  std::string m_error; //!< Error message.
 };
 
 #endif /*EXCEPTION_HH_*/

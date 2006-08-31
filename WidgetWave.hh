@@ -10,8 +10,15 @@ class WidgetWave  :  public WidgetAudioView
 
 public:
   
-  WidgetWave(PG_Widget *parent, const PG_Rect &rect,
-             AudioInputController *audio_input, unsigned int pixels_per_second);
+  /** 
+   * \param parent Parent widget.
+   * \param rect Rectangle area of the widget.
+   * \param audio_input Source of audio data.
+   * \param pixels_per_second Time resolution. */
+  WidgetWave(PG_Widget *parent,
+             const PG_Rect &rect,
+             AudioInputController *audio_input,
+             unsigned int pixels_per_second);
   virtual ~WidgetWave() { };
   
   virtual void initialize();
@@ -22,7 +29,7 @@ protected:
 
 private:
   
-  Uint32 m_foreground_color;
+  Uint32 m_foreground_color; //!< Color of the wave.
 
 };
 

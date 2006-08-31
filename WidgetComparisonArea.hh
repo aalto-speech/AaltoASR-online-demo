@@ -14,9 +14,15 @@ class WidgetComparisonArea  :  public PG_Widget
 
 public:
 
+  /** Constructs the comparison area.
+   * \param parent Parent window. Needs the parent as a Window object because
+   *               runs some child windows.
+   * \param rect Rectangle area of the widget.
+   * \param recognition Source of the recognition information. */
   WidgetComparisonArea(Window &parent,
                        const PG_Rect &rect,
                        RecognizerStatus *recognition);
+  /** Destructs the widget. */
   virtual ~WidgetComparisonArea();
   
 protected:

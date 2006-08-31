@@ -55,10 +55,9 @@ protected:
    * \param enable true to unpause, false to pause. */
   void enable_recognizer(bool enable);
   
-  /** Callback functions for ParaGUI buttons.
-   * \return true. */
-  bool handle_stop_button();
-  bool handle_record_button();
+  // Callback functions for ParaGUI buttons.
+  bool handle_stop_button(); //!< Stop audio.
+  bool handle_record_button(); //!< Reset recognizer and start recording.
   bool handle_recognize_button();
   bool handle_pause_button();
   bool handle_exit_button();

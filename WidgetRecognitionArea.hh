@@ -19,6 +19,12 @@ class WidgetRecognitionArea  :  public PG_Widget
   
 public:
 
+  /** Constructs the widget.
+   * \param parent Parent widget.
+   * \param rect Rectangle area of the widget.
+   * \param audio_input Source of audio data.
+   * \param recognition Source of recognition information.
+   * \param pixels_per_second Time resolution used for all children. */
   WidgetRecognitionArea(PG_Widget *parent,
                         const PG_Rect &rect,
                         AudioInputController *audio_input,

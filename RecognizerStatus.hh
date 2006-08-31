@@ -108,8 +108,8 @@ protected:
   inline static void append_morphemes(std::string &str,
                                       const MorphemeList &morphemes);
 
-  /** Copies the morpheme to the data string. Changes "<w> to " ", and ignores
-   * "<s>" or "</s>". TODO: Should sentence breaks be handled in some way?
+  /** Copies the morpheme to the data string. Changes "<w> to " " and
+   * "</s>" to ".". Ignores "<s>" to "".
    * \param data Destination of the copy.
    * \param morpheme Source of the copy. */
   static void write_morpheme_data(std::string &data,

@@ -68,7 +68,8 @@ WindowSettings::do_ok()
   int beam = 0, lmscale = 0;
   double suppressor, exponent;
   
-  // Read values.
+  // Read values from text edit boxes. Show error message and return false if
+  // parameter is invalid.
   
   exponent = this->read_float_value(this->m_exponent_edit, 0, 1, &ok);
   if (!ok) {

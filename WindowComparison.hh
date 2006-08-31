@@ -12,6 +12,10 @@ class WindowComparison  :  public WindowChild
   
 public:
 
+  /** 
+   * \param parent Parent widget.
+   * \param reference Reference text in comparison.
+   * \param hypothesis Hypothesis text in comparison. */
   WindowComparison(PG_Widget *parent,
                    const std::string &reference,
                    const std::string &hypothesis);
@@ -21,7 +25,9 @@ public:
   
 protected:
 
+  /** Starts comparison process. */
   virtual void do_opening();
+  /** Waits for comparison, and prints the results when ready. */
   virtual void do_running();
   virtual void do_closing(int return_value);
   
@@ -46,7 +52,7 @@ private:
   const std::string m_reference;
   const std::string m_hypothesis;
 
-  PG_Label *m_waiting_label;
+  PG_Label *m_waiting_label; //!< Text label when waiting the comparison.
   TextComparer *m_comparer; //!< Reference-hypothesis comparer.
 };
 

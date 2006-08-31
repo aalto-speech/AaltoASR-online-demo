@@ -15,6 +15,12 @@ class WidgetRecognitionText  :  public WidgetScrollArea
   
 public:
 
+  /** Constructs widget for recognition text.
+   * \param parent Parent widget.
+   * \param rect Rectangle area of the widget.
+   * \param audio_input Used for playback when morphemes are clicked.
+   * \param recognition Source of recognition information.
+   * \param pixels_per_second Time resolution. */
   WidgetRecognitionText(PG_Widget *parent,
                          const PG_Rect &rect,
                          AudioInputController *audio_input,
@@ -22,7 +28,9 @@ public:
                          unsigned int pixels_per_second);
   virtual ~WidgetRecognitionText();
   
+  /** Update recognition text and screen. */
   void update();
+  /** Clear all word and morpheme widgets. */
   void reset();
   
 protected:
@@ -30,7 +38,9 @@ protected:
   void initialize();
   void terminate();
 
+  /** Updates recognized morphemes to screen widgets. */
   void update_recognition();
+  /** Clears previous hypothesis and adds widgets according to hypothesis. */
   void update_hypothesis();
   
   /** Removes all hypothesis widgets. */
