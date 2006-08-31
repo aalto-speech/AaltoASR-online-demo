@@ -6,6 +6,7 @@
 #include "WindowChild.hh"
 #include "comparison.hh"
 
+/** A window for executing the comparison and showing the comparison results. */
 class WindowComparison  :  public WindowChild
 {
   
@@ -46,7 +47,7 @@ private:
   const std::string m_hypothesis;
 
   PG_Label *m_waiting_label;
-  TextComparer *m_comparer;
+  TextComparer *m_comparer; //!< Reference-hypothesis comparer.
 };
 
 #endif /*WINDOWTEXTCOMPARISON_HH_*/

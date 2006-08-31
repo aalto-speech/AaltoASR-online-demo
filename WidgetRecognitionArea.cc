@@ -38,8 +38,10 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                                    audioscroll_radio);
   this->m_disablescroll_radio->SetSizeByText();
   this->m_disablescroll_radio->sigClick.connect(slot(*this, &WidgetRecognitionArea::handle_radio), (void*)DISABLE);
-  audioscroll_radio->SetPressed();
-  this->m_autoscroll = AUDIO;
+  
+  // Set autoscrolling to follow recognizer by default.
+  recognizerscroll_radio->SetPressed();
+  this->m_autoscroll = RECOGNIZER;
 
   // Create time axis.
   this->m_time_axis = new WidgetTimeAxis(this,
@@ -77,6 +79,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                               0.9985);
   this->m_spectrogram->initialize();
   // Map the y axis! You may adjust these values to modify the y axis.
+  // It is part logarithmic part linear axis.
   this->m_spectrogram->create_y_axis(0.63, 0.21); 
                                                 
   
@@ -118,8 +121,8 @@ WidgetRecognitionArea::reset()
   this->m_spectrogram->reset();
   this->m_text_area->reset();
   this->m_time_axis->reset();
+  // Update scroll.
   this->set_scroll_range();
-
   this->set_scroll_position(this->m_scroll_bar->GetPosition());
 }
 
@@ -128,10 +131,11 @@ WidgetRecognitionArea::set_scroll_position(unsigned long page)
 {
   unsigned long max = this->m_scroll_bar->GetMaxRange();
   page = page <= max ? page : max;
+
+  // Set scroll position for each component.
   this->m_scroll_bar->SetPosition(page);
   this->m_text_area->set_scroll_position(page);
   this->m_time_axis->set_scroll_position(page);
-//  this->m_text_area->ScrollTo(page, 0);
   this->m_wave->set_scroll_position(page);
   this->m_spectrogram->set_scroll_position(page);
 }
@@ -139,6 +143,7 @@ WidgetRecognitionArea::set_scroll_position(unsigned long page)
 void
 WidgetRecognitionArea::update_cursors()
 {
+  // Draw the line cursors.
   this->draw_cursor(this->get_audio_cursor(), PG_Color(255, 255, 255));
   this->draw_cursor(this->get_recognizer_cursor(), PG_Color(255, 0, 255));
   if (this->m_audio_input->is_playbacking())
@@ -148,6 +153,7 @@ WidgetRecognitionArea::update_cursors()
 void
 WidgetRecognitionArea::draw_cursor(long position, PG_Color color)
 {
+  // Draw a vertical line to given data position.
   if (position >= this->m_scroll_bar->GetPosition() &&
       position <= this->m_scroll_bar->GetPosition() + this->Width()) {
         
@@ -169,13 +175,13 @@ WidgetRecognitionArea::update_screen(bool new_data)
 {
   this->m_wave->update();
   this->m_spectrogram->update();
-  if (new_data) {
+  if (new_data)
     this->m_text_area->update();
-  }
   this->m_time_axis->update(this->m_audio_input->get_audio_data_size() / SAMPLE_RATE);
     
   this->update_cursors();
 
+  // Update the screen.
   this->Update(true);
 }
 
@@ -211,6 +217,7 @@ WidgetRecognitionArea::update()
     this->m_scroll_bar->SetPosition(this->m_scroll_bar->GetPosition());
   }
   
+  // Update screen.
   this->update_screen(true);
 }
 
@@ -218,25 +225,17 @@ void
 WidgetRecognitionArea::set_scroll_range()
 {
   unsigned long audio_data_pixels = this->get_audio_pixels();
-  if (audio_data_pixels > this->Width()) {
+  // Set the range of the scroll bar.
+  if (audio_data_pixels > this->Width())
     this->m_scroll_bar->SetRange(0, audio_data_pixels - this->Width());
-  }
-  else {
+  else
     this->m_scroll_bar->SetRange(0, 0);
-  }
 }
 
 bool
-//WidgetRecognitionArea::handle_scroll(PG_ScrollBar *scroll_bar, Sint32 page)
 WidgetRecognitionArea::handle_scroll(PG_ScrollBar *scroll_bar, long page)
 {
-  /*
-  if (this->m_autoscroll == DISABLE ||
-      (this->m_autoscroll == AUDIO && this->m_audio_input->is_paused())) {
-    this->set_scroll_position(page);
-    this->update_screen(false);
-  }
-  //*/
+  // When user scrolls, disable autoscroll.
   this->m_autoscroll = DISABLE;
   this->m_disablescroll_radio->SetPressed();
   this->set_scroll_position(page);

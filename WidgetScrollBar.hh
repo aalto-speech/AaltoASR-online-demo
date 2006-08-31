@@ -4,6 +4,11 @@
 
 #include <pgscrollbar.h>
 
+/** This class is used to derive the ParaGUI's scroll bar and fix/customize some
+ * behaviour. Fixes are:
+ * 1) Drag buttons size correlates to the page size and scroll area.
+ * 2) When scroll size is zero, the drag button doesn't position itself on top
+ *    of the left/top-most scroll button */
 class WidgetScrollBar  :  public PG_ScrollBar
 {
   
@@ -25,7 +30,6 @@ protected:
   
 private:
   
-//  void calculate_scrollbutton_positions(Uint16 length, Uint16 thickness);
   void calculate_position_and_size(Sint16 start_pos,
                                    Uint16 total_size,
                                    Sint16 &position,

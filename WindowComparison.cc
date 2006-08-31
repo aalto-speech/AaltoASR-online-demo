@@ -86,6 +86,7 @@ WindowComparison::do_closing(int return_value)
 void
 WindowComparison::construct_result_array(const TextComparisonResult &result)
 {
+  // Array for word comparison.
   this->construct_label(0, 0, "WORD", PG_Label::RIGHT);
   this->construct_label(1, 0, "N", PG_Label::CENTER);
   this->construct_label(2, 0, "%", PG_Label::CENTER);
@@ -95,6 +96,7 @@ WindowComparison::construct_result_array(const TextComparisonResult &result)
   this->construct_label(0, 4, "Deletion", PG_Label::RIGHT);
   this->construct_label(0, 5, "Insertion", PG_Label::RIGHT);
 
+  // Array for character comparison.
   this->construct_label(0, 7, "CHARACTER", PG_Label::RIGHT);
   this->construct_label(1, 7, "N", PG_Label::CENTER);
   this->construct_label(2, 7, "%", PG_Label::CENTER);
@@ -104,16 +106,19 @@ WindowComparison::construct_result_array(const TextComparisonResult &result)
   this->construct_label(0, 11, "Deletion", PG_Label::RIGHT);
   this->construct_label(0, 12, "Insertion", PG_Label::RIGHT);
 
+  // Numeric results for word comparison.
   this->construct_numeric_label(1, 2, result._word.correct);
   this->construct_numeric_label(1, 3, result._word.substitution);
   this->construct_numeric_label(1, 4, result._word.deletion);
   this->construct_numeric_label(1, 5, result._word.insertion);
 
+  // Numeric results for character comparison.
   this->construct_numeric_label(1, 9, result._char.correct);
   this->construct_numeric_label(1, 10, result._char.substitution);
   this->construct_numeric_label(1, 11, result._char.deletion);
   this->construct_numeric_label(1, 12, result._char.insertion);
 
+  // Percentage results for word comparison.
   long correct = (long)result._word.correct - result._word.insertion;
   unsigned int ref_words = result._word.correct + result._word.substitution +
                            result._word.deletion;// - result._word.insertion;
@@ -125,6 +130,7 @@ WindowComparison::construct_result_array(const TextComparisonResult &result)
   this->construct_percentage_label(2, 4, result._word.deletion, total);
   this->construct_percentage_label(2, 5, result._word.insertion, total);
   
+  // Percentage results for character comparison.
   correct = (long)result._char.correct - result._char.insertion;
   ref_words = result._char.correct + result._char.substitution +
               result._char.deletion;// - result._char.insertion;

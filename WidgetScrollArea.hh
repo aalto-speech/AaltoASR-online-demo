@@ -5,7 +5,8 @@
  * that I rather make a scrolling area of my own. You should also note that
  * because PG_Rect uses Sint16 variables we have to use PG_Widget's user data
  * variable to store the real x-coordinate in 4 bytes. Otherwise the
- * x-coordinate range is insufficient for our purpose.
+ * x-coordinate range is insufficient for our purpose. The user data MUST be
+ * set before adding a widget as a child into this widget!
  */
 
 #ifndef WIDGETSCROLLAREA_HH_

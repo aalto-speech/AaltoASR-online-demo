@@ -120,9 +120,7 @@ WidgetAudioView::blit_old()
     src_rect.y = dest_rect.y = 0;
     src_rect.w = dest_rect.w = oldview_size;
     src_rect.h = dest_rect.h = this->my_height;
-    // Filling is for debugging...
-//    SDL_FillRect(surface, NULL, SDL_MapRGB(surface->format, 10, 100, 20));
-    // Do the actual blitting.
+
     SDL_BlitSurface(this->m_surface_backbuffer, &src_rect, surface, &dest_rect);
   }
   

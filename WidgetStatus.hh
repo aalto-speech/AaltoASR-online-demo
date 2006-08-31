@@ -6,6 +6,7 @@
 #include <pgwidget.h>
 #include <pglabel.h>
 
+/** A status bar widget. Shows recognition status and adaptation status. */
 class WidgetStatus  :  public PG_Widget
 {
   
@@ -19,9 +20,13 @@ public:
   
 private:
 
-  const RecognizerStatus *m_recog_status;
+  const RecognizerStatus *m_recog_status; //!< Recognizer status.
   PG_Label *m_recognition_label;
   PG_Label *m_adaptation_label;
+  
+  // These variables are used to check the need for a update.
+  RecognizerStatus::RecognitionStatus m_recognition_status;
+  RecognizerStatus::AdaptationStatus m_adaptation_status;
   
 };
 

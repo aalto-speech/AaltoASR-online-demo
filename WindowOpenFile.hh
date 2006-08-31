@@ -4,6 +4,7 @@
 
 #include "WindowFile.hh"
 
+/** A pop-up window to open a file of some kind. */
 class WindowOpenFile  :  public WindowFile
 {
   
@@ -14,6 +15,7 @@ public:
   
 protected:
 
+  /** Tries to read the file when ok is pressed. */
   virtual bool do_ok();
   virtual bool read_file() = 0;
 

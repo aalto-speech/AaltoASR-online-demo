@@ -4,6 +4,7 @@
 
 #include "WindowSaveFile.hh"
 
+/** A pop-up window to save a text file. */
 class WindowSaveTextFile  :  public WindowSaveFile
 {
 

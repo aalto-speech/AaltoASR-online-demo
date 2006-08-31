@@ -5,6 +5,7 @@
 #include "WindowOpenFile.hh"
 #include "AudioInputController.hh"
 
+/** A pop-up window to load an audio file. */
 class WindowOpenAudioFile  :  public WindowOpenFile
 {
   

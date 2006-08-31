@@ -2,12 +2,13 @@
 #ifndef WINDOWSTARTPROCESS_HH_
 #define WINDOWSTARTPROCESS_HH_
 
-#include "WindowWaitRecognizer.hh"
-//#include "Process.hh"
-//#include "msg.hh"
+#include "WindowChild.hh"
 #include "RecognizerProcess.hh"
 
-class WindowStartProcess  :  public WindowWaitRecognizer
+/** A window which finishes the recognizer process if running and restarts it.
+ * Window closes only if the start was successful or exits the whole program
+ * if user decides not to retry the start. */
+class WindowStartProcess  :  public WindowChild
 {
 
 public:
@@ -17,20 +18,17 @@ public:
 
 protected:
 
+  /** Finish and restart the process. */
   virtual void do_opening();
+  /** Waits until the recognizer sends ready message. If process is disconnected
+   * asks whether to retry or exit. */
+  virtual void do_running();
   
+  /** If process is disconnected, ask whether to retry. */
   virtual void handle_broken_pipe();
   
   RecognizerProcess *m_recognizer;
-//  Process *m_process;
-//  msg::OutQueue *m_out_queue;
   
-private:
-
-//  void finish_process_and_queues();
-//  void start_process();
-//  void start_queues();
-
 };
 
 #endif /*WINDOWSTARTPROCESS_HH_*/

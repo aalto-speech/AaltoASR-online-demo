@@ -14,7 +14,7 @@ void
 WidgetScrollBar::SetRange(Uint32 min, Uint32 max)
 {
   PG_ScrollBar::SetRange(min, max);
-  // TODO: Only need to set the size (and position) of dragbutton....
+  // TODO: Only need to set the size (and position) of dragbutton?
   this->RecalcPositions();
 }
 

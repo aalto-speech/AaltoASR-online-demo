@@ -33,57 +33,34 @@ RecognizerProcess::start()
   // Fork a child process.
   if (this->m_process.create() == 0) {
     // Child process enters here.
-//    int ret;
-//    if (this->m_route) {
-      //*
-//      std::string connect = "ssh pyramida.hut.fi ssh itl-cl1";
-      std::vector<std::string> args;
-      str::split(&this->m_connect, " ", true, &args);
-      char **arg_array = new char*[args.size()+3];
-      if (args.size() > 0) {
-        arg_array[0] = new char[args.at(0).size()+1];
-        strcpy(arg_array[0], args.at(0).c_str());
-        arg_array[args.size()+1] = new char[this->m_script.size()+1];
-        strcpy(arg_array[args.size()+1], this->m_script.c_str());
-      }
-      else {
-        // If no command given, the script file is the execution command.
-        arg_array[0] = new char[this->m_script.size()+1];
-        strcpy(arg_array[0], this->m_script.c_str());
-      }
-      // Second parameter for exec does not matter.
-      arg_array[1] = new char[1];
-      strcpy(arg_array[1], "");
-
-      // Copy the parameters into the array.      
-      for (unsigned int ind = 1; ind < args.size(); ind++) {
-        arg_array[ind+1] = new char[args.at(ind).size()+1];
-        strcpy(arg_array[ind+1], args.at(ind).c_str());
-      }
-      arg_array[args.size()+2] = NULL;
-      
-      int ret = execvp(arg_array[0], &arg_array[1]);
-                   //*/
-                   /*
-      ret = execlp("ssh",
-                   "ssh",
-                   "-t",
-                   this->m_route->data(),
-                   "ssh",
-                   this->m_cluster.data(),
-                   this->m_script.data(),
-                   (char*)NULL);
-                   //*/
-                   /*
+    // Parse the parameters to exec-function.
+    std::vector<std::string> args;
+    str::split(&this->m_connect, " ", true, &args);
+    char **arg_array = new char*[args.size()+3];
+    if (args.size() > 0) {
+      arg_array[0] = new char[args.at(0).size()+1];
+      strcpy(arg_array[0], args.at(0).c_str());
+      arg_array[args.size()+1] = new char[this->m_script.size()+1];
+      strcpy(arg_array[args.size()+1], this->m_script.c_str());
     }
     else {
-      ret = execlp("ssh",
-                   "ssh",
-                   this->m_cluster.data(),
-                   this->m_script.data(),
-                   (char*)NULL);
-    }     
-    //*/
+      // If no command given, the script file is the execution command.
+      arg_array[0] = new char[this->m_script.size()+1];
+      strcpy(arg_array[0], this->m_script.c_str());
+    }
+    // Second parameter for exec does not matter.
+    arg_array[1] = new char[1];
+    strcpy(arg_array[1], "");
+
+    // Copy the parameters into the array.      
+    for (unsigned int ind = 1; ind < args.size(); ind++) {
+      arg_array[ind+1] = new char[args.at(ind).size()+1];
+      strcpy(arg_array[ind+1], args.at(ind).c_str());
+    }
+    arg_array[args.size()+2] = NULL;
+    
+    // Execute the recognizer.
+    int ret = execvp(arg_array[0], &arg_array[1]);
                     
     if (ret < 0) {
       perror("Recognizer process failed exec()");
@@ -95,17 +72,14 @@ RecognizerProcess::start()
   }
   // Parent process continues here.
   
-//  fprintf(stderr, "RecognizerProcess start 1\n");
   msg::set_non_blocking(this->m_process.read_fd);
   msg::set_non_blocking(this->m_process.write_fd);
   
-//  fprintf(stderr, "RecognizerProcess start 2\n");
   this->m_in_queue.enable(this->m_process.read_fd);
   this->m_out_queue.enable(this->m_process.write_fd);
 
-//  fprintf(stderr, "RecognizerProcess start 3\n");
+  // Synchronize settings.
   this->send_settings();
-//  fprintf(stderr, "RecognizerProcess start 4\n");
 }
 
 void

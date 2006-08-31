@@ -23,28 +23,28 @@ WindowSettings::initialize()
   new PG_Label(this->m_window, PG_Rect(10, 50, 200, 20), "Enter parameters.");
   text = str::fmt(40, "Beam (%u-%u):", RecognizerProcess::MIN_BEAM,
                                        RecognizerProcess::MAX_BEAM);
-  new PG_Label(this->m_window, PG_Rect(10, 100, 180, 20), text.data());
+  new PG_Label(this->m_window, PG_Rect(10, 100, 150, 20), text.data());
   text = str::fmt(40, "LM-scale (%u-%u):", RecognizerProcess::MIN_LMSCALE,
                                            RecognizerProcess::MAX_LMSCALE);
-  new PG_Label(this->m_window, PG_Rect(10, 140, 180, 20), text.data());
-  new PG_Label(this->m_window, PG_Rect(10, 180, 180, 20), "Spectrum contrast:");
-  new PG_Label(this->m_window, PG_Rect(10, 220, 180, 20), "Spectrum gamma:");
+  new PG_Label(this->m_window, PG_Rect(10, 140, 150, 20), text.data());
+  new PG_Label(this->m_window, PG_Rect(10, 180, 200, 20), "Spectrum contrast (0-1):");
+  new PG_Label(this->m_window, PG_Rect(10, 220, 200, 20), "Spectrum darkness (0-1):");
   
   // Text edit boxes.
   this->m_beam_edit = new PG_LineEdit(this->m_window,
-                                      PG_Rect(200, 100, 50, 20),
+                                      PG_Rect(150, 100, 50, 20),
                                       "LineEdit",
                                       3);
   this->m_lmscale_edit = new PG_LineEdit(this->m_window,
-                                         PG_Rect(200, 140, 50, 20),
+                                         PG_Rect(150, 140, 50, 20),
                                          "LineEdit",
                                          3);
   this->m_exponent_edit = new PG_LineEdit(this->m_window,
-                                          PG_Rect(200, 180, 100, 20),
+                                          PG_Rect(220, 180, 100, 20),
                                           "LineEdit",
                                           8);
   this->m_suppressor_edit = new PG_LineEdit(this->m_window,
-                                            PG_Rect(200, 220, 100, 20),
+                                            PG_Rect(220, 220, 100, 20),
                                             "LineEdit",
                                             8);
   
@@ -78,7 +78,7 @@ WindowSettings::do_ok()
   }  
   suppressor = this->read_float_value(this->m_suppressor_edit, 0, 1, &ok);
   if (!ok) {
-    this->error("Spectrogram gamma must be a float in range (0,1).",
+    this->error("Spectrogram darkness must be a float in range (0,1).",
                 ERROR_NORMAL);
     return false;
   }  
@@ -105,20 +105,20 @@ WindowSettings::do_ok()
     }
   }
 
-  // If all values were ok, set the values.
+  // All values were ok, set the values.
   
   this->m_spectrogram->set_magnitude_exponent(exponent);
   this->m_spectrogram->set_magnitude_suppressor(suppressor);
 
   if (this->m_recognizer) {
-  // Send parameter change messages to recognizer.
+    // Send parameter change messages to recognizer.
     this->m_recognizer->set_beam(beam);
     this->m_recognizer->set_lmscale(lmscale);
     try {
       this->m_recognizer->get_out_queue()->flush();
-//      this->m_recognizer->send_settings();
     }
     catch(msg::ExceptionBrokenPipe) {
+      // -1 is a signal of a broken pipe!
       this->end_running(-1);
       return false;
     }

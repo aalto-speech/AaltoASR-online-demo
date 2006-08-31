@@ -19,7 +19,7 @@ WidgetScrollArea::set_scroll_position(Sint32 xscroll)
     PG_Widget *item = child_list->first();
     unsigned int index;
   
-    // Ainakin alkuun k‰yd‰‰n vaan karusti kaikki l‰pi..
+    // Set widget positions.
     for (index = 0; index < child_list->size(); index++)
     {
       this->set_widget_position(item);
@@ -34,36 +34,23 @@ WidgetScrollArea::set_widget_position(PG_Widget *item) const
 {
   Sint32 x;
   item->GetUserData(&x);
-  //*
-  if (abs(x - this->m_scroll_x) < 20000)
+  if (abs(x - this->m_scroll_x) < 20000) {
+    // If the widget is close to or in the view, put it in correct coordinates -
+    // although it might not be in the visible view.
     item->MoveWidget(x - this->m_scroll_x, 0, false);
-  else
-    item->MoveWidget(-20000, 0, false);
-    //*/
-  /*
-  if (x < this->m_scroll_x + this->my_width &&
-      x + item->my_width > this->m_scroll_x)
-  {
-    item->MoveWidget(x - this->m_scroll_x, 0, false);
-    //item->my_xpos = x - this->m_scroll_x;
-    item->SetVisible(true);
   }
   else {
-    //item->MoveWidget(-10000, 0, false);
-    //item->my_xpos = -item->my_width;
-    item->SetVisible(false);
+    // If the widget is far from the view, put it constant distance. We cannot
+    // put it mathematically correct position, because the PG_Rect uses
+    // 2 byte integer for the coordinate.
+    item->MoveWidget(-20000, 0, false);
   }
-  //*/
 }
 
 void
 WidgetScrollArea::AddChild(PG_Widget *item)
 {
-//  fprintf(stderr, "add child 1\n");
   item->SetVisible(false);
-//  fprintf(stderr, "add child 2\n");
   PG_Widget::AddChild(item);
-//  fprintf(stderr, "add child 3\n");
   this->set_widget_position(item);
-//  fprintf(stderr, "add child 4\n");
 }

@@ -33,7 +33,7 @@ public:
   AudioInputController(msg::OutQueue *out_queue);
   
   /** Destructs the controller. */
-  virtual ~AudioInputController();
+  virtual ~AudioInputController() { }
 
   /** Creates audio stream.
    * \return false if failed to activate the audio stream for some reason. */

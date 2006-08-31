@@ -6,7 +6,7 @@ AudioInputController::AudioInputController(msg::OutQueue *out_queue)
     m_playback_buffer(32000),
     m_output_buffer(48000),
     m_input_buffer(48000),
-    m_mode(RECORD)//, m_speakers(32000)
+    m_mode(RECORD)
 {
   this->m_recognizer_cursor = 0;
   this->m_output_cursor = 0;
@@ -20,10 +20,6 @@ AudioInputController::AudioInputController(msg::OutQueue *out_queue)
   this->m_playback_from = 0;
   this->m_playback_length = 0;
   this->m_playback_played = 0;
-}
-
-AudioInputController::~AudioInputController()
-{
 }
 
 bool
@@ -49,16 +45,12 @@ AudioInputController::terminate()
 bool
 AudioInputController::load_file(const std::string &filename)
 {
-  bool ret_val = false;
-  if (audio::read_wav_data(filename, this->m_audio_data)) {
-    this->reset_cursors();
-    ret_val = true;
-  }
-  else {
+  if (!audio::read_wav_data(filename, this->m_audio_data)) {
     fprintf(stderr, "AudioFileInputController::load_file failed.\n");
-    ret_val = false;
+    return false;
   }
-  return ret_val;
+  this->reset_cursors();
+  return true;
 }
 
 
@@ -70,7 +62,7 @@ AudioInputController::operate()
   unsigned long read_size = 0;
 
   // Do playback if playback is requested.  
-  if (this->m_playback) {// && this->m_paused) {
+  if (this->m_playback) {
     unsigned long write_size;
     unsigned long max_size = 0;
 
@@ -92,6 +84,7 @@ AudioInputController::operate()
                                                            
   }
   
+  // Read microphone input or put audio to output.
   this->read_input();
   read_size = this->get_audio_cursor() - this->m_recognizer_cursor;
 
@@ -108,14 +101,12 @@ AudioInputController::operate()
       message.append(&audio_data[this->m_recognizer_cursor*sizeof(AUDIO_FORMAT)],
                      read_size * sizeof(AUDIO_FORMAT));
 
-      // Send message to out queue.
+      // Send message to out queue. (do not flush)
       this->m_out_queue->add_message(message);
-//      this->m_out_queue->send_message(message);
     }
   }
 
   this->m_recognizer_cursor += read_size;
-
   return read_size;
 }
 
@@ -169,16 +160,7 @@ AudioInputController::pause_listening(bool pause)
 bool
 AudioInputController::start_playback(unsigned long from, unsigned long length)
 {
-  /*
-  if (this->m_audio_stream.get_output_buffer() == &this->m_output_buffer) {
-    this->m_audio_stream.set_output_buffer(NULL);
-    this->m_output_buffer.clear();
-    this->m_audio_stream.set_output_buffer(&this->m_output_buffer);
-  }
-  else {
-    this->m_output_buffer.clear();
-  }
-  //*/
+  // Start playback only if paused and not already playbacking.
   if (this->m_paused && !this->m_playback) {
     this->m_playback = true;
     this->m_playback_from = from;
@@ -206,20 +188,41 @@ AudioInputController::stop_playback()
 void
 AudioInputController::reset()
 {
-  // TODO: AUDIOBUFFERS NOT THREAD SAFE HERE????
+  // These are for thread safety.
+  AudioBuffer *input_buffer = this->m_audio_stream.get_input_buffer();
+  AudioBuffer *output_buffer = this->m_audio_stream.get_output_buffer();
+  this->m_audio_stream.set_input_buffer(NULL);
+  this->m_audio_stream.set_output_buffer(NULL);
+
+  // Resetting.
   this->m_audio_data.clear();
   this->m_playback_length = 0;
   this->m_playback_played = 0;
   this->m_playback = false;
   this->m_playback_buffer.clear();
   this->reset_cursors();
+
+  // ... for thread safety
+  this->m_audio_stream.set_input_buffer(input_buffer);
+  this->m_audio_stream.set_output_buffer(output_buffer);
 }
 
 void
 AudioInputController::reset_cursors()
 {
+  // These are for thread safety.
+  AudioBuffer *input_buffer = this->m_audio_stream.get_input_buffer();
+  AudioBuffer *output_buffer = this->m_audio_stream.get_output_buffer();
+  this->m_audio_stream.set_input_buffer(NULL);
+  this->m_audio_stream.set_output_buffer(NULL);
+
+  // Resetting.
   this->m_input_buffer.clear();
   this->m_output_buffer.clear();
   this->m_output_cursor = 0;
   this->m_recognizer_cursor = 0;
+
+  // ... for thread safety
+  this->m_audio_stream.set_input_buffer(input_buffer);
+  this->m_audio_stream.set_output_buffer(output_buffer);
 }

@@ -7,6 +7,8 @@
 #include "RecognizerStatus.hh"
 #include "Window.hh"
 
+/** A GUI class which contains the two text fields (reference and hypothesis)
+ * and several buttons for handling them. */
 class WidgetComparisonArea  :  public PG_Widget
 {
 
@@ -19,6 +21,7 @@ public:
   
 protected:
 
+  /** Callback functions for ParaGUI. */
   bool handle_openoriginal_button();
   bool handle_saveoriginal_button();
   bool handle_clearoriginal_button();
@@ -30,10 +33,10 @@ protected:
 
 private:
 
-  Window &m_parent;
-  RecognizerStatus *m_recognition;
-  WidgetMultiLineEdit *m_original_text;
-  WidgetMultiLineEdit *m_recognition_text;
+  Window &m_parent; //!< Parent window. Needed for running child windows.
+  RecognizerStatus *m_recognition; //!< Source for recognition.
+  WidgetMultiLineEdit *m_original_text; //!< Text field for reference.
+  WidgetMultiLineEdit *m_recognition_text; //!< Text field for hypothesis.
   
 };
 

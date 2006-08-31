@@ -76,9 +76,9 @@ public:
    * \param output_buffer New output buffer. */
   void set_output_buffer(AudioBuffer *output_buffer);
   /** \return Current input buffer. */
-  inline const AudioBuffer* get_input_buffer() const;
+  inline AudioBuffer* get_input_buffer();
   /** \return Current output buffer. */
-  inline const AudioBuffer* get_output_buffer() const;
+  inline AudioBuffer* get_output_buffer();
 
 protected:
 
@@ -130,14 +130,14 @@ private:
 
 };
 
-const AudioBuffer*
-AudioStream::get_input_buffer() const
+AudioBuffer*
+AudioStream::get_input_buffer()
 {
   return this->m_input_buffer;
 }
 
-const AudioBuffer*
-AudioStream::get_output_buffer() const
+AudioBuffer*
+AudioStream::get_output_buffer()
 {
   return this->m_output_buffer;
 }

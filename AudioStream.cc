@@ -24,6 +24,7 @@ audio::read_wav_data(const std::string &filename, std::string &to)
     
   data = new char[sizeof(AUDIO_FORMAT)*info.frames+1];
   read_size = audio_read_function(file, (AUDIO_FORMAT*)data, info.frames);
+  
   // Because there might be '\0' character in the data, don't not use =-operator
   to.assign(data, read_size * sizeof(AUDIO_FORMAT));
 

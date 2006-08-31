@@ -1,15 +1,22 @@
 
 #include "RecognizerStatus.hh"
 #include "str.hh"
+#include <stdio.h>
 
 const unsigned int RecognizerStatus::frames_per_second = 125;
 
+RecognizerStatus::RecognizerStatus()
+  : m_recognition_status(READY), m_adaptation_status(NONE)
+{
+  this->m_adapted = false;
+  this->m_was_adapting_when_reseted = false;
+  pthread_mutex_init(&this->m_lock, NULL);
+}
 
-
-/// STARTS HERE
-//#include "RecognizerStatus.hh"
-#include <stdio.h>
-
+RecognizerStatus::~RecognizerStatus()
+{
+  pthread_mutex_destroy(&this->m_lock);
+}
 
 void
 RecognizerStatus::reset_recognition()
@@ -82,27 +89,6 @@ RecognizerStatus::AdaptationStatus
 RecognizerStatus::get_adaptation_status() const
 {
   return this->m_adaptation_status;
-}
-
-// ENDS HERE
-
-
-
-
-
-
-RecognizerStatus::RecognizerStatus()
-  : m_recognition_status(READY), m_adaptation_status(NONE)
-{
-//  fprintf(stderr, "RS constructor\n");
-  this->m_adapted = false;
-  this->m_was_adapting_when_reseted = false;
-  pthread_mutex_init(&this->m_lock, NULL);
-}
-
-RecognizerStatus::~RecognizerStatus()
-{
-  pthread_mutex_destroy(&this->m_lock);
 }
 
 std::string

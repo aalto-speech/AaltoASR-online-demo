@@ -5,6 +5,7 @@
 #include <pglineedit.h>
 #include "WindowChild.hh"
 
+/** A general window which has a text field for giving a file name. */
 class WindowFile  :  public WindowChild
 {
   

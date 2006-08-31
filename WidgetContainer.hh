@@ -4,6 +4,9 @@
 
 #include <pgwidget.h>
 
+/** This class is used to create word containers in the scrolling hypothesis
+ * view. This way all morphemes are in the same unite rectangle and it also
+ * enables the possibility to force word breaks. */
 class WidgetContainer  :  public PG_Widget
 {
 public:

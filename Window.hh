@@ -16,7 +16,9 @@ public:
   Window();
   virtual ~Window();
 
-  /** Run this window modally. */
+  /** Run this window modally.
+   * \return Window-specific closing value. Value 0 means that the whole program
+   *         should exit. */
   int run_modal();
   
   /** Does some initialization that can't be done in constructor. Must be
@@ -48,13 +50,17 @@ protected:
   virtual void do_opening() { };
   /** Does some fast procedures. This function is called repeatedly. */
   virtual void do_running() { };
-  /** Does closing procedures. Must be called once after do_running calls. */
+  /** Does closing procedures. Must be called once after do_running calls.
+   * \param return_value The value to return from run_modal function. */
   virtual void do_closing(int return_value) { };
   
-  /** Requests the window to close (stop calling do_running). */
+  /** Requests the window to close (stop calling do_running).
+   * \param return_value Value to return from the run_modal function. Zero means
+   *                     that the whole program should be exited. */
   void end_running(int return_value);
   
-  /** Disables or enables the window, so it won't disturb e.g. child window. */
+  /** Disables or enables the window, so it won't disturb e.g. child window.
+   * \param pause true to disable, false to enable.*/
   virtual void pause_window_functionality(bool pause);
 
   /** Creates the widget for the window. Allocates the memory, but freeing

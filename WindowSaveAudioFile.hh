@@ -5,6 +5,7 @@
 #include "WindowSaveFile.hh"
 #include "AudioInputController.hh"
 
+/** A pop-up window to save an audio file. */
 class WindowSaveAudioFile  :  public WindowSaveFile
 {
 

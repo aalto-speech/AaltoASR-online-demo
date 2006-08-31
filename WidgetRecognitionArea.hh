@@ -26,18 +26,26 @@ public:
                         unsigned int pixels_per_second);
   virtual ~WidgetRecognitionArea();
 
+  /** Resets all child widgets and updates the scroll position. */
   void reset();
+  /** Updates all child widgets. Should be called as often as possible to get
+   * fast graphics. */
   void update();
   
+  /** Sets the scroll position of all childs.
+   * \param page Scroll position. */
   void set_scroll_position(unsigned long page);
   
+  /** \return The spectrogram child widget. */
   inline WidgetSpectrogram* get_spectrogram();
 
 protected:
   
+  /** Callback functions for ParaGUI. */
   bool handle_scroll(PG_ScrollBar *scroll_bar, long page);
   bool handle_radio(PG_RadioButton *radio, bool status, void *user_data);
   
+  /** Updates the scroll bar by checking the size of the audio data. */
   void set_scroll_range();
   
   void update_cursors();
@@ -50,6 +58,9 @@ protected:
   
 private:
 
+  /** Updates the screen areas of the child widgets.
+   * \param new_data true if new recognitions should be checked.
+   * TODO: The parameter has a very little affect and it could be removed. */
   void update_screen(bool new_data);
 
   // Some widgets that form this area.
@@ -65,8 +76,6 @@ private:
 
   const unsigned int m_pixels_per_second; //!< Scale of the view.
   const double m_frames_per_pixel; //!< Audio samples per one pixel.
-//  const unsigned int m_pixels_per_second; //!< Scale of the view.
-//  const unsigned int m_frames_per_pixel; //!< Audio samples per one pixel.
 
   enum Autoscroll { DISABLE, RECOGNIZER, AUDIO };
   Autoscroll m_autoscroll; //!< Auto scrolling status.

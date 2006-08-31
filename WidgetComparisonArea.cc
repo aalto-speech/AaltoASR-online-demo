@@ -175,30 +175,12 @@ WidgetComparisonArea::handle_pasteoriginal_button()
 bool
 WidgetComparisonArea::handle_updaterecognition_button()
 {
-//  Uint16 x = this->m_recognition_text->GetScrollPosX();
-//  Uint16 y = this->m_recognition_text->GetScrollPosY();
-//  int y = this->m_recognition_text->GetVPosition();
-//  int y = this->m_recognition_text->GetCursorPos();
   this->m_recognition->lock();
   this->m_recognition_text->SetText(this->m_recognition->get_recognition_text().data());
   this->m_recognition->unlock();
-  // Keep old scroll location.
-  // NOTE: It was a good idea to keep the old scroll position. But ScrollTo
-  // function doesn't work properly: 1) it doesn't move the scroll bar and 2) it
-  // updates the screen. This makes the screen flicker and the scroll bar
-  // is in different position than the text area. Should overwrite some
-  // functions, but it isn't very trivial task, so I won't implement it at
-  // this time. Implement your own class derived from RichEdit and write your
-  // own ScrollTo function there using ParaGUI open source code as a guide.
-  // NEW NOTE: I changed to MultiLineEdit because RichEdit had some bugs in it.
-  // MultiLineEdit has a function SetVPosition to set the scroll position.
-  // Unfortunately this member function is private so we cannot use it without
-  // some "hacking". And SetVPosition also updates the screen, so the
-  // flickering problem remains.
-//  this->m_recognition_text->ScrollTo(x, y);
-//  this->m_recognition_text->SetVPosition(y);
+
   this->m_recognition_text->Update();
-//  this->m_recognition_text->SetCursorPos(y);
+
   return true;
 }
 
@@ -215,7 +197,6 @@ WidgetComparisonArea::handle_saverecognition_button()
 bool
 WidgetComparisonArea::handle_compare_button()
 {
-//  this->m_parent.error("Comparing not yet implemented.", Window::ERROR_NORMAL);
   WindowComparison window(this->m_parent.get_widget(),
                               this->m_original_text->GetText(),
                               this->m_recognition_text->GetText());

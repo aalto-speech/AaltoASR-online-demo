@@ -5,6 +5,7 @@
 #include "WindowOpenFile.hh"
 #include "str.hh"
 
+/** A pop-up window to open a text file. */
 class WindowOpenTextFile  :  public WindowOpenFile
 {
   

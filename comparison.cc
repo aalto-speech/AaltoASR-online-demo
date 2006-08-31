@@ -65,8 +65,9 @@ ProcessExecutor::read_output(std::string *output)
       return false;
     if (errno == EINTR) // interrupted by signal
       return false;
-    perror("read_output(): read() failed");
+    perror("ProcessExecutor::read_output(): read() failed");
     fprintf(stderr, "errno: %d\n", errno);
+    // TODO: Exception here??
     exit(1);
   }
   

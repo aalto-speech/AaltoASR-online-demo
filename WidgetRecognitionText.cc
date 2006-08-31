@@ -1,7 +1,6 @@
 
 #include "WidgetRecognitionText.hh"
 #include "WidgetContainer.hh"
-//#include <pgscrollarea.h>
 #include <pglabel.h>
 
 WidgetRecognitionText::WidgetRecognitionText(PG_Widget *parent,
@@ -29,10 +28,6 @@ WidgetRecognitionText::initialize()
   this->m_last_recog_word = NULL;
   this->m_last_recog_morph = NULL;
   this->m_last_recognition_frame = 0;
-
-//  this->m_recognition->lock();
-//  this->m_recognized_iter = this->m_recognition->get_recognized().begin();
-//  this->m_recognition->unlock();
 }
 
 void
@@ -81,7 +76,7 @@ WidgetRecognitionText::add_morpheme_widget(const Morpheme &morpheme,
 
   //* min_x is used to force word breaks.
   // These lines may be commented out if forcing is undesired. Note that
-  // then sentence breaks will most likely hide.
+  // then sentence breaks will most likely be then hidden.
   if (x < min_x) {
     // Cut width.
     if ((Sint32)w + x > min_x)
@@ -104,86 +99,43 @@ WidgetRecognitionText::add_morpheme_widget(const Morpheme &morpheme,
       SDL_FillRect(morph_widget->GetWidgetSurface(),
                    NULL,
                    color.MapRGB(morph_widget->GetWidgetSurface()->format));
+      // We need to use this for x coordinate. (See WidgetScrollArea for more
+      // information.
       morph_widget->SetUserData(&x, sizeof(Sint32));
       this->AddChild(morph_widget);
-//      morph_widget->BringToFront();
       morph_widget->SetVisible(true);
     }
     else {
       if (word_widget == NULL) {
         word_widget = new WidgetContainer(NULL, 0, 0, PG_Color(90, 90, 90));
+        // We need to use this for x coordinate. (See WidgetScrollArea for more
+        // information.
         word_widget->SetUserData(&x, sizeof(Sint32));
         this->AddChild(word_widget);
         word_widget->SetVisible(true);
       }
-      /*
-      if (word_widget == NULL) {
-        word_widget = new PG_Widget(NULL, rect, true);
-        word_widget->SetUserData(&x, sizeof(Sint32));
-        this->AddChild(word_widget);
-      }
-      //*/
 
-      //*
       Sint32 word_x;
       word_widget->GetUserData(&word_x);
       rect.x = x - word_x;
       morph_widget = new PG_Label(word_widget, rect, morpheme.data.data());
-      //*/
-      /*
-      morph_widget = new PG_Label(NULL, rect, morpheme.data.data());
-      morph_widget->SetUserData(&x, sizeof(Sint32));
-      this->AddChild(morph_widget);
-      //*/
+
       ((PG_Label*)morph_widget)->SetAlignment(PG_Label::CENTER);
       morph_widget->SetFontColor(color);
       morph_widget->sigMouseButtonUp.connect(slot(*this, &WidgetRecognitionText::handle_morpheme_widget), NULL);
       morph_widget->SetVisible(true);
       
-      /*
-      fprintf(stderr, "add morph 3.1\n");
-      Sint32 word_x;
-      word_widget->GetUserData(&word_x);
-      word_widget->SizeWidget(x + rect.w - word_x,
-                              word_widget->my_height,
-                              false);
-      SDL_FillRect(word_widget->GetWidgetSurface(),
-                   NULL,
-                   SDL_MapRGB(word_widget->GetWidgetSurface()->format, 90, 90, 90));
-      word_widget->SendToBack();
-      word_widget->SetVisible(true);
-      fprintf(stderr, "add morph 4\n");
-      //*/
     }
   }  
   
   return morph_widget;
 }
 
-    /* OLDER. HERE SENTENCE BREAKS ARE IGNORED AND WORD BREAKS ARE BLOCKS.
-    if (morpheme.data == " ") {
-      rect.w = w > 1 ? w : 1; // Word separator at least one pixel wide.
-      item = new PG_Widget(NULL, rect, true);
-      SDL_FillRect(item->GetWidgetSurface(),
-                   NULL,
-                   color.MapRGB(item->GetWidgetSurface()->format));
-    }
-    else {
-      item = new PG_Label(NULL, rect, morpheme.data.data());
-      ((PG_Label*)item)->SetAlignment(PG_Label::CENTER);
-      ((PG_Label*)item)->SetFontColor(color);
-      item->sigMouseButtonUp.connect(slot(*this, &WidgetRecognitionText::handle_morpheme_widget), NULL);
-    }
-    //*/
-
 void
 WidgetRecognitionText::update_recognition()
 {
   const MorphemeList &morphemes = this->m_recognition->get_recognized();
   Sint32 min_x = 0;
-//  PG_Widget *last_nonnull_widget = this->m_last_recog_morph;
-//  PG_Widget *previous_word = this->m_last_recog_word;
-//  PG_Widget *current_morph = this->m_last_recog_morph;
   
   // Update if new morphemes has been recognized.
   if (morphemes.size() > this->m_last_recognition_count) {
@@ -222,7 +174,7 @@ WidgetRecognitionText::update_recognition()
 
 void
 WidgetRecognitionText::update_hypothesis()
-{//*
+{
   PG_Widget *nonnull, *current_morph, *previous_word, *current_word;
   const MorphemeList &morphemes = this->m_recognition->get_hypothesis();
   Sint32 min_x = 0;
@@ -230,7 +182,6 @@ WidgetRecognitionText::update_hypothesis()
   this->remove_hypothesis();
 
   // Start where recognition ends.
-//  previous_morph = NULL;
   nonnull = NULL;
   current_morph = this->m_last_recog_morph;
   current_word = this->m_last_recog_word;
@@ -258,6 +209,7 @@ WidgetRecognitionText::update_hypothesis()
                                               current_word,
                                               min_x);
     
+    // Handle three different possibilities for the hypothesis morpheme.
     if (current_word == NULL) {
       // Possible sentence break widget.
       if (current_morph)
@@ -298,10 +250,9 @@ WidgetRecognitionText::handle_morpheme_widget(PG_MessageObject *widget,
   double multiplier = (double)SAMPLE_RATE / this->m_pixels_per_second;
   unsigned long x = ((PG_Widget*)widget)->my_xpos;
   unsigned long w = ((PG_Widget*)widget)->my_width;
-  x += this->get_scroll_position();//this->GetScrollPosX();//
+  x += this->get_scroll_position();
   x = (unsigned long)(x * multiplier);
   w = (unsigned long)(w * multiplier);
-//  fprintf(stderr, "Morpheme pressed... Playing %d, %d.\n", x, w);
   this->m_audio_input->stop_playback();
   this->m_audio_input->start_playback(x, w);
   return true;

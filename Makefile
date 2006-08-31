@@ -45,10 +45,9 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	WidgetRecognitionArea.cc str.cc WidgetRecognitionText.cc \
 	WidgetScrollArea.cc WindowFile.cc WindowMessageBox.cc \
 	WidgetSpectrogram.cc WindowChild.cc WindowSettings.cc \
-	RecognizerListener.cc WindowStartProcess.cc WindowWaitRecognizer.cc \
+	RecognizerListener.cc WindowStartProcess.cc \
 	WidgetScrollBar.cc WindowSaveFile.cc WindowOpenFile.cc \
-	WidgetTimeAxis.cc WidgetComparisonArea.cc WindowOpenAudioFile.cc \
-	WindowSaveAudioFile.cc WindowOpenTextFile.cc WindowSaveTextFile.cc \
+	WidgetTimeAxis.cc WidgetComparisonArea.cc \
 	WidgetMultiLineEdit.cc conf.cc RecognizerProcess.cc WidgetAudioView.cc \
 	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc \
 	scrap.cc RecognizerStatus.cc WidgetStatus.cc

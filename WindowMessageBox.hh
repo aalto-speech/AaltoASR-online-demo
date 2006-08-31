@@ -4,6 +4,7 @@
 
 #include "WindowChild.hh"
 
+/** A general message box pop up window. */
 class WindowMessageBox  :  public WindowChild
 {
 public:

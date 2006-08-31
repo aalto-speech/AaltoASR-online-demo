@@ -3,7 +3,6 @@
 #define WIDGETMULTILINEEDIT_HH_
 
 #include <pglineedit.h>
-//#include <pgscrollbar.h>
 #include "WidgetScrollBar.hh"
 #include <pgtheme.h>
 #include <pgstring.h>

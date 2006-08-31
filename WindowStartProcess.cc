@@ -4,38 +4,25 @@
 
 WindowStartProcess::WindowStartProcess(const PG_Widget *parent,
                                        RecognizerProcess *recognizer)
-//                                       Process *process,
-//                                       msg::InQueue *in_queue,
-//                                       msg::OutQueue *out_queue)
-  : WindowWaitRecognizer(parent,
-                         "Starting recognizer..",
-                         350,
-                         150,
-                         recognizer ? recognizer->get_in_queue() : NULL)
+  : WindowChild(parent, "Starting recognizer..", 350, 150, false)
 {
-//  this->m_app = app;
-//  this->m_process = process;
-//  this->m_in_queue = in_queue;
-//  this->m_out_queue = out_queue;
   this->m_recognizer = recognizer;
 }
 
 void
 WindowStartProcess::do_opening()
 {
+  // If no recognizer process, we can just close the window.
   if (!this->m_recognizer) {
     this->end_running(1);
     return;
   }
   
   // Finish old process and start a new one.
-//  fprintf(stderr, "WindowStartProcess 1\n");
   this->m_recognizer->finish();
   this->m_recognizer->start();
-//  fprintf(stderr, "WindowStartProcess 2\n");
   
-  WindowWaitRecognizer::do_opening();
-//  fprintf(stderr, "WindowStartProcess 3\n");
+  WindowChild::do_opening();
   
   try {
     this->m_recognizer->send_settings();
@@ -44,8 +31,29 @@ WindowStartProcess::do_opening()
   catch (msg::ExceptionBrokenPipe) {
     this->handle_broken_pipe();
   }
-//  fprintf(stderr, "WindowStartProcess 4\n");
 }
+
+void
+WindowStartProcess::do_running()
+{
+  // Check if pipe is broken.
+  if (this->m_recognizer->get_in_queue()->get_eof()) {
+    fprintf(stderr, "Warning: WindowWaitRecognizer got eof from input!\n");
+    this->handle_broken_pipe();
+    return;
+  }
+  
+  // Listen for M_READY message.
+  this->m_recognizer->get_in_queue()->flush();
+  if (!this->m_recognizer->get_in_queue()->empty()) {
+    msg::Message message = this->m_recognizer->get_in_queue()->queue.front();
+    if (message.type() == msg::M_READY) {
+      this->end_running(1);
+    }
+    this->m_recognizer->get_in_queue()->queue.pop_front();
+  }
+}
+
 
 void
 WindowStartProcess::handle_broken_pipe()
@@ -57,70 +65,12 @@ WindowStartProcess::handle_broken_pipe()
                            "Exit");
   message.initialize();
   int ret_val = this->run_child_window(&message);
-  if (ret_val == 1) {
+  
+  // On Retry, do the opening procedures again.
+  if (ret_val == 1)
     this->do_opening();
-  }
+  
+  // Exiting is done closing the window with signal 0.
   if (ret_val == 2)
     this->end_running(0);
 }
-/*
-void
-WindowStartProcess::finish_process_and_queues()
-{
-  // Finish old process.
-  if (this->m_process->is_created()) {
-    this->m_process->finish();
-    if (this->m_in_queue)
-      this->m_in_queue->disable();
-    if (this->m_out_queue)
-      this->m_out_queue->disable();
-  }
-}
-
-void
-WindowStartProcess::start_process()
-{
-//  Settings::read_settings();
-  if (this->m_process->create() == 0) {
-    // All streams must be closed!
-//    AudioStream::close_all_streams();
-//    AudioStream::close();
-//    AudioStream::terminate();
-//    this->m_audio_input->terminate();
-    // NOTE: Here we should free all memory and close all streams, but how
-    // could we do that? If we free everything, we would have to reload
-    // surfaces....
-//    throw ExceptionChildProcess();
-
-//    Application::app->clean();
-//    fcloseall();
-    int ret = execlp("ssh",
-                     "ssh",
-                     Settings::ssh_to.data(),
-                     Settings::script_file.data(),
-                     (char*)NULL);
-                    
-    if (ret < 0) {
-      perror("Application::run exec() failed");
-      exit(1);                                    
-    }
-    assert(false);
-
-  }
-  
-  msg::set_non_blocking(this->m_process->read_fd);
-  msg::set_non_blocking(this->m_process->write_fd);
-}
-
-void
-WindowStartProcess::start_queues()
-{  
-  if (this->m_in_queue) {
-    this->m_in_queue->enable(this->m_process->read_fd);
-  }
-  
-  if (this->m_out_queue) {
-    this->m_out_queue->enable(this->m_process->write_fd);
-  }
-}
-//*/

@@ -2,8 +2,6 @@
 #include <assert.h>
 #include "WindowFile.hh"
 
-// This is to fasten debugging..
-
 WindowFile::WindowFile(const PG_Widget *parent, const std::string &title)
   : WindowChild(parent, title, 400, 200, true, true, "OK", "Cancel")
 {
@@ -27,7 +25,6 @@ WindowFile::initialize()
   this->m_window->AddChild(text_label);
   this->m_window->AddChild(this->m_filename_textbox);
   
-//  this->m_filename_textbox->SetText(this->get_last_file().data());//WindowFile::last_file.data());
 }
 
 void
@@ -44,16 +41,7 @@ WindowFile::do_opening()
 {
   this->focus_textbox();
 }
-/*
-void
-WindowFile::do_closing(int return_value)
-{
-  if (return_value == 1) {
-    this->set_last_file(this->get_filename());
-    //WindowFile::last_file = this->get_filename();
-  }
-}
-//*/
+
 bool
 WindowFile::file_exists()
 {
