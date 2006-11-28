@@ -6,7 +6,7 @@ AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
 #AKU_PATH = /home/thirsima/Work/akumod
 
 OPT = -g -O2
-AUX_CXXFLAGS ?= -Wall
+AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	$(shell paragui-config --cflags) \
 	-I/share/puhe/linux/include \

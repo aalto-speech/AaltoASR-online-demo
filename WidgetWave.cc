@@ -1,4 +1,4 @@
-
+#include <math.h>
 #include "WidgetWave.hh"
 
 WidgetWave::WidgetWave(PG_Widget *parent,

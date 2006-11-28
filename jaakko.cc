@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
   // classes and convert ints to Sint32/Uint32.
   if (!config['b'].specified && sizeof(int) < 4) {
     fprintf(stdout, "This program assumes that system uses at least 4 bytes "
-                    "for int. Your system uses only %d.\nProgram will exit.\n",
+                    "for int. Your system uses only %d.\nProgram will exit.\n"
                     "To ignore this error start application with -b flag.\n",
                     sizeof(int));
     return EXIT_FAILURE;
