@@ -36,32 +36,18 @@ RecognizerProcess::start()
     // Parse the parameters to exec-function.
     std::vector<std::string> args;
     str::split(&this->m_connect, " ", true, &args);
-    char **arg_array = new char*[args.size()+3];
-    if (args.size() > 0) {
-      arg_array[0] = new char[args.at(0).size()+1];
-      strcpy(arg_array[0], args.at(0).c_str());
-      arg_array[args.size()+1] = new char[this->m_script.size()+1];
-      strcpy(arg_array[args.size()+1], this->m_script.c_str());
-    }
-    else {
-      // If no command given, the script file is the execution command.
-      arg_array[0] = new char[this->m_script.size()+1];
-      strcpy(arg_array[0], this->m_script.c_str());
-    }
-    // Second parameter for exec does not matter.
-    arg_array[1] = new char[1];
-    strcpy(arg_array[1], "");
+    args.push_back(this->m_script);
+
+    char **arg_array = new char*[args.size() + 1];
 
     // Copy the parameters into the array.      
-    for (unsigned int ind = 1; ind < args.size(); ind++) {
-      arg_array[ind+1] = new char[args.at(ind).size()+1];
-      strcpy(arg_array[ind+1], args.at(ind).c_str());
-    }
-    arg_array[args.size()+2] = NULL;
+    for (unsigned int i = 0; i < args.size(); i++)
+      arg_array[i] = strdup(args[i].c_str());
+    arg_array[args.size()] = NULL;
     
     // Execute the recognizer.
-    int ret = execvp(arg_array[0], &arg_array[1]);
-                    
+    int ret = execvp(arg_array[0], &arg_array[0]);
+              
     if (ret < 0) {
       perror("Recognizer process failed exec()");
       // NOTE: Must use _exit NOT exit so Xlib will work properly!
