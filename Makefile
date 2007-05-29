@@ -6,12 +6,15 @@ AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
 #AKU_PATH = /home/thirsima/Work/akumod
 
 OPT = -g -O2
-AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing
+AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing -Wno-sign-compare
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	$(shell paragui-config --cflags) \
+	-I/share/puhe/x86_64/include \
+	-I/share/puhe/x86_64/include/lapackpp \
+	-I/share/puhe/x86_64/include/hcld \
 	-I/share/puhe/linux/include \
 	-I/share/puhe/linux/include/lapackpp
-LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) # -static
+LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) 
 CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT)
 
 ##################################################
@@ -29,11 +32,11 @@ decoder: $(decoder_srcs:%.cc=%.o) $(DECODER_PATH)/libdecoder.a
 recognizer_srcs = recognizer.cc conf.cc msg.cc \
 	Recognizer.cc Process.cc Adapter.cc
 recognizer_libs = -L/share/puhe/x86_64/lib/ \
-	-lpthread -lakumod -lfftw3 -lsndfile -llapackpp -llapack
+	-lpthread -lakumod -lfftw3 -lsndfile -llapackpp -llapack -lhcld
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libakumod.a
 
-gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
-gui_libs = -lpthread -lakumod -lsndfile
+gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc str.cc
+gui_libs = -lpthread -lsndfile
 gui: $(gui_srcs:%.cc=%.o)
 
 jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
@@ -53,6 +56,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	scrap.cc RecognizerStatus.cc WidgetStatus.cc
 
 jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype -lfftw3
+#jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
 jaakko: $(jaakko_srcs:%.cc=%.o)
 
 srcs = $(decoder_srcs) $(recognizer_srcs) $(gui_srcs) $(jaakko_srcs)
