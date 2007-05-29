@@ -151,6 +151,7 @@ namespace msg {
   public:
     // Should this be protected/private?
     std::deque<Message> queue;
+    std::string name; //!< Optional queue name for debugging purposes
 
   public:
     InQueue(int fd = -1);

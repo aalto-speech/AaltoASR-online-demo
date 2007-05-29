@@ -36,7 +36,8 @@ Adapter::adapt(const std::string &str,
     assert(end_frame > start_frame);
     for (int f = start_frame; f < end_frame; f++) {
       const std::vector<float> &vec = features.at(f);
-      mllr.find_probs(&state, FeatureVec(&vec[0], vec.size()));
+      FeatureVec fea(&vec[0], vec.size());
+      mllr.find_probs(&state, fea);
     }
     start_frame = end_frame;
   }

@@ -1,6 +1,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include "msg.hh"
+#include "str.hh"
 
 namespace msg {
 
@@ -81,16 +82,23 @@ namespace msg {
       	break;
       }
 
+      // FIXME: remove debug
+      if (0) {
+        fprintf(stderr, "READ %d-%d: ", bytes_got, bytes_got + ret);
+        for (int i = 0; i < ret; i++) {
+          fprintf(stderr, "%02x ", (unsigned char)buffer[bytes_got + i]);
+        }
+        fprintf(stderr, "\n");
+      }
+
       assert(ret <= bytes_left);
       bytes_got += ret;
       if (ret == bytes_left) {
 
       	if (bytes_got == header_size) {
       	  int length = endian::get4<int>(&buffer[0]);
-      	  if (length < header_size) {
-      	    fprintf(stderr, "InQueue::flush() got message length %d\n",  length);
-      	    exit(1);
-      	  }
+      	  if (length < header_size)
+            throw str::fmt(256, "InQueue::flush() got message length %d\n");
 
       	  buffer.resize(length);
       	  if (bytes_got < length)
@@ -99,6 +107,7 @@ namespace msg {
       
       	Message message;
       	message.buf = buffer;
+
         if (message.urgent()) {
           std::deque<Message>::iterator iter;
           // Find the position just before first non-urgent message.
@@ -173,14 +182,14 @@ namespace msg {
   OutQueue::send_next() throw(ExceptionBrokenPipe)
   {
     assert(fd >= 0);
-
     assert(bytes_sent < buffer.length());
-    int bytes_left = buffer.length() - bytes_sent;
-    assert(bytes_left > 0);
 
     // Write buffer with restart
     ssize_t ret;
+
     while (1) {
+      int bytes_left = buffer.length() - bytes_sent;
+      assert(bytes_left > 0);
       while (1) {
         ret = write(fd, &buffer[bytes_sent], bytes_left);
         if (ret < 0) {
@@ -321,7 +330,13 @@ namespace msg {
       for (int i = 0; i < (int)select_in_queues.size(); i++) {
         InQueue *queue = select_in_queues[i];
         if (FD_ISSET(queue->get_fd(), &read_set)) {
-          queue->flush();
+          try {
+            queue->flush();
+          }
+          catch (std::string &str) {
+            throw "Mux::wait_and_flush(): error in queue '" + queue->name +
+              "': " + str;
+          }
           if (!queue->empty() || queue->get_eof())
             message_pending = true;
         }

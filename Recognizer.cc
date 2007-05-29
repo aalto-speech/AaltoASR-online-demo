@@ -516,6 +516,10 @@ Recognizer::run()
   msg::set_non_blocking(0);
   msg::set_non_blocking(1);
 
+  stdin_queue.name = "stdin";
+  ac_in_queue.name = "ac_in";
+  dec_in_queue.name = "dec_in";
+
   msg::Mux mux;
   mux.in_queues.push_back(&stdin_queue);
   mux.in_queues.push_back(&ac_in_queue);

@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <sndfile.h>
 #include <pthread.h>
 #include "msg.hh"
@@ -13,6 +14,63 @@ pthread_t thread;
 pthread_cond_t cond_var;
 pthread_mutex_t cond_mutex;
 bool waiting = false;
+std::string current_filename;
+
+std::string recog_sure;
+std::string recog_hypo;
+
+SNDFILE *snd_file = NULL;
+
+void
+replace_all(std::string &str, const std::string &from, const std::string &to)
+{
+  std::string::size_type pos = 0;
+  while (1) {
+    pos = str.find(from, pos);
+    if (pos == str.npos)
+      return;
+    str.replace(pos, from.length(), to);
+    pos++;
+  }
+}
+
+void
+process_recog(std::string str)
+{
+  replace_all(str, "<w>", "_");
+
+  std::string sure;
+  std::string hypo;
+  std::string::size_type pos = str.find('*');
+  if (pos == str.npos)
+    sure = str;
+  else {
+    sure = str.substr(0, pos);
+    hypo = str.substr(pos + 1);
+  }
+
+  str::clean(&sure, " ");
+  str::clean(&hypo, " ");
+
+  std::vector<std::string> fields;
+
+  str::split(&sure, " \t", true, &fields);
+  for (size_t i = 0; i < fields.size(); i++) {
+    if (isdigit(fields[i].at(0)))
+      continue;
+    recog_sure.append(fields[i]);
+    recog_sure.append(" ");
+  }
+
+  recog_hypo.clear();
+  str::split(&hypo, " \t", true, &fields);
+  for (size_t i = 1; i < fields.size(); i += 2) {
+    if (isdigit(fields[i].at(0)))
+      continue;
+    recog_hypo.append(fields[i]);
+    recog_hypo.append(" ");
+  }
+}
 
 static void*
 input_thread(void *data)
@@ -24,15 +82,23 @@ input_thread(void *data)
       msg::Message &message = rec_in_queue.queue.front();
 
       std::string word(message.data_ptr(), message.data_length());
-      if (message.type() == msg::M_RECOG)
-        fprintf(stderr, "gui: got RECOG: %s\n", word.c_str());
+      if (message.type() == msg::M_RECOG) {
+//        fprintf(stderr, "gui: got RECOG: %s\n", word.c_str());
+        process_recog(word);
+        fprintf(stderr, "RECOG: %s%s\n", 
+                recog_sure.c_str(), recog_hypo.c_str());
+      }
 
       else if (message.type() == msg::M_RECOG_END) {
         fprintf(stderr, "gui: got RECOG_END\n");
+        recog_sure.clear();
+        recog_hypo.clear();
       }
       
       else if (message.type() == msg::M_READY) {
         fprintf(stderr, "gui: got READY\n");
+        recog_sure.clear();
+        recog_hypo.clear();
       }
       
       else if (message.type() == msg::M_MESSAGE) {
@@ -101,16 +167,18 @@ enqueue(const msg::Message &msg)
   pthread_mutex_unlock(&cond_mutex);
 }
 
-SNDFILE*
+void
 open_audio(std::string file)
 {
+  if (snd_file != NULL)
+    sf_close(snd_file);
+
   SF_INFO snd_info;
-  SNDFILE *snd_file = sf_open(file.c_str(), SFM_READ, &snd_info);
+  snd_file = sf_open(file.c_str(), SFM_READ, &snd_info);
   if (snd_file == NULL) {
     fprintf(stderr, "sf_open(%s) failed\n", file.c_str());
     perror("system error:");
   }
-  return snd_file;
 }
 
 int
@@ -121,27 +189,65 @@ main(int argc, char *argv[])
       ('h', "help", "", "", "display help")
       ('a', "audio=FILE", "arg must", "", "audio file")
       ('r', "rec=FILE", "arg must", "", "rec script file")
-      ('\0', "host=STR", "arg must", "", "remote host")
+      ('\0', "host=STR", "arg", "", "remote host")
+      ('\0', "connect=STR", "arg", "", "command to connect")
       ;
 
     config.default_parse(argc, argv);
     if (config.arguments.size() != 0)
       config.print_help(stderr, 1);
 
-    SNDFILE *snd_file = open_audio(config["audio"].get_str());
+    current_filename = config["audio"].get_str();
+    open_audio(current_filename);
     
     Process proc;
     if (proc.create() == 0) {
-      int ret = execlp("ssh", "ssh", config["host"].get_c_str(), 
-                       config["rec"].get_c_str(), NULL);
-      if (ret < 0) {
-        perror("exec() failed");
+
+      if (config["connect"].specified) {
+        std::vector<std::string> fields;
+        std::string connect(config["connect"].get_str());
+        str::clean(&connect, " \t");
+        str::split(&connect, " \t", true, &fields);
+        if (fields.empty()) {
+          fprintf(stderr, "empty command in --connect\n");
+          exit(1);
+        }
+        fields.push_back(config["rec"].get_str());
+        char **argv = new char* [fields.size() + 1];
+        for (size_t i = 0; i < fields.size(); i++)
+          argv[i] = strdup(fields[i].c_str());
+        argv[fields.size()] = NULL;
+        int ret = execvp(fields[0].c_str(), argv);
+        if (ret < 0) {
+          perror("execvp() failed");
+          exit(1);
+        }
+      }
+      else if (config["host"].specified) {
+        int ret = execlp("ssh", "ssh", config["host"].get_c_str(), 
+                         config["rec"].get_c_str(), NULL);
+        if (ret < 0) {
+          perror("execlp() failed");
+          exit(1);
+        }
+      }
+      else {
+        fprintf(stderr, "--host or --connect required\n");
         exit(1);
       }
       assert(false);
     }
 
     rec_in_queue.enable(proc.read_fd);
+
+    {
+      fprintf(stderr, "waiting input from recognition process\n");
+      msg::Mux mux;
+      mux.in_queues.push_back(&rec_in_queue);
+      mux.wait_and_flush();
+      fprintf(stderr, "got message\n");
+    }
+
     rec_out_queue.enable(proc.write_fd);
     create_threads();
 
@@ -158,8 +264,13 @@ main(int argc, char *argv[])
         if (!str::read_line(&line, stdin, true))
           break;
         str::split(&line, " \t", true, &fields);
-        if (fields.size() == 0)
-          continue;
+
+        if (fields.size() == 0) {
+          send_rest = true;
+          prompt = false;
+          open_audio(current_filename);
+        }
+
       }
 
       if (fields[0] == "adapt") {
@@ -214,20 +325,17 @@ main(int argc, char *argv[])
       }
       if (fields[0] == "o") {
 
-        if (fields.size() > 1)
-          snd_file = open_audio(fields[1]);
-
-        if (snd_file != NULL) {
-          if (sf_seek(snd_file, 0, SEEK_SET) < 0) {
-            fprintf(stderr, "sf_seek(0) failed: %s\n", sf_strerror(snd_file));
-            exit(1);
-          }
+        if (fields.size() > 1) {
+          open_audio(fields[1]);
+          current_filename = fields[1];
         }
+
+        open_audio(current_filename);
         continue;
       }
       if (fields[0] == "e")
 	  enqueue(msg::Message(msg::M_AUDIO_END));
-      if (fields[0] == "r") {
+      if (fields[0] == "R") {
 	  enqueue(msg::Message(msg::M_RESET, true));
       }
       if (send_rest || fields[0] == "a") {
@@ -252,6 +360,8 @@ main(int argc, char *argv[])
             fprintf(stderr, "gui: end of audio\n");
             send_rest = false;
             prompt = true;
+            msg::Message message(msg::M_AUDIO_END);
+            enqueue(message);
           }
           else {
             buf.resize(ret * 2);
