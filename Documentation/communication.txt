@@ -1,0 +1,20 @@
+Tiedostossa state_chart.fig on tilakaavio tunnistinmokkulan (rec)
+toiminnasta, tilasta ja viesteistä.  Systeemiin kuuluu seuraavia
+mokkuloita:
+
+* gui - erillinen binääri, joka lukee mikkiä, lähettää audiopaketteja
+rec:lle ja saa rec:ltä tunnistustulosta
+
+* rec - "tunnistin", joka johtaa toimintaa ja välittää viestejä.  Saa
+audiota gui:lta, lähettää sitä ac:lle, saa ac:ltä todennäköisyyksiä ja
+lähettää niitä dec:lle, saa dec:ltä tunnistustulosta ja lähettää
+gui:lle.  Sisältää tavallaan mokkulat "ac" ja "dec"
+
+  * ac - threadi rec:n sisällä, joka lukee audiota rec:ltä ja lähettää
+tilatodennäköisyyksiä rec:lle
+
+  * dec - rec:n sisällä forkattu dekooderi, joka saa rec:ltä
+tilatodennäköisyyksiä ja lähettää tunnistustulosta rec:lle
+
+Tuo dec laitettiin aikoinaan omaan prosessiin sen takia, että se voi
+pyöriä tuplaprosarikoneessa eri prosarilla kuin ac.
