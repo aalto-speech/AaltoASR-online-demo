@@ -3,7 +3,7 @@
 #include "str.hh"
 
 const unsigned int RecognizerProcess::MIN_BEAM = 1;
-const unsigned int RecognizerProcess::MAX_BEAM = 200;
+const unsigned int RecognizerProcess::MAX_BEAM = 300;
 const unsigned int RecognizerProcess::MIN_LMSCALE = 1;
 const unsigned int RecognizerProcess::MAX_LMSCALE = 100;
 
@@ -34,8 +34,7 @@ RecognizerProcess::start()
   if (this->m_process.create() == 0) {
     // Child process enters here.
     // Parse the parameters to exec-function.
-    std::vector<std::string> args;
-    str::split(&this->m_connect, " ", true, &args);
+    std::vector<std::string> args = str::split(this->m_connect, " ", true);
     args.push_back(this->m_script);
 
     char **arg_array = new char*[args.size() + 1];
