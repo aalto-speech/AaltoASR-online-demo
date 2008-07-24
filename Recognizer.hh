@@ -58,7 +58,7 @@ public:
   bool adaptation;
 
   /** Feature vectors of the previous utterance. */
-  std::vector<std::vector<float> > feature_vectors;
+  std::vector<std::vector<double> > feature_vectors;
 
 public:
   Recognizer();

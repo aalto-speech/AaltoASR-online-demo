@@ -28,7 +28,7 @@ public:
    * \param str = state history information from the decoder
    */
   void adapt(const std::string &str,
-             const std::vector<std::vector<float> > &features,
+             const std::vector<std::vector<double> > &features,
              LinTransformModule *mllr_mod);
 
   /** Forget all previous adaptation information. */
