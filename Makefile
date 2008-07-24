@@ -1,21 +1,21 @@
 arch = $(shell uname -m)
 
-DECODER_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/decoder
-#DECODER_PATH = /home/thirsima/share/decoder-online-demo/src
-AKU_PATH = /home/thirsima/Work/online-demo-libs/$(arch)/akumod
-#AKU_PATH = /home/thirsima/Work/akumod
+DECODER_PATH = /home/mavarjok/decoder/src
+AKU_PATH = /home/mavarjok/aku
 
-OPT = -g -O2
+OPT = -O2
+WARNINGS = -Wall -Wno-deprecated
 AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing -Wno-sign-compare
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
+	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	$(shell paragui-config --cflags) \
 	-I/share/puhe/x86_64/include \
 	-I/share/puhe/x86_64/include/lapackpp \
 	-I/share/puhe/x86_64/include/hcld \
 	-I/share/puhe/linux/include \
 	-I/share/puhe/linux/include/lapackpp
-LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) 
-CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT)
+LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) -L$(DECODER_PATH)/fsalm -L$(DECODER_PATH)/misc
+CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT) $(WARNINGS)
 
 ##################################################
 
@@ -26,16 +26,16 @@ default: $(progs)
 all: $(progs)
 
 decoder_srcs = decoder.cc Decoder.cc conf.cc msg.cc endian.cc
-decoder_libs = -ldecoder
+decoder_libs = -ldecoder -lfsalm -lmisc
 decoder: $(decoder_srcs:%.cc=%.o) $(DECODER_PATH)/libdecoder.a
 
 recognizer_srcs = recognizer.cc conf.cc msg.cc \
 	Recognizer.cc Process.cc Adapter.cc
 recognizer_libs = -L/share/puhe/x86_64/lib/ \
-	-lpthread -lakumod -lfftw3 -lsndfile -llapackpp -llapack -lhcld
-recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libakumod.a
+	-lpthread -laku -lfftw3 -lsndfile -llapackpp -llapack -lhcld
+recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libaku.a
 
-gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc str.cc
+gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
 gui_libs = -lpthread -lsndfile
 gui: $(gui_srcs:%.cc=%.o)
 
@@ -45,7 +45,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	Application.cc Window.cc \
 	WidgetWave.cc \
 	WindowRecognizer.cc \
-	WidgetRecognitionArea.cc str.cc WidgetRecognitionText.cc \
+	WidgetRecognitionArea.cc WidgetRecognitionText.cc \
 	WidgetScrollArea.cc WindowFile.cc WindowMessageBox.cc \
 	WidgetSpectrogram.cc WindowChild.cc WindowSettings.cc \
 	RecognizerListener.cc WindowStartProcess.cc \
