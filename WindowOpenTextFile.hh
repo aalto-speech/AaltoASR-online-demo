@@ -27,7 +27,11 @@ protected:
       return false;
     }
       
-    if (!str::read_file(&this->m_content, file)) {
+    try {
+      (this->m_content = str::read_file(file));
+        }
+    catch (std::runtime_error &err)
+    {
       this->error("Could not read from text file.", ERROR_NORMAL);
       this->focus_textbox();
       return false;

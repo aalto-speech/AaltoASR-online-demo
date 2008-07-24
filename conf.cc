@@ -91,8 +91,7 @@ namespace conf {
       long_name_map_key.erase(equal_pos);
 
     // Parse the type string
-    std::vector<std::string> types;
-    str::split(&type, " \t", true, &types);
+    std::vector<std::string> types = str::split(type, " \t", true);
     for (int i = 0; i < (int)types.size(); i++) {
       if (types[i] == "arg")
 	o.needs_argument = true;
@@ -266,12 +265,16 @@ namespace conf {
   {
     // Read and split the file in fields
     std::string text;
-    if (!str::read_file(&text, file)) {
+    try {
+      text = str::read_file(file);
+    }
+    catch (std::runtime_error err) {
       perror("could not read config file");
       exit(1);
     }
-    std::vector<std::string> fields;
-    str::split_with_quotes(&text, " \t\n", true, &fields);
+    std::vector<std::string> fields = str::split(text, " \t\n", true);
+//    str::split_with_quotes(&text, " \t\n", true, &fields);
+
     
     // Prepare for parsing
     std::deque<std::string> argument_queue(fields.begin(), fields.end());
