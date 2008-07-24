@@ -9,11 +9,10 @@ Adapter::Adapter(HmmSet &model, FeatureGenerator &feagen)
 
 void
 Adapter::adapt(const std::string &str, 
-               const std::vector<std::vector<float> > &features,
+               const std::vector<std::vector<double> > &features,
                LinTransformModule *mllr_mod)
 {
-  std::vector<std::string> fields;
-  str::split(&str, " \t", true, &fields);
+  std::vector<std::string> fields = str::split(str, " \t", true);
   if (fields.size() % 2 != 1) {
     fprintf(stderr, 
             "WARNING: Adapter::adapt(): invalid state history string\n");
@@ -21,11 +20,11 @@ Adapter::adapt(const std::string &str,
   }
 
   bool ok = true;
-  int start_frame = str::str2long(&fields[0], &ok);
+  int start_frame = str::str2long(fields[0]);
   for (int i = 1; i < (int)fields.size(); i += 2) {
     assert(i + 1 < (int)fields.size());
-    int state_index = str::str2long(&fields[i], &ok);
-    int end_frame = str::str2long(&fields[i+1], &ok);
+    int state_index = str::str2long(fields[i]);
+    int end_frame = str::str2long(fields[i+1]);
     if (!ok) {
       fprintf(stderr, 
               "ERROR: Adapter::adapt(): invalid start_frame or state_index\n");
@@ -35,9 +34,12 @@ Adapter::adapt(const std::string &str,
 
     assert(end_frame > start_frame);
     for (int f = start_frame; f < end_frame; f++) {
-      const std::vector<float> &vec = features.at(f);
-      FeatureVec fea(&vec[0], vec.size());
-      mllr.find_probs(&state, fea);
+      FeatureVec fea = FeatureVec();
+      fea.set(features.at(f));
+      // FIXME: what should the prior be?
+      // FeatureVec fea(&(features.at(f)), features.at(f).size());
+      // mllr.find_probs(&state, fea);
+      mllr.find_probs(1/(double)model.num_states(), &state, fea);
     }
     start_frame = end_frame;
   }
