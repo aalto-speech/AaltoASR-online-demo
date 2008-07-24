@@ -121,23 +121,22 @@ bool
 TextComparer::parse_result(TextComparisonResult::Result &result,
                            const std::string &output)
 {
-  std::vector<std::string> split_vector;
   std::string line;
   
   // Split the output into lines.
-  str::split(&output, "\n", true, &split_vector);
+  std::vector<std::string> split_vector = str::split(output, "\n", true);
   for (unsigned int ind = 0; ind < split_vector.size(); ind++) {
     // Search the line containing the scores.
     if (split_vector.at(ind).compare(0, 7, "Scores:") == 0) {
       line = split_vector.at(ind);
-      str::split(&line, " ", true, &split_vector);
+      split_vector = str::split(line, " ", true);
       // Transform each point from string to integer.
       if (split_vector.size() == 9) {
         bool ok = true;
-        result.correct = str::str2long(&split_vector.at(5), &ok);
-        result.substitution = str::str2long(&split_vector.at(6), &ok);
-        result.deletion = str::str2long(&split_vector.at(7), &ok);
-        result.insertion = str::str2long(&split_vector.at(8), &ok);
+        result.correct = str::str2long(split_vector.at(5));
+        result.substitution = str::str2long(split_vector.at(6));
+        result.deletion = str::str2long(split_vector.at(7));
+        result.insertion = str::str2long(split_vector.at(8));
         return ok;
       }
       return false;

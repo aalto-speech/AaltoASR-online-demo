@@ -232,18 +232,16 @@ Decoder::run()
     }
 
     else if (message.type() == msg::M_DECODER_SETTING) {
-      std::vector<std::string> fields;
       std::string line(message.data_ptr(), message.data_length());
       
-      str::split(&line, " \t", true, &fields);
+      std::vector<std::string> fields = str::split(line, " \t", true);
       if (fields.size() < 1)
         fprintf(stderr, "decoder: empty DECODER_SETTING message\n");
       else {
         if (fields[0] == "beam") {
           if (fields.size() != 2)
             fprintf(stderr, "decoder: invalid beam setting message\n");
-          bool ok = true;
-          float beam = str::str2float(&fields[1], &ok);
+          float beam = str::str2float(fields[1]);
           t.set_global_beam(beam);
           fprintf(stderr, "decoder: set beam to %g\n", beam);
         }
@@ -251,8 +249,7 @@ Decoder::run()
         else if (fields[0] == "lm_scale") {
           if (fields.size() != 2)
             fprintf(stderr, "decoder: invalid lm_scale setting message\n");
-          bool ok = true;
-          float lm_scale = str::str2float(&fields[1], &ok);
+          float lm_scale = str::str2float(fields[1]);
           t.set_lm_scale(lm_scale);
           fprintf(stderr, "decoder: set lm_scale to %g\n", lm_scale);
         }

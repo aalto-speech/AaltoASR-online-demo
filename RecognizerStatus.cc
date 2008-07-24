@@ -122,7 +122,7 @@ RecognizerStatus::parse(const std::string &message)
   this->m_hypothesis.clear();
 
   // Split the text into parts.
-  str::split(&message, " ", true, &split_vector);
+  split_vector = str::split(message, " ", true);
   
   // Format example: "101 jou 120 lu * 130 on 140 jo 148"
   for (unsigned int ind = 0; ind < split_vector.size(); ind++) {
@@ -131,7 +131,7 @@ RecognizerStatus::parse(const std::string &message)
     }
     else {
       if (next_is_time) {
-        long time = str::str2long(&split_vector.at(ind), &ok);
+        long time = str::str2long(split_vector.at(ind));
         new_morpheme.time = time < 0 ? 0 : time;
         if (last_morpheme)
           last_morpheme->duration = time - last_morpheme->time;
