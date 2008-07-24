@@ -85,7 +85,7 @@ WindowSettings::do_ok()
   }  
 
   if (this->m_recognizer) {
-    beam = this->read_long_value(this->m_beam_edit, 1, 200, &ok);
+    beam = this->read_long_value(this->m_beam_edit, 1, 300, &ok);
     if (!ok) {
       this->error(str::fmt(50,
                            "Beam must be an integer between %u-%u.",
@@ -135,7 +135,7 @@ WindowSettings::read_float_value(PG_LineEdit *line_edit,
                                  bool *ok)
 {
   std::string text = line_edit->GetText();
-  float value = str::str2float(&text, ok);
+  float value = str::str2float(text);
 
   if (!ok)
     return 0;
@@ -155,7 +155,7 @@ WindowSettings::read_long_value(PG_LineEdit *line_edit,
                                 bool *ok)
 {
   std::string text = line_edit->GetText();
-  long value = str::str2long(&text, ok);
+  long value = str::str2long(text);
 
   if (!ok)
     return 0;
