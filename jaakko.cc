@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include "Application.hh"
 #include "conf.hh"
@@ -6,6 +5,8 @@
 // cluster, beam, lmscale, int16
 int main(int argc, char* argv[])
 {
+
+  try {
   conf::Config config;
 
   config(0, "beam", "arg", "", "Beam value for recognizer.");
@@ -68,7 +69,7 @@ int main(int argc, char* argv[])
           fprintf(stderr, "Warning: You are trying to run the recognizer "
                           "locally. You may want to specify either host- or "
                           "connect-flag.\n");
-          
+
         ok = app.initialize(config["width"].get_int(),
                             config["height"].get_int(),
                             connect,
@@ -93,4 +94,10 @@ int main(int argc, char* argv[])
   app.clean();
   fprintf(stderr, "Clean exit.\n");
   return ret_val;
+
+  }
+  catch (std::string &str) {
+    fprintf(stderr, "jaakko: exception: %s\n", str.c_str());
+    exit(1);
+  } 
 }
