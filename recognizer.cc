@@ -16,6 +16,9 @@ main(int argc, char *argv[])
       ('b', "hmms-base=BASENAME", "arg", 
        path + "/mfcc_speecon_mag_tri_25.5.2006_10", "basename for HMM files")
       ('d', "decoder=COMMAND", "arg", "", "decoder command to run")
+      ('C', "clusters=FILE", "arg", "", "Gaussian clustering file")
+      ('\0', "eval-minc=FLOAT", "arg", "0", "minimum ratio of top clusters to evaluate")
+      ('\0', "eval-ming=FLOAT", "arg", "0", "minimum ratio of Gaussians to evaluate")
       ('v', "verbosity=INT", "arg", "0", "verbosity level")
       ;
 
@@ -42,6 +45,13 @@ main(int argc, char *argv[])
 
     fprintf(stderr, "rec: reading HMM model\n");
     rec.hmms.read_all(config["hmms-base"].get_str());
+
+    if (config["clusters"].specified) {
+      rec.hmms.read_clustering(config["clusters"].get_str());
+      rec.hmms.set_clustering_min_evals(config["eval-minc"].get_double(),
+                                        config["eval-ming"].get_double());
+    }
+    
     fprintf(stderr, "rec: configuring feature generator\n");
     rec.gen.load_configuration(
       io::Stream(config["hmms-base"].get_str() + ".cfg"));
