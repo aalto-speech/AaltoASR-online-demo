@@ -104,9 +104,12 @@ WidgetRecognitionArea::get_audio_cursor() const
 unsigned long
 WidgetRecognitionArea::get_recognizer_cursor() const
 {
-  return (unsigned long)(this->m_pixels_per_second *
-                         this->m_recognition->get_recognition_frame() /
-                         RecognizerStatus::frames_per_second);
+  if (m_recognition->m_message_result_true_called)
+    return get_audio_pixels();
+  else
+    return (unsigned long)(this->m_pixels_per_second *
+                           this->m_recognition->get_recognition_frame() /
+                           RecognizerStatus::frames_per_second);
 }
 
 unsigned long 

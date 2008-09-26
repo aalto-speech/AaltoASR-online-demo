@@ -1,6 +1,7 @@
 
 #include "WidgetRecognitionArea.hh"
 #include "WidgetScrollBar.hh"
+#include "AudioStream.hh"
 
 WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                              const PG_Rect &rect,
@@ -9,7 +10,7 @@ WidgetRecognitionArea::WidgetRecognitionArea(PG_Widget *parent,
                                              unsigned int pixels_per_second)
   : PG_Widget(parent, rect, false),
     m_pixels_per_second(pixels_per_second),
-    m_frames_per_pixel(SAMPLE_RATE / (double)pixels_per_second)
+    m_frames_per_pixel((double)audio::audio_sample_rate / (double)pixels_per_second)
 {
   this->m_audio_input = audio_input;
   this->m_recognition = recognition;
@@ -177,7 +178,7 @@ WidgetRecognitionArea::update_screen(bool new_data)
   this->m_spectrogram->update();
   if (new_data)
     this->m_text_area->update();
-  this->m_time_axis->update(this->m_audio_input->get_audio_data_size() / SAMPLE_RATE);
+  this->m_time_axis->update(this->m_audio_input->get_audio_data_size() / audio::audio_sample_rate);
     
   this->update_cursors();
 
