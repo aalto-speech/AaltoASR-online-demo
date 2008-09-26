@@ -49,12 +49,10 @@ process_recog(std::string str)
     hypo = str.substr(pos + 1);
   }
 
-  str::clean(&sure, " ");
-  str::clean(&hypo, " ");
+  str::clean(sure, " ");
+  str::clean(hypo, " ");
 
-  std::vector<std::string> fields;
-
-  str::split(&sure, " \t", true, &fields);
+  std::vector<std::string> fields = str::split(sure, " \t", true);
   for (size_t i = 0; i < fields.size(); i++) {
     if (isdigit(fields[i].at(0)))
       continue;
@@ -63,7 +61,7 @@ process_recog(std::string str)
   }
 
   recog_hypo.clear();
-  str::split(&hypo, " \t", true, &fields);
+  fields = str::split(hypo, " \t", true);
   for (size_t i = 1; i < fields.size(); i += 2) {
     if (isdigit(fields[i].at(0)))
       continue;
@@ -197,6 +195,8 @@ main(int argc, char *argv[])
     if (config.arguments.size() != 0)
       config.print_help(stderr, 1);
 
+//    audio::audio_sample_rate = (unsigned)config["sample-rate"].get_int();
+
     current_filename = config["audio"].get_str();
     open_audio(current_filename);
     
@@ -206,8 +206,8 @@ main(int argc, char *argv[])
       if (config["connect"].specified) {
         std::vector<std::string> fields;
         std::string connect(config["connect"].get_str());
-        str::clean(&connect, " \t");
-        str::split(&connect, " \t", true, &fields);
+        str::clean(connect, " \t");
+        fields = str::split(connect, " \t", true);
         if (fields.empty()) {
           fprintf(stderr, "empty command in --connect\n");
           exit(1);
@@ -261,9 +261,9 @@ main(int argc, char *argv[])
       fields.push_back("");
       if (prompt) {
         fprintf(stderr, "> ");
-        if (!str::read_line(&line, stdin, true))
+        if (!str::read_line(line, stdin, true))
           break;
-        str::split(&line, " \t", true, &fields);
+        fields = str::split(line, " \t", true);
 
         if (fields.size() == 0) {
           send_rest = true;
