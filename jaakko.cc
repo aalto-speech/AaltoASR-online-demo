@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "Application.hh"
 #include "conf.hh"
+#include "AudioStream.hh"
+#include "RecognizerStatus.hh"
 
 // cluster, beam, lmscale, int16
 int main(int argc, char* argv[])
@@ -9,16 +11,19 @@ int main(int argc, char* argv[])
   try {
   conf::Config config;
 
-  config(0, "beam", "arg", "", "Beam value for recognizer.");
-  config(0, "lmscale", "arg", "", "Language model scale value for recognizer.");
-  config(0, "help", "", "", "Help text.");
-  config('w', "width", "arg", "1024", "Window width.");
-  config('h', "height", "arg", "768", "Window height.");
-  config(0, "host", "arg", "", "Recognizer is run on this computer via SSH.");
-  config(0, "script", "arg", "rec.sh", "Script file that starts recognizer.");
-  config('b', "", "", "", "Allow less than 4 byte int.");
-  config('d', "disable_recog", "", "", "Disables the recognizer.");
-  config(0, "connect", "arg", "", "SSH connection command, e.g. \"ssh pyramid.hut.fi ssh itl-cl1\".");
+  config('\0', "beam", "arg", "", "Beam value for recognizer.")
+    ('\0', "lmscale", "arg", "", "Language model scale value for recognizer.")
+    ('\0', "help", "", "", "Help text.")
+    ('w', "width", "arg", "1024", "Window width.")
+    ('h', "height", "arg", "768", "Window height.")
+    ('\0', "host", "arg", "", "Recognizer is run on this computer via SSH.")
+    ('\0', "script", "arg", "rec.sh", "Script file that starts recognizer.")
+    ('b', "four-byte", "", "", "Allow less than 4 byte int.")
+    ('d', "disable_recog", "", "", "Disables the recognizer.")
+    ('s', "sample-rate", "arg", "16000", "sets the sample rate (default 16000)")
+    ('\0', "words", "", "", "word based LM (without word break symbols)")
+    ('\0', "connect", "arg", "", "SSH connection command, e.g. \"ssh pyramid.hut.fi ssh itl-cl1\".")
+    ;
 
   config.default_parse(argc, argv);
   
@@ -41,7 +46,9 @@ int main(int argc, char* argv[])
   Application app;
   int ret_val = EXIT_SUCCESS;
   bool ok = false;
-
+  audio::audio_sample_rate = (unsigned)config["sample-rate"].get_int();
+  RecognizerStatus::words = config["words"].specified;
+  
   if (config['d'].specified) {
     ok = app.initialize(config["width"].get_int(),
                         config["height"].get_int());
