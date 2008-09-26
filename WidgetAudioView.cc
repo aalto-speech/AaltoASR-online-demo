@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <algorithm>
 #include "WidgetWave.hh"
+#include "AudioStream.hh"
 
 WidgetAudioView::WidgetAudioView(PG_Widget *parent,
                                  const PG_Rect &rect,
@@ -10,7 +11,7 @@ WidgetAudioView::WidgetAudioView(PG_Widget *parent,
                                  const unsigned int pixels_per_second)
   : PG_Widget(parent, rect, true),
     m_pixels_per_second(pixels_per_second),
-    m_samples_per_pixel(SAMPLE_RATE / (double)pixels_per_second)
+    m_samples_per_pixel((double)audio::audio_sample_rate / (double)pixels_per_second)
 {
   this->m_audio_input = audio_input;
   
