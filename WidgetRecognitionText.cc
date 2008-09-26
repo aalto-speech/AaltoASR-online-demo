@@ -1,6 +1,7 @@
 
 #include "WidgetRecognitionText.hh"
 #include "WidgetContainer.hh"
+#include "AudioStream.hh"
 #include <pglabel.h>
 
 WidgetRecognitionText::WidgetRecognitionText(PG_Widget *parent,
@@ -42,7 +43,7 @@ WidgetRecognitionText::update()
 {
   this->m_recognition->lock();
   unsigned long frame = this->m_recognition->get_recognition_frame();
-  if (frame > this->m_last_recognition_frame) {
+  if (frame > this->m_last_recognition_frame || m_recognition->m_message_result_true_called) {
     this->update_recognition();
     this->update_hypothesis();
     this->m_last_recognition_frame = frame;
@@ -247,7 +248,7 @@ WidgetRecognitionText::handle_morpheme_widget(PG_MessageObject *widget,
                                                const SDL_MouseButtonEvent *event,
                                                void *user_data)
 {
-  double multiplier = (double)SAMPLE_RATE / this->m_pixels_per_second;
+  double multiplier = (double)audio::audio_sample_rate / this->m_pixels_per_second;
   unsigned long x = ((PG_Widget*)widget)->my_xpos;
   unsigned long w = ((PG_Widget*)widget)->my_width;
   x += this->get_scroll_position();
