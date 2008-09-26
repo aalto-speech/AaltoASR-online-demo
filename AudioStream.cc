@@ -4,61 +4,68 @@
 #include <stdio.h>
 #include <assert.h>
 #include "AudioStream.hh"
-  
-bool
-audio::read_wav_data(const std::string &filename, std::string &to)
-{
-  SF_INFO info;
-  SNDFILE *file;
-  char *data;
-  unsigned long read_size = 0;
 
-  info.format = 0;
-  file = sf_open(filename.data(), SFM_READ, &info);
-  
-  if (file == NULL) {
-    perror("sf_open failed");
-    fprintf(stderr, "read_wav_data failed to open file \"%s\"\n", filename.data());
-    return false;
-  }
+
+namespace audio {
+
+  bool
+  read_wav_data(const std::string &filename, std::string &to)
+  {
+    SF_INFO info;
+    SNDFILE *file;
+    char *data;
+    unsigned long read_size = 0;
+
+    info.format = 0;
+    file = sf_open(filename.data(), SFM_READ, &info);
     
-  data = new char[sizeof(AUDIO_FORMAT)*info.frames+1];
-  read_size = audio_read_function(file, (AUDIO_FORMAT*)data, info.frames);
-  
-  // Because there might be '\0' character in the data, don't not use =-operator
-  to.assign(data, read_size * sizeof(AUDIO_FORMAT));
-
-  delete [] data;
-  sf_close(file);
-  return true;
-}
-
-bool
-audio::write_wav_data(const std::string &filename,
-                      const AUDIO_FORMAT *from,
-                      unsigned long frames)
-{
-  SF_INFO info;
-  SNDFILE *file;
-
-  info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
-  info.samplerate = SAMPLE_RATE;
-  info.channels = 1;
-  file = sf_open(filename.data(), SFM_WRITE, &info);
-  
-  if (file == NULL) {
-    fprintf(stderr, "write_wav_data failed to write file \"%s\"\n", filename.data());
-    return false;
+    if (file == NULL) {
+      perror("sf_open failed");
+      fprintf(stderr, "read_wav_data failed to open file \"%s\"\n", filename.data());
+      return false;
+    }
+    
+    data = new char[sizeof(AUDIO_FORMAT)*info.frames+1];
+    read_size = audio_read_function(file, (AUDIO_FORMAT*)data, info.frames);
+    
+    // Because there might be '\0' character in the data, don't not use =-operator
+    to.assign(data, read_size * sizeof(AUDIO_FORMAT));
+    
+    delete [] data;
+    sf_close(file);
+    return true;
   }
   
-  // Have to use const_cast because libsndfile authors haven't made proper
-  // function definition (or are they really modifying the parameter??).
-  audio_write_function(file, const_cast<AUDIO_FORMAT*>(from), frames);
+  bool
+  write_wav_data(const std::string &filename,
+                 const AUDIO_FORMAT *from,
+                 unsigned long frames)
+  {
+    SF_INFO info;
+    SNDFILE *file;
     
-  sf_close(file);
+    info.format = SF_FORMAT_WAV | SF_FORMAT_PCM_16;
+    info.samplerate = audio::audio_sample_rate;
+    info.channels = 1;
+    file = sf_open(filename.data(), SFM_WRITE, &info);
+    
+    if (file == NULL) {
+      fprintf(stderr, "write_wav_data failed to write file \"%s\"\n", filename.data());
+      return false;
+    }
+    
+    // Have to use const_cast because libsndfile authors haven't made proper
+    // function definition (or are they really modifying the parameter??).
+    audio_write_function(file, const_cast<AUDIO_FORMAT*>(from), frames);
+    
+    sf_close(file);
+    
+    return true;
+  }
   
-  return true;
-}
+  unsigned int audio_sample_rate=16000;
+};
+
 
 AudioStream::AudioStream()
 {
@@ -117,7 +124,7 @@ AudioStream::open(bool input_stream, bool output_stream)
   error = Pa_OpenStream(&this->m_stream,
                         input_params,
                         output_params,
-                        SAMPLE_RATE,
+                        audio::audio_sample_rate,
                         paFramesPerBufferUnspecified,
                         paNoFlag,
                         AudioStream::callback,

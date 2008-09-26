@@ -12,7 +12,6 @@ typedef short AUDIO_FORMAT;
 #define audio_read_function sf_read_short
 #define audio_write_function sf_write_short
 #define PA_AUDIO_FORMAT paInt16
-const unsigned long SAMPLE_RATE = 16000;
 
 // This definition makes a bit nicer code.
 typedef Buffer<AUDIO_FORMAT> AudioBuffer;
@@ -37,6 +36,8 @@ namespace audio
   bool write_wav_data(const std::string &filename,
                       const AUDIO_FORMAT *from,
                       unsigned long frames);
+
+  extern unsigned int audio_sample_rate;
                       
 };
 
@@ -132,7 +133,6 @@ private:
   // Locks to prevent buffer change while writing/reading the buffer.
   pthread_mutex_t m_inputbuffer_lock; //!< Lock for input buffer changes.
   pthread_mutex_t m_outputbuffer_lock; //!< Lock for output buffer changes.
-
 };
 
 AudioBuffer*
