@@ -34,8 +34,12 @@ Decoder::init(conf::Config &config)
   }
 
   t.set_lm_lookahead(1);
-  t.set_word_boundary("<w>");
-
+  
+  if (config["words"].specified)
+    t.set_silence_is_word(false);
+  else
+    t.set_word_boundary("<w>");
+  
   if (verbose)
     fprintf(stderr, "decoder: reading lexicon %s\n",
 	    config["lexicon"].get_c_str());
@@ -104,6 +108,11 @@ Decoder::message_result(bool send_all)
   bool all_guaranteed = true;
   msg::Message message(msg::M_RECOG);
 
+  if (send_all)
+    message.append("all ");
+  else
+    message.append("part ");
+  
   for (int i = hist_vec.size() - 1; i >= 0; i--) {
     TPLexPrefixTree::LMHistory *hist = hist_vec[i];
     assert(hist->reference_count > 0);
@@ -112,13 +121,15 @@ Decoder::message_result(bool send_all)
         last_guaranteed_history = hist;
     }
     else {
-      if (all_guaranteed)
+      if (!send_all && all_guaranteed)
         message.append("* ");
       all_guaranteed = false;
     }
 
-    message.append(str::fmt(256, "%d ", hist->word_start_frame) +
+    message.append(str::fmt(256, "%d %d ", hist->word_start_frame, hist->word_first_silence_frame) +
                    t.word(hist->word_id) + " ");
+//    message.append(str::fmt(256, "%d ", hist->word_start_frame) +
+//                   t.word(hist->word_id) + " ");
   }
   message.append(str::fmt(256, "%d", frame));
   out_queue.queue.push_back(message);
@@ -213,7 +224,7 @@ Decoder::run()
         bool ret = t.run();
         assert(!ret);
 
-        message_result(false);
+        message_result(true);
         if (adaptation)
           send_state_history();
       }
