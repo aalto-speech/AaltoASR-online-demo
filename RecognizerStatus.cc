@@ -2,11 +2,17 @@
 #include "RecognizerStatus.hh"
 #include "str.hh"
 #include <stdio.h>
+#include <iostream>
 
 const unsigned int RecognizerStatus::frames_per_second = 125;
+bool RecognizerStatus::words = false;
+
+
 
 RecognizerStatus::RecognizerStatus()
-  : m_recognition_status(READY), m_adaptation_status(NONE)
+  : m_recognition_status(READY),
+    m_adaptation_status(NONE),
+    m_message_result_true_called(false)
 {
   this->m_adapted = false;
   this->m_was_adapting_when_reseted = false;
@@ -118,33 +124,71 @@ RecognizerStatus::parse(const std::string &message)
   bool next_is_time = true;
   bool ok = true;
   long last_time = 0;
-  
-  this->m_hypothesis.clear();
 
   // Split the text into parts.
   split_vector = str::split(message, " ", true);
-  
+
+  // Clear previous
+  this->m_hypothesis.clear();
+
+  // Check if we are in the end of recognition
+  if (split_vector.at(0) == "all") {
+    this->m_recognized.clear();
+    m_message_result_true_called = true;
+  }
+  if (m_message_result_true_called && split_vector.at(0) == "part")
+    m_message_result_true_called = false;
+    
   // Format example: "101 jou 120 lu * 130 on 140 jo 148"
-  for (unsigned int ind = 0; ind < split_vector.size(); ind++) {
+  for (unsigned int ind = 1; ind < split_vector.size(); ind++) {
     if (split_vector.at(ind) == "*") {
       hypothesis_part = true;
     }
     else {
       if (next_is_time) {
-        long time = str::str2long(split_vector.at(ind));
-        new_morpheme.time = time < 0 ? 0 : time;
-        if (last_morpheme)
-          last_morpheme->duration = time - last_morpheme->time;
-        last_time = time;
+        if (ind == split_vector.size()-1) {
+          long start_time = str::str2long(split_vector.at(ind));
+          if (!words && last_morpheme)
+            last_morpheme->duration = start_time - last_morpheme->time;
+          last_time = start_time;
+        }
+        else {
+          long start_time = str::str2long(split_vector.at(ind));
+          ind++;
+          long end_time = str::str2long(split_vector.at(ind));
+          new_morpheme.time = start_time < 0 ? 0 : start_time;
+          if (words) {
+            if (start_time > 0 && end_time > start_time)
+              new_morpheme.duration = end_time-start_time;
+          }
+          else {
+            if (last_morpheme)
+              last_morpheme->duration = start_time - last_morpheme->time;
+          } 
+        }
         next_is_time = false;
       }
       else {
         this->write_morpheme_data(new_morpheme.data, split_vector.at(ind));
         if (hypothesis_part) {
+          if (words && last_morpheme) {
+            Morpheme wb;
+            wb.time = last_morpheme->time + last_morpheme->duration;
+            wb.duration = new_morpheme.time - wb.time;
+            wb.data = std::string(" ");
+            this->m_hypothesis.push_back(wb);
+          }
           this->m_hypothesis.push_back(new_morpheme);
           last_morpheme = &this->m_hypothesis.back();
         }
         else {
+          if (words && last_morpheme) {
+            Morpheme wb;
+            wb.time = last_morpheme->time + last_morpheme->duration;
+            wb.duration = new_morpheme.time - wb.time;
+            wb.data = std::string(" ");
+            this->m_recognized.push_back(wb);
+          }
           this->m_recognized.push_back(new_morpheme);
           last_morpheme = &this->m_recognized.back();
         }
@@ -158,7 +202,7 @@ RecognizerStatus::parse(const std::string &message)
     fprintf(stderr, "Warning: Recognition did not parse time properly.\n");
   if (next_is_time)
     fprintf(stderr, "Warning: No ending frame in parsed recognition.\n");
-  
+
   // Update last frame.
   this->m_recognition_frame = last_time;
 }

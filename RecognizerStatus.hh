@@ -37,6 +37,9 @@ public:
 
   /** Constant telling how many (recognition) frames in second. */
   static const unsigned int frames_per_second;
+
+  /** If word based recognition or not */
+  static bool words;
   
   /** Constructs the object. */
   RecognizerStatus();
@@ -100,6 +103,9 @@ public:
   /** Clears all morphemes and recognition frame. */
   void reset();
 
+  /** message_result(true) has been called */
+  bool m_message_result_true_called;
+  
 protected:
   
   /** Writes morpheme into the string.
@@ -128,7 +134,6 @@ private:
   AdaptationStatus m_adaptation_status;
   bool m_adapted; //!< Has the recognizer been adapted at the time.
   bool m_was_adapting_when_reseted;
-
 };
 
 void
