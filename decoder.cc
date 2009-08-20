@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <Toolbox.hh>
 #include "conf.hh"
 #include "str.hh"

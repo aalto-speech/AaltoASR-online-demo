@@ -184,7 +184,6 @@ WindowRecognizer::do_running()
     this->m_recognition_area->update();
     this->m_status_bar->update();
   }
-  
 }
 
 void

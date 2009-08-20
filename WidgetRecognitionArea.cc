@@ -174,6 +174,8 @@ WidgetRecognitionArea::draw_cursor(long position, PG_Color color)
 void
 WidgetRecognitionArea::update_screen(bool new_data)
 {
+  fprintf(stderr, "update_screen\n");
+
   this->m_wave->update();
   this->m_spectrogram->update();
   if (new_data)

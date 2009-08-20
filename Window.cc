@@ -42,6 +42,7 @@ Window::run_modal()
     else {
       // When idle, allow window to perform its own operations.
       this->do_running();
+      usleep(100*1000);
     }
   }
   

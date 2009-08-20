@@ -1,6 +1,8 @@
 #ifndef STR_HH
 #define STR_HH
 
+#include <limits.h>
+#include <string.h>
 #include <assert.h>
 #include <sstream>
 #include <string>
@@ -114,8 +116,8 @@ namespace str {
    */
   inline void remove(std::string &str, const char *chars)
   {
-    int src = 0;
-    int tgt = 0;
+    std::string::size_type src = 0;
+    std::string::size_type tgt = 0;
     while (1) {
       if (src == str.length())
         break;
@@ -566,7 +568,7 @@ namespace str {
   inline std::string str(const std::vector<int> &vec)
   {
     std::string str;
-    for (int i = 0; i < vec.size(); i++)
+    for (size_t i = 0; i < vec.size(); i++)
       str.append(fmt(256, "%s%d", i > 0 ? " " : "", vec[i]));
     return str;
   }

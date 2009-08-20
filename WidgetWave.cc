@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <math.h>
 #include "WidgetWave.hh"
 

@@ -1,6 +1,7 @@
 #ifndef MESSENGER_HH
 #define MESSENGER_HH
 
+#include <sys/select.h>
 #include <string>
 #include <vector>
 #include <deque>

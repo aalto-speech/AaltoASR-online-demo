@@ -81,10 +81,10 @@ input_thread(void *data)
 
       std::string word(message.data_ptr(), message.data_length());
       if (message.type() == msg::M_RECOG) {
-//        fprintf(stderr, "gui: got RECOG: %s\n", word.c_str());
-        process_recog(word);
-        fprintf(stderr, "RECOG: %s%s\n", 
-                recog_sure.c_str(), recog_hypo.c_str());
+        fprintf(stderr, "gui: got RECOG: %s\n", word.c_str());
+//        process_recog(word);
+//        fprintf(stderr, "RECOG: %s%s\n", 
+//                recog_sure.c_str(), recog_hypo.c_str());
       }
 
       else if (message.type() == msg::M_RECOG_END) {
@@ -232,8 +232,12 @@ main(int argc, char *argv[])
         }
       }
       else {
-        fprintf(stderr, "--host or --connect required\n");
-        exit(1);
+        int ret = execlp(config["rec"].get_c_str(), 
+                         config["rec"].get_c_str(), NULL);
+        if (ret < 0) {
+          perror("execlp() failed");
+          exit(1);
+        }
       }
       assert(false);
     }

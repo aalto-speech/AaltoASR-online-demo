@@ -123,6 +123,7 @@ WidgetAudioView::blit_old()
     src_rect.h = dest_rect.h = this->my_height;
 
     SDL_BlitSurface(this->m_surface_backbuffer, &src_rect, surface, &dest_rect);
+    fprintf(stderr, "blitting\n");
   }
   
   return oldview_size;

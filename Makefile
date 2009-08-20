@@ -1,20 +1,34 @@
-arch = $(shell uname -m)
+ARCH = $(shell uname -m)
 
-DECODER_PATH = /home/mavarjok/decoder/src
-AKU_PATH = /home/mavarjok/aku
+DECODER_PATH = $(HOME)/share/decoder/src
+AKU_PATH = $(HOME)/Work/aku
 
 OPT = -O2
 WARNINGS = -Wall -Wno-deprecated
 AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing -Wno-sign-compare
+
+ifeq ($(ARCH),i686)
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	$(shell paragui-config --cflags) \
+	-I/share/puhe/linux/include \
+	-I/share/puhe/linux/include/lapackpp
+LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) -L$(DECODER_PATH)/fsalm -L$(DECODER_PATH)/misc -L/share/puhe/linux/lib
+endif
+
+ifeq ($(ARCH),x86_64)
+LAPACKPP_PATH = /share/puhe/x86_64/stow/lapackpp-2.5.0
+INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
+	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
+	$(shell paragui-config --cflags) \
+	-I$(LAPACKPP_PATH)/include/lapackpp \
 	-I/share/puhe/x86_64/include \
-	-I/share/puhe/x86_64/include/lapackpp \
 	-I/share/puhe/x86_64/include/hcld \
 	-I/share/puhe/linux/include \
 	-I/share/puhe/linux/include/lapackpp
 LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) -L$(DECODER_PATH)/fsalm -L$(DECODER_PATH)/misc
+endif
+
 CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT) $(WARNINGS)
 
 ##################################################
@@ -31,8 +45,7 @@ decoder: $(decoder_srcs:%.cc=%.o) $(DECODER_PATH)/libdecoder.a
 
 recognizer_srcs = recognizer.cc conf.cc msg.cc \
 	Recognizer.cc Process.cc Adapter.cc
-recognizer_libs = -L/share/puhe/x86_64/lib/ \
-	-lpthread -laku -lfftw3 -lsndfile -llapackpp -llapack -lhcld
+recognizer_libs = -lpthread -laku -lfftw3 -lsndfile -llapackpp -llapack -lhcld
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libaku.a
 
 gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
@@ -55,7 +68,7 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc \
 	scrap.cc RecognizerStatus.cc WidgetStatus.cc
 
-jaakko_libs = -lportaudio -lsndfile -lparagui -lfreetype -lfftw3
+jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell paragui-config --libs) -lX11
 #jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
 jaakko: $(jaakko_srcs:%.cc=%.o)
 
@@ -67,7 +80,8 @@ objs = $(srcs:%.cc=%.o)
 default: $(progs)
 
 %.o: %.cc
-	$(CXX) $(CXXFLAGS) -c $< 2>&1 | ./c++filter.pl
+	$(CXX) $(CXXFLAGS) -c $<
+#	$(CXX) $(CXXFLAGS) -c $< 2>&1 | ./c++filter.pl
 
 $(progs): %: %.o
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) -o $@ $($@_srcs:%.cc=%.o) $($@_libs)

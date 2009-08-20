@@ -257,7 +257,7 @@ AudioStream::output_stream_callback(AUDIO_FORMAT *output_buffer,
 void
 AudioStream::print_error(const std::string &message, const PaError *error)
 {
-  fprintf(stderr, message.data());
+  fputs(message.data(), stderr);
   if (error) {
     fprintf(stderr, "%s\n", Pa_GetErrorText(*error));
   }
