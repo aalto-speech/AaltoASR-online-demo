@@ -1,7 +1,9 @@
 ARCH = $(shell uname -m)
 
-DECODER_PATH = $(HOME)/share/decoder/src
-AKU_PATH = $(HOME)/Work/aku
+ROOT = /share/puhe/online-demo
+
+DECODER_PATH = $(ROOT)/decoder/src
+AKU_PATH = $(ROOT)/aku
 
 OPT = -O2
 WARNINGS = -Wall -Wno-deprecated
@@ -33,7 +35,7 @@ CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT) $(WARNINGS)
 
 ##################################################
 
-progs = jaakko gui decoder recognizer
+progs = jaakko decoder recognizer 
 
 default: $(progs)
 
@@ -47,10 +49,6 @@ recognizer_srcs = recognizer.cc conf.cc msg.cc \
 	Recognizer.cc Process.cc # Adapter.cc
 recognizer_libs = -lpthread -laku -lfftw3 -lsndfile -llapackpp -llapack -lhcld
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libaku.a
-
-gui_srcs = gui.cc conf.cc msg.cc Process.cc io.cc endian.cc
-gui_libs = -lpthread -lsndfile
-gui: $(gui_srcs:%.cc=%.o)
 
 jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	Process.cc msg.cc endian.cc \
