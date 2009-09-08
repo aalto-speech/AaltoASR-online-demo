@@ -3,7 +3,7 @@
 #include "conf.hh"
 #include "msg.hh"
 #include "str.hh"
-#include "Adapter.hh"
+// #include "Adapter.hh"
 
 static const char *ac_state_str[] = {
   "A_STARTING",
@@ -304,11 +304,15 @@ Recognizer::process_stdin_queue()
     }
 
     else if (message.type() == msg::M_ADAPT_RESET) {
+      fprintf(stderr, "NOT IMPLEMENTED: adaptation does not seem to work anymore after multi matrix adaptation was implemeted.  The MllrTrainer::restore_identity() function has disappeared.\n");
+      assert(false);
+      /*
       Adapter adapter(hmms, gen);
       LinTransformModule *mllr_mod = 
         dynamic_cast<LinTransformModule*>(gen.module("mllr"));
-      MllrTrainer::restore_identity(mllr_mod);
+      // MllrTrainer::restore_identity(mllr_mod);
       fprintf(stderr, "rec: adaptation reset\n");
+      */
     }
 
     else if (message.type() == msg::M_DECODER_SETTING ||
@@ -474,6 +478,9 @@ Recognizer::process_dec_in_queue()
         fprintf(stderr, "rec: ignoring STATE_HISTORY when adaptation off\n");
       }
 
+      fprintf(stderr, "NOT IMPLEMENTED: adaptation does not seem to work anymore after multi matrix adaptation was implemeted.  The MllrTrainer class has been modified.\n");
+      assert(false);
+      /*
       Adapter adapter(hmms, gen);
       LinTransformModule *mllr_mod = 
         dynamic_cast<LinTransformModule*>(gen.module("mllr"));
@@ -481,6 +488,7 @@ Recognizer::process_dec_in_queue()
       fprintf(stderr, "rec: adapting\n");
       adapter.adapt(message.data_str(), feature_vectors, mllr_mod);
       fprintf(stderr, "rec: adapting finished\n");
+      */
 
       pthread_mutex_unlock(&ac_thread.lock);
     }

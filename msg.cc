@@ -172,8 +172,8 @@ namespace msg {
         }
       }
 
-      queue.pop_front();
       assert((int)buffer.size() > 0);
+      queue.pop_front();
     }
     return true;
   }

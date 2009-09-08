@@ -39,7 +39,9 @@ Adapter::adapt(const std::string &str,
       // FIXME: what should the prior be?
       // FeatureVec fea(&(features.at(f)), features.at(f).size());
       // mllr.find_probs(&state, fea);
-      mllr.find_probs(1/(double)model.num_states(), &state, fea);
+      fprintf(stderr, "NOT IMPLEMENTED: adaptation does not seem to work anymore after multi matrix adaptation was implemeted.  The MllrTrainer::find_probs() function has disappeared.\n");
+      //mllr.find_probs(1/(double)model.num_states(), &state, fea);
+      assert(false);
     }
     start_frame = end_frame;
   }
