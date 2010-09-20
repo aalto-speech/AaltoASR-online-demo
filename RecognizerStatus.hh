@@ -60,6 +60,8 @@ public:
   void start_adapting();
   /** Call when adaptation is reseted. */
   void reset_adaptation();
+  /** Call when adaptation is cancelled (from state ADAPTING) */
+  void cancel_adaptation();
   /** Call when M_RECOG_END is received. */
   void recognition_end();
   /** \return The adaptation status of the recognizer. */

@@ -77,6 +77,15 @@ RecognizerStatus::reset_adaptation()
 }
 
 void
+RecognizerStatus::cancel_adaptation()
+{
+  lock();
+  m_adaptation_status = NONE;
+  m_was_adapting_when_reseted = false;
+  unlock();
+}
+
+void
 RecognizerStatus::recognition_end()
 {
   lock();

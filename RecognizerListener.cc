@@ -124,6 +124,10 @@ RecognizerListener::run() throw(msg::ExceptionBrokenPipe)
         if (message.type() == msg::M_RECOG_END) {
           this->m_recognition->recognition_end();
         }
+	if (message.type() == msg::M_ADAPT_CANCELLED) {
+	  // FIXME: Show information that adaptation failed
+	  this->m_recognition->cancel_adaptation();
+	}
         if (!this->m_wait_ready) {
           // Read recognition message if not waiting for ready.
           if (message.type() == msg::M_RECOG) {

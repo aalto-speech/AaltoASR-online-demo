@@ -525,7 +525,6 @@ WindowRecognizer::handle_adaptation_button()
     flush_out_queue();
   }
   m_recog_status.start_adapting();
-  //m_recog_status.adaptation_finished();
   
   return true;
 }

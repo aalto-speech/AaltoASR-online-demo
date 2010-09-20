@@ -340,8 +340,9 @@ Recognizer::process_stdin_queue()
 	// Check we have enough adaptation data
 	if (adapter->get_num_adapt_frames() < 1000)
 	{
-	  // FIXME: Show information if adaptation failed
 	  fprintf(stderr, "rec: Not enough statistics for adaptation\n");
+	  stdout_queue.queue.push_back(msg::Message(msg::M_ADAPT_CANCELLED));
+	  stdout_queue.flush();
 	}
 	else
 	{
