@@ -84,7 +84,7 @@ namespace msg {
 
       // FIXME: remove debug
       if (0) {
-        fprintf(stderr, "READ %d-%d: ", bytes_got, bytes_got + ret);
+        fprintf(stderr, "READ %d-%d: ", bytes_got, bytes_got + (int)ret);
         for (int i = 0; i < ret; i++) {
           fprintf(stderr, "%02x ", (unsigned char)buffer[bytes_got + i]);
         }
