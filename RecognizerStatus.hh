@@ -132,7 +132,6 @@ private:
   
   RecognitionStatus m_recognition_status;
   AdaptationStatus m_adaptation_status;
-  bool m_adapted; //!< Has the recognizer been adapted at the time.
   bool m_was_adapting_when_reseted;
 };
 

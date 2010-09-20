@@ -6,6 +6,7 @@
 #include "HmmSet.hh"
 #include "msg.hh"
 #include "Process.hh"
+#include "Adapter.hh"
 
 class Recognizer {
 public:
@@ -57,11 +58,14 @@ public:
   /** Speaker adaptation mode. */
   bool adaptation;
 
+  Adapter *adapter;
+
   /** Feature vectors of the previous utterance. */
   std::vector<std::vector<double> > feature_vectors;
 
 public:
   Recognizer();
+  virtual ~Recognizer();
   void run();
 
 private:

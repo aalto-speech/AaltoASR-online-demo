@@ -3,7 +3,6 @@
 #include "conf.hh"
 #include "msg.hh"
 #include "str.hh"
-// #include "Adapter.hh"
 
 static const char *ac_state_str[] = {
   "A_STARTING",
@@ -132,7 +131,15 @@ Recognizer::Recognizer()
   ac_state = A_CLOSED;
   dec_state = D_CLOSED;
   adaptation = false;
+  adapter = NULL;
 }
+
+Recognizer::~Recognizer()
+{
+  if (adapter != NULL)
+    delete adapter;
+}
+
 
 void // private
 Recognizer::change_state(AcState a, DecState d)
@@ -293,26 +300,58 @@ Recognizer::process_stdin_queue()
       stdin_queue.mux_suspend();
     }
 
-    else if (message.type() == msg::M_ADAPT_ON) {
-      adaptation = true;
-      dec_out_queue.queue.push_back(message);
-    }
+    // else if (message.type() == msg::M_ADAPT_ON) {
+    //   if (!adaptation)
+    //   {
+    // 	adaptation = true;
+    //     pthread_mutex_lock(&ac_thread.lock);
+    //     LinTransformModule *mllr_mod = 
+    //       dynamic_cast<LinTransformModule*>(gen.module("mllr"));
+    // 	adapter = new Adapter(hmms, mllr_mod);
+    //     pthread_mutex_unlock(&ac_thread.lock);
+    //   }
+    //   fprintf(stderr, "rec: adaptation set on\n");
+    //   dec_out_queue.queue.push_back(message);
+    // }
 
-    else if (message.type() == msg::M_ADAPT_OFF) {
-      adaptation = false;
-      dec_out_queue.queue.push_back(message);
-    }
+    // else if (message.type() == msg::M_ADAPT_OFF) {
+    //   if (adaptation)
+    //   {
+    //     adaptation = false;
+    //     delete adapter;
+    //     adapter = NULL;
+    //   }
+    //   fprintf(stderr, "rec: adaptation set off\n");
+    //   dec_out_queue.queue.push_back(message);
+    // }
 
     else if (message.type() == msg::M_ADAPT_RESET) {
-      fprintf(stderr, "NOT IMPLEMENTED: adaptation does not seem to work anymore after multi matrix adaptation was implemeted.  The MllrTrainer::restore_identity() function has disappeared.\n");
-      assert(false);
-      /*
-      Adapter adapter(hmms, gen);
-      LinTransformModule *mllr_mod = 
-        dynamic_cast<LinTransformModule*>(gen.module("mllr"));
-      // MllrTrainer::restore_identity(mllr_mod);
+      if (adaptation)
+      {
+        adapter->reset();
+      }
       fprintf(stderr, "rec: adaptation reset\n");
-      */
+    }
+
+    else if (message.type() == msg::M_ADAPT_CALC)
+    {
+      if (adaptation)
+      {
+	// Check we have enough adaptation data
+	if (adapter->get_num_adapt_frames() < 1000)
+	{
+	  // FIXME: Show information if adaptation failed
+	  fprintf(stderr, "rec: Not enough statistics for adaptation\n");
+	}
+	else
+	{
+	  adapter->compute_adaptation();
+	  fprintf(stderr, "rec: Adaptation estimated\n");
+	  // If adaptation succeeded, send ready message
+	  stdout_queue.queue.push_back(msg::Message(msg::M_READY));
+	  stdout_queue.flush();
+	}
+      }
     }
 
     else if (message.type() == msg::M_DECODER_SETTING ||
@@ -477,18 +516,12 @@ Recognizer::process_dec_in_queue()
       if (!adaptation) {
         fprintf(stderr, "rec: ignoring STATE_HISTORY when adaptation off\n");
       }
-
-      fprintf(stderr, "NOT IMPLEMENTED: adaptation does not seem to work anymore after multi matrix adaptation was implemeted.  The MllrTrainer class has been modified.\n");
-      assert(false);
-      /*
-      Adapter adapter(hmms, gen);
-      LinTransformModule *mllr_mod = 
-        dynamic_cast<LinTransformModule*>(gen.module("mllr"));
-
-      fprintf(stderr, "rec: adapting\n");
-      adapter.adapt(message.data_str(), feature_vectors, mllr_mod);
-      fprintf(stderr, "rec: adapting finished\n");
-      */
+      else
+      {
+        fprintf(stderr, "rec: computing adaptation statistics\n");
+        adapter->add_adaptation_data(message.data_str(), feature_vectors);
+        fprintf(stderr, "rec: adaptation statistics computed\n");
+      }
 
       pthread_mutex_unlock(&ac_thread.lock);
     }
@@ -552,6 +585,12 @@ Recognizer::run()
   change_state(A_STARTING, D_NULL);
   quit_pending = false;
 
+  // Changed adaptation behaviour:
+  // Adaptation is now always collected, but the adaptation matrix needs
+  // to be explicitly estimated. Decoder sends state histories by default.
+  adaptation = true;
+  adapter = new Adapter(hmms);
+  
   while (1) {
 
     assert(stdin_queue.empty());

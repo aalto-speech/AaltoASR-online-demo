@@ -67,6 +67,10 @@ Decoder::init(conf::Config &config)
   t.set_print_text_result(0);
   t.reset(0);
 
+  // Set collection of state histories for adaptation
+  adaptation = true;
+  t.set_keep_state_segmentation(true);
+
   in_queue.enable(0);
   out_queue.enable(1);
 }
@@ -232,15 +236,15 @@ Decoder::run()
       out_queue.flush();
     }
 
-    else if (message.type() == msg::M_ADAPT_ON) {
-      adaptation = true;
-      t.set_keep_state_segmentation(true);
-    }
+    // else if (message.type() == msg::M_ADAPT_ON) {
+    //   adaptation = true;
+    //   t.set_keep_state_segmentation(true);
+    // }
 
-    else if (message.type() == msg::M_ADAPT_OFF) {
-      adaptation = false;
-      t.set_keep_state_segmentation(false);
-    }
+    // else if (message.type() == msg::M_ADAPT_OFF) {
+    //   adaptation = false;
+    //   t.set_keep_state_segmentation(false);
+    // }
 
     else if (message.type() == msg::M_DECODER_SETTING) {
       std::string line(message.data_ptr(), message.data_length());

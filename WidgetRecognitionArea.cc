@@ -247,13 +247,13 @@ WidgetRecognitionArea::handle_scroll(PG_ScrollBar *scroll_bar, long page)
 bool
 WidgetRecognitionArea::handle_radio(PG_RadioButton *radio, bool status, void *user_data)
 {
-  if ((int)user_data == AUDIO) {
+  if (user_data == (void*)AUDIO) {
     this->m_autoscroll = AUDIO;
   }
-  if ((int)user_data == RECOGNIZER) {
+  if (user_data == (void*)RECOGNIZER) {
     this->m_autoscroll = RECOGNIZER;
   }
-  if ((int)user_data == DISABLE) {
+  if (user_data == (void*)DISABLE) {
     this->m_autoscroll = DISABLE;
   }
   return true;

@@ -64,6 +64,7 @@ protected:
   bool handle_resetrecog_button();
   bool handle_pauserecog_button();
   bool handle_settings_button();
+  bool handle_adaptation_button();
   bool handle_resetadaptation_button();
   bool handle_save_button();
   bool handle_open_button();
@@ -116,7 +117,7 @@ private:
   PG_Button *m_stop2_button; // have different location.
   PG_Button *m_pause_button;
   PG_Button *m_showadvanced_button;
-  PG_CheckButton *m_adapt_check;
+  PG_Button *m_adapt_button;
   PG_Button *m_resetadapt_button;
   PG_Button *m_pauserecog_button;
   PG_Button *m_reset_button;
