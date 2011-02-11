@@ -1,34 +1,46 @@
 ARCH = $(shell uname -m)
 
-ROOT = /share/puhe/online-demo
+# ROOT = /share/puhe/online-demo
 
-DECODER_PATH = $(ROOT)/decoder/src
-AKU_PATH = $(ROOT)/aku
+DECODER_PATH = ../decoder/src
+# $(ROOT)/decoder/src
+AKU_PATH = ../aku
+# $(ROOT)/aku
 
 OPT = -O2
 WARNINGS = -Wall -Wno-deprecated
 AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing -Wno-sign-compare
 
+LDFLAGS = \
+  -L$(AKU_PATH) \
+  -L$(DECODER_PATH) \
+  -L$(DECODER_PATH)/fsalm \
+  -L$(DECODER_PATH)/misc \
+  -L../lapackpp/src/.libs
+
 ifeq ($(ARCH),i686)
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	$(shell paragui-config --cflags) \
-	-I/share/puhe/linux/include \
-	-I/share/puhe/linux/include/lapackpp
-LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) -L$(DECODER_PATH)/fsalm -L$(DECODER_PATH)/misc -L/share/puhe/linux/lib
+	-I../lapackpp/include
+#	-I/share/puhe/linux/include
+#	-I/share/puhe/linux/include/lapackpp
+# -L/share/puhe/linux/lib
 endif
 
 ifeq ($(ARCH),x86_64)
-LAPACKPP_PATH = /share/puhe/x86_64/stow/lapackpp-2.5.0
+# LAPACKPP_PATH = ../lapackpp
+# /share/puhe/x86_64/stow/lapackpp-2.5.0
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	$(shell paragui-config --cflags) \
-	-I$(LAPACKPP_PATH)/include/lapackpp \
-	-I/share/puhe/x86_64/include \
-	-I/share/puhe/x86_64/include/hcld \
-	-I/share/puhe/linux/include \
-	-I/share/puhe/linux/include/lapackpp
-LDFLAGS = -L$(AKU_PATH) -L$(DECODER_PATH) -L$(DECODER_PATH)/fsalm -L$(DECODER_PATH)/misc
+	-I../lapackpp/include \
+	-I/share/puhe/x86_64/include/hcld
+#	-I$(LAPACKPP_PATH)/include/lapackpp \
+#	-I/share/puhe/x86_64/include \
+#	-I/share/puhe/linux/include \
+#	-I/share/puhe/linux/include/lapackpp
+LDFLAGS += -L/share/puhe/x86_64/lib
 endif
 
 CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT) $(WARNINGS)
