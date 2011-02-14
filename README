@@ -1,0 +1,29 @@
+To build online-demo, checkout aku, lapackpp, and paragui projects from CVS,
+into the same directory where you have online-demo project.
+
+In Debian based systems, you need to install the following dependencies:
+liblapack-dev
+libblas-dev
+libfftw3-dev
+libsndfile1-dev
+libsigc++-1.2-dev
+portaudio19-dev
+
+In Red Hat based systems, you need to install the following dependencies:
+lapack-devel
+blas-devel
+fftw-devel
+libsndfile-devel
+libsigc++-devel
+portaudio-devel
+
+paragui and lapackpp use the GNU Autotools build system, so you have to call
+
+./autogen.sh
+./configure
+make
+
+in both project directories. Don't call make install. Then call make in all the
+other project directories.
+
+Not sure if swig is required as well.

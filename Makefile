@@ -21,7 +21,8 @@ LDFLAGS = \
 ifeq ($(ARCH),i686)
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
-	$(shell paragui-config --cflags) \
+	-I ../paragui/include \
+	$(shell ../paragui/paragui-config --cflags) \
 	-I../lapackpp/include
 #	-I/share/puhe/linux/include
 #	-I/share/puhe/linux/include/lapackpp
@@ -33,7 +34,8 @@ ifeq ($(ARCH),x86_64)
 # /share/puhe/x86_64/stow/lapackpp-2.5.0
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
-	$(shell paragui-config --cflags) \
+	-I ../paragui/include \
+	$(shell ../paragui/paragui-config --cflags) \
 	-I../lapackpp/include \
 	-I/share/puhe/x86_64/include/hcld
 #	-I$(LAPACKPP_PATH)/include/lapackpp \
@@ -78,8 +80,8 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc \
 	scrap.cc RecognizerStatus.cc WidgetStatus.cc
 
-jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell paragui-config --libs) -lX11
-#jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
+jaakko_libs = -lportaudio -lsndfile -lfftw3 -L../paragui/src/.libs $(shell ../paragui/paragui-config --libs) -lX11
+#jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell ../paragui/paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
 jaakko: $(jaakko_srcs:%.cc=%.o)
 
 srcs = $(decoder_srcs) $(recognizer_srcs) $(gui_srcs) $(jaakko_srcs)
