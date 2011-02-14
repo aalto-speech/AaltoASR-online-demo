@@ -1,8 +1,11 @@
-#include <stdio.h>
+#include <iostream>
+#include <cstdio>
 #include "Application.hh"
 #include "conf.hh"
 #include "AudioStream.hh"
 #include "RecognizerStatus.hh"
+
+using namespace std;
 
 // cluster, beam, lmscale, int16
 int main(int argc, char* argv[])
@@ -36,10 +39,10 @@ int main(int argc, char* argv[])
   // the necessary ParaGUI source code files into this project, rename the
   // classes and convert ints to Sint32/Uint32.
   if (!config['b'].specified && sizeof(int) < 4) {
-    fprintf(stdout, "This program assumes that system uses at least 4 bytes "
-                    "for int. Your system uses only %d.\nProgram will exit.\n"
-                    "To ignore this error start application with -b flag.\n",
-                    sizeof(int));
+    cout << "This program assumes that system uses at least 4 bytes for int. "
+    		"Your system uses only " << sizeof(int) << "%d.\n"
+            "Program will exit.\n"
+            "To ignore this error start application with -b flag.\n";
     return EXIT_FAILURE;
   }
   
@@ -84,8 +87,8 @@ int main(int argc, char* argv[])
                             (unsigned)config["beam"].get_int(),
                             (unsigned)config["lmscale"].get_int());
       }
-      catch (Exception exception) {
-        fprintf(stderr, "%s\n", exception.what());
+      catch (Exception & e) {
+        fprintf(stderr, "%s\n", e.what());
       }
     }
   }
