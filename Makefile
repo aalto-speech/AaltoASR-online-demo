@@ -61,7 +61,11 @@ decoder: $(decoder_srcs:%.cc=%.o) $(DECODER_PATH)/libdecoder.a
 
 recognizer_srcs = recognizer.cc conf.cc msg.cc \
 	Recognizer.cc Process.cc Adapter.cc
-recognizer_libs = -lpthread -laku -lfftw3 -lsndfile -llapackpp -llapack -lhcld
+recognizer_libs = -lpthread -laku -lfftw3 -lsndfile -llapackpp -llapack
+ifeq ($(ARCH),x86_64)
+recognizer_libs += -lhcld
+endif
+
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libaku.a
 
 jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
@@ -80,7 +84,12 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	comparison.cc WindowComparison.cc WidgetContainer.cc WindowTextEdit.cc \
 	scrap.cc RecognizerStatus.cc WidgetStatus.cc
 
-jaakko_libs = -lportaudio -lsndfile -lfftw3 -L../paragui/src/.libs $(shell ../paragui/paragui-config --libs) -lX11
+# Segmentation fault will occur without the -Wl,-Bdynamic.
+jaakko_libs = -lportaudio -lsndfile -lfftw3 \
+  -L../paragui/src/.libs -lsigc-1.2 -lSDL -lpthread -lexpat -lfreetype -lstdc++ \
+  -l physfs -lX11 \
+  -Wl,-Bstatic -lparagui -Wl,-Bdynamic
+#jaakko_libs = -lportaudio -lsndfile -lfftw3 -L../paragui/src/.libs $(shell ../paragui/paragui-config --libs) -lX11
 #jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell ../paragui/paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
 jaakko: $(jaakko_srcs:%.cc=%.o)
 
