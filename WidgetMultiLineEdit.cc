@@ -119,7 +119,10 @@ void WidgetMultiLineEdit::DrawText(const PG_Rect& dst) {
       PG_Color inv_color(255 - color.r, 255 - color.g, 255 - color.b);      
       SetFontColor(inv_color);
       PG_FontEngine::GetTextSize(middlepart.c_str(), GetFont(), &w);
-      SDL_Rect rect = {x + x1, y + _y, w, GetFontHeight()};
+      SDL_Rect rect = {static_cast<Sint16>(x + x1),
+                       static_cast<Sint16>(y + _y),
+                       w,
+                       static_cast<Uint16>(GetFontHeight())};
       SDL_Surface* screen = PG_Application::GetScreen();
       SDL_FillRect(screen, &rect, SDL_MapRGB(screen->format, color.r, color.g, color.b));
       PG_Widget::DrawText(x1, _y, middlepart.c_str());
