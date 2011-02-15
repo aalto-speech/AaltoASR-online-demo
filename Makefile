@@ -92,7 +92,7 @@ jaakko_libs = -lportaudio -lsndfile -lfftw3 \
   -Wl,-Bstatic -lparagui -Wl,-Bdynamic
 #jaakko_libs = -lportaudio -lsndfile -lfftw3 -L../paragui/src/.libs $(shell ../paragui/paragui-config --libs) -lX11
 #jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell ../paragui/paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
-jaakko: $(jaakko_srcs:%.cc=%.o)
+jaakko: $(jaakko_srcs:%.cc=%.o) ../paragui/src/.libs/libparagui.a
 
 srcs = $(decoder_srcs) $(recognizer_srcs) $(gui_srcs) $(jaakko_srcs)
 objs = $(srcs:%.cc=%.o)

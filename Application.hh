@@ -21,12 +21,20 @@ public:
 
   /** Initializes the application without recognizer. This is mostly for
    * debugging purposes only.
+   * \param argv0 The argv[0] string passed to your program's mainline. This
+   * may be NULL on most platforms (such as ones without a standard main()
+   * function), but you should always try to pass something in here. Unix-
+   * like systems such as Linux _need_ to pass argv[0] from main() in here.
    * \param width Application window width.
    * \param height Application window height.
    * \return false if ParaGUI initialization failed. */
-  bool initialize(unsigned int width, unsigned int height);
+  bool initialize(const char * argv0, unsigned int width, unsigned int height);
   
   /** Initializes the application with recognizer.
+   * \param argv0 The argv[0] string passed to your program's mainline. This
+   * may be NULL on most platforms (such as ones without a standard main()
+   * function), but you should always try to pass something in here. Unix-
+   * like systems such as Linux _need_ to pass argv[0] from main() in here.
    * \param width Application window width.
    * \param height Application window height.
    * \param connect Optional SSH connection command,
@@ -35,7 +43,8 @@ public:
    * \param beam Beam value.
    * \param lmscale LM-scale value.
    * \return false if ParaGUI initialization failed. */
-  bool initialize(unsigned int width,
+  bool initialize(const char * argv0,
+                  unsigned int width,
                   unsigned int height,
                   const std::string &connect,
                   const std::string &script_file,
