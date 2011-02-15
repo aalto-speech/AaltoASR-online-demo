@@ -61,7 +61,8 @@ decoder: $(decoder_srcs:%.cc=%.o) $(DECODER_PATH)/libdecoder.a
 
 recognizer_srcs = recognizer.cc conf.cc msg.cc \
 	Recognizer.cc Process.cc Adapter.cc
-recognizer_libs = -lpthread -laku -lfftw3 -lsndfile -llapackpp -llapack
+recognizer_libs = -lpthread -laku -lfftw3 -lsndfile \
+  -Wl,-Bstatic -llapackpp -Wl,-Bdynamic -llapack
 ifeq ($(ARCH),x86_64)
 recognizer_libs += -lhcld
 endif
