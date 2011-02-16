@@ -118,7 +118,11 @@ bool AudioStream::open(bool input_stream, bool output_stream)
 		int num_channels = info->maxInputChannels;
 		if (num_channels < 1)
 			continue;
-		cerr << i << ": " << info->name << ", " << num_channels << " channels" << endl;
+		string name = info->name;
+		if (i == Pa_GetDefaultInputDevice()) {
+			name = "[" + name + "]";
+		}
+		cerr << i << ": " << name << ", " << num_channels << " channels" << endl;
 	}
 
 	cerr << "Enumerating playback devices." << endl;
@@ -132,7 +136,11 @@ bool AudioStream::open(bool input_stream, bool output_stream)
 		int num_channels = info->maxOutputChannels;
 		if (num_channels < 1)
 			continue;
-		cerr << i << ": " << info->name << ", " << num_channels << " channels" << endl;
+		string name = info->name;
+		if (i == Pa_GetDefaultInputDevice()) {
+			name = "[" + name + "]";
+		}
+		cerr << i << ": " << name << ", " << num_channels << " channels" << endl;
 	}
 
 	if (input_stream) {
@@ -162,8 +170,6 @@ bool AudioStream::open(bool input_stream, bool output_stream)
 	}
 
 	// Try to open audio stream.
-	cerr << "InputDevice=" << input_params->device << " OutputDevice="
-			<< output_params->device << endl;
 	error = Pa_OpenStream(&this->m_stream, input_params, output_params,
 			audio::audio_sample_rate, paFramesPerBufferUnspecified, paNoFlag,
 			AudioStream::callback, this);
