@@ -9,8 +9,4 @@ lex="$DATA_DIR/hammas.lex"
 hmm="$DATA_DIR/test_mfcc_noisy_trained"
 DECODER_CMD="\"$DEMO_DIR/decoder\" --words --binlm \"$lm\" --lookahead \"$la_lm\" --lexicon \"$lex\" --ph \"$hmm.ph\" --dur \"$hmm.dur\" --lm-scale 40 --token-limit 20000 --beam 200"
 
-echo Basename for HMM files: $hmm
-echo Decoder command: $DECODER_CMD
-echo
-
 "$DEMO_DIR/recognizer" -b $hmm -d "$DECODER_CMD" -C "$hmm.gcl" --eval-ming 0.10
