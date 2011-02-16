@@ -106,7 +106,6 @@ default: $(progs)
 #	$(CXX) $(CXXFLAGS) -c $< 2>&1 | ./c++filter.pl
 
 $(progs): %: %.o
-	echo $@_srcs
 	$(CXX) $(LDFLAGS) -o $@ $($@_srcs:%.cc=%.o) $($@_libs)
 
 .PHONY: clean
