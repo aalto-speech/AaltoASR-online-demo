@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdio>
+#include <pglog.h>
 #include "Application.hh"
 #include "conf.hh"
 #include "AudioStream.hh"
@@ -46,7 +47,9 @@ int main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
   
+  PG_LogConsole::SetLogLevel(PG_LOG_WRN);
   Application app;
+
   int ret_val = EXIT_SUCCESS;
   bool ok = false;
   audio::audio_sample_rate = (unsigned)config["sample-rate"].get_int();
