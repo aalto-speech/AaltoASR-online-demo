@@ -64,7 +64,7 @@ bool write_wav_data(const std::string &filename, const AUDIO_FORMAT *from,
 	return true;
 }
 
-unsigned int audio_sample_rate = 44100;//16000;
+unsigned int audio_sample_rate = 16000;
 
 }
 
@@ -170,6 +170,7 @@ bool AudioStream::open(bool input_stream, bool output_stream)
 	}
 
 	// Try to open audio stream.
+	cerr << "Sample rate: " << audio::audio_sample_rate << endl;
 	error = Pa_OpenStream(&this->m_stream, input_params, output_params,
 			audio::audio_sample_rate, paFramesPerBufferUnspecified, paNoFlag,
 			AudioStream::callback, this);
