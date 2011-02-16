@@ -49,7 +49,7 @@ CXXFLAGS ?= $(AUX_CXXFLAGS) $(INCLUDES) $(OPT) $(WARNINGS)
 
 ##################################################
 
-progs = jaakko decoder recognizer 
+progs = demogui decoder recognizer 
 
 default: $(progs)
 
@@ -69,7 +69,7 @@ endif
 
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libaku.a
 
-jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
+demogui_srcs = demogui.cc AudioStream.cc Buffer.cc \
 	Process.cc msg.cc endian.cc \
 	AudioInputController.cc \
 	Application.cc Window.cc \
@@ -86,15 +86,15 @@ jaakko_srcs = jaakko.cc AudioStream.cc Buffer.cc \
 	scrap.cc RecognizerStatus.cc WidgetStatus.cc
 
 # Segmentation fault will occur without the -Wl,-Bdynamic.
-jaakko_libs = -lportaudio -lsndfile -lfftw3 \
+demogui_libs = -lportaudio -lsndfile -lfftw3 \
   -L../paragui/src/.libs -lsigc-1.2 -lSDL -lpthread -lexpat -lfreetype -lstdc++ \
   -l physfs -lX11 \
   -Wl,-Bstatic -lparagui -Wl,-Bdynamic
-#jaakko_libs = -lportaudio -lsndfile -lfftw3 -L../paragui/src/.libs $(shell ../paragui/paragui-config --libs) -lX11
-#jaakko_libs = -lportaudio -lsndfile -lfftw3 $(shell ../paragui/paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
-jaakko: $(jaakko_srcs:%.cc=%.o) ../paragui/src/.libs/libparagui.a
+#demogui_libs = -lportaudio -lsndfile -lfftw3 -L../paragui/src/.libs $(shell ../paragui/paragui-config --libs) -lX11
+#demogui_libs = -lportaudio -lsndfile -lfftw3 $(shell ../paragui/paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
+demogui: $(demogui_srcs:%.cc=%.o) ../paragui/src/.libs/libparagui.a
 
-srcs = $(decoder_srcs) $(recognizer_srcs) $(gui_srcs) $(jaakko_srcs)
+srcs = $(decoder_srcs) $(recognizer_srcs) $(gui_srcs) $(demogui_srcs)
 objs = $(srcs:%.cc=%.o)
 
 ##################################################
@@ -106,7 +106,8 @@ default: $(progs)
 #	$(CXX) $(CXXFLAGS) -c $< 2>&1 | ./c++filter.pl
 
 $(progs): %: %.o
-	$(CXX) $(LDFLAGS) $(CXXFLAGS) -o $@ $($@_srcs:%.cc=%.o) $($@_libs)
+	echo $@_srcs
+	$(CXX) $(LDFLAGS) -o $@ $($@_srcs:%.cc=%.o) $($@_libs)
 
 .PHONY: clean
 clean:
