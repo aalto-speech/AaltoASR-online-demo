@@ -20,7 +20,7 @@ portaudio-devel
 paragui and lapackpp use the GNU Autotools build system, so you have to call
 
 ./autogen.sh
-./configure --enable-static
+./configure --enable-static=yes --enable-shared=no
 make
 
 in both project directories. Don't call make install. Then call make in all the
