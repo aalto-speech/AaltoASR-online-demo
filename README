@@ -8,6 +8,7 @@ libfftw3-dev
 libsndfile1-dev
 libsigc++-1.2-dev
 portaudio19-dev
+swig
 
 In Red Hat based systems, you need to install the following dependencies:
 lapack-devel
@@ -16,6 +17,7 @@ fftw-devel
 libsndfile-devel
 libsigc++-devel
 portaudio-devel
+swig
 
 paragui and lapackpp use the GNU Autotools build system, so you have to call
 
@@ -25,5 +27,3 @@ make
 
 in both project directories. Don't call make install. Then call make in all the
 other project directories.
-
-Not sure if swig is required as well.
