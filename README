@@ -1,5 +1,5 @@
-To build online-demo, checkout aku, lapackpp, and paragui projects from CVS,
-into the same directory where you have online-demo project.
+To build online-demo, checkout decoder, aku, lapackpp, and paragui projects from
+CVS, into the same directory where you have online-demo project.
 
 In Debian based systems, you need to install the following packages:
 liblapack-dev
