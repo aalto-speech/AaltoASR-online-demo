@@ -1,7 +1,7 @@
 To build online-demo, checkout aku, lapackpp, and paragui projects from CVS,
 into the same directory where you have online-demo project.
 
-In Debian based systems, you need to install the following dependencies:
+In Debian based systems, you need to install the following packages:
 liblapack-dev
 libblas-dev
 libfftw3-dev
@@ -9,15 +9,13 @@ libsndfile1-dev
 libsigc++-1.2-dev
 portaudio19-dev
 swig
-
-In Red Hat based systems, you need to install the following dependencies:
-lapack-devel
-blas-devel
-fftw-devel
-libsndfile-devel
-libsigc++-devel
-portaudio-devel
-swig
+autoconf
+libtool
+libsdl-dev
+libexpat-dev
+libphysfs-dev
+g++
+fort77
 
 paragui and lapackpp use the GNU Autotools build system, so you have to call
 
