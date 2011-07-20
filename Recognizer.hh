@@ -47,8 +47,8 @@ public:
   msg::InQueue dec_in_queue;
   msg::OutQueue dec_out_queue;
 
-  FeatureGenerator gen;
-  HmmSet hmms;
+  aku::FeatureGenerator gen;
+  aku::HmmSet hmms;
 
   msg::InQueue stdin_queue;
   msg::OutQueue stdout_queue;

@@ -32,7 +32,7 @@ public:
    * \param feagen = feature generator used only for checking dimensions by 
    * MllrTrainer
    */
-  Adapter(HmmSet &model);
+  Adapter(aku::HmmSet &model);
   virtual ~Adapter();
 
   /** Add adaptation data to statistics, for estimating the adaptation matrix later on 

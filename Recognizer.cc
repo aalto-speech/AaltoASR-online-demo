@@ -4,6 +4,8 @@
 #include "msg.hh"
 #include "str.hh"
 
+using namespace aku;
+
 static const char *ac_state_str[] = {
   "A_STARTING",
   "A_READY",
