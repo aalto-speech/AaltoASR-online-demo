@@ -10,17 +10,17 @@ class Adapter {
 public:
 
   /** MLLR matrix estimator. */
-  MllrTrainer *m_mllr_trainer;
+  aku::MllrTrainer *m_mllr_trainer;
 
   /** HMM acoustic model */
-  HmmSet &m_model;
+  aku::HmmSet &m_model;
 
 private:
   /** Adaptation tree representation needed for MllrTrainer */
-  RegClassTree m_rtree;
+  aku::RegClassTree m_rtree;
 
   /** Model transformer storing the cMLLR transformation(s) */
-  ModelTransformer m_model_trans;
+  aku::ModelTransformer m_model_trans;
 
   /** Number of frames currently in statistics */
   int m_num_adapt_frames;

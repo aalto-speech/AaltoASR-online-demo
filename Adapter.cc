@@ -2,6 +2,8 @@
 #include "LinearAlgebra.hh" // For Vector
 #include "Adapter.hh"
 
+using namespace aku;
+
 Adapter::Adapter(HmmSet &model)
   : m_model(model)
 {
