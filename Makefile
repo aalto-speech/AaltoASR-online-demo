@@ -36,8 +36,8 @@ INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	-I ../paragui/include \
 	$(shell ../paragui/paragui-config --cflags) \
-	-I../lapackpp/include \
-	-I/share/puhe/x86_64/include/hcld
+	-I../lapackpp/include
+#	-I/share/puhe/x86_64/include/hcld \
 #	-I$(LAPACKPP_PATH)/include/lapackpp \
 #	-I/share/puhe/x86_64/include \
 #	-I/share/puhe/linux/include \
@@ -63,9 +63,9 @@ recognizer_srcs = recognizer.cc conf.cc msg.cc \
 	Recognizer.cc Process.cc Adapter.cc
 recognizer_libs = -lpthread -laku -lfftw3 -lsndfile \
   -Wl,-Bstatic -llapackpp -Wl,-Bdynamic -llapack -lblas
-ifeq ($(ARCH),x86_64)
-recognizer_libs += -lhcld
-endif
+#ifeq ($(ARCH),x86_64)
+#recognizer_libs += -lhcld
+#endif
 
 recognizer: $(recognizer_srcs:%.cc=%.o) $(AKU_PATH)/libaku.a
 
