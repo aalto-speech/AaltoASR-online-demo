@@ -16,9 +16,9 @@ Application::~Application()
 }
 
 bool
-Application::initialize(const char * argv0, unsigned int width, unsigned int height)
+Application::initialize(unsigned int width, unsigned int height)
 {
-  this->m_app = new PG_Application(argv0);
+  this->m_app = new PG_Application;
   
   if (width < 950) {
     fprintf(stderr, "Width must be at least 950.\n");
@@ -44,8 +44,7 @@ Application::initialize(const char * argv0, unsigned int width, unsigned int hei
 }
 
 bool
-Application::initialize(const char * argv0,
-                        unsigned int width,
+Application::initialize(unsigned int width,
                         unsigned int height,
                         const std::string &connect,
                         const std::string &script_file,
@@ -55,7 +54,7 @@ Application::initialize(const char * argv0,
   // Create the recognizer.
   this->m_recognizer = new RecognizerProcess(connect, script_file, beam, lmscale);
 
-  return this->initialize(argv0, width, height);
+  return this->initialize(width, height);
 }
 
 void

@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
   
-  PG_LogConsole::SetLogLevel(PG_LOG_WRN);
+//  PG_LogConsole::SetLogLevel(PG_LOG_WRN);
   Application app;
 
   int ret_val = EXIT_SUCCESS;
@@ -56,8 +56,7 @@ int main(int argc, char* argv[])
   RecognizerStatus::words = config["words"].specified;
   
   if (config['d'].specified) {
-    ok = app.initialize(argv[0],
-                        config["width"].get_int(),
+    ok = app.initialize(config["width"].get_int(),
                         config["height"].get_int());
   }  
   else {
@@ -84,8 +83,7 @@ int main(int argc, char* argv[])
                           "locally. You may want to specify either host- or "
                           "connect-flag.\n");
 
-        ok = app.initialize(argv[0],
-                            config["width"].get_int(),
+        ok = app.initialize(config["width"].get_int(),
                             config["height"].get_int(),
                             connect,
                             config["script"].get_str(),

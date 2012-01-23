@@ -88,7 +88,7 @@ demogui_srcs = demogui.cc AudioStream.cc Buffer.cc \
 # Segmentation fault will occur without the -Wl,-Bdynamic.
 demogui_libs = -lportaudio -lsndfile -lfftw3 \
   -L../paragui/src/.libs -lsigc-1.2 -lSDL -lpthread -lexpat -lfreetype -lstdc++ \
-  -l physfs -lX11 \
+  -lX11 \
   -Wl,-Bstatic -lparagui -Wl,-Bdynamic
 #demogui_libs = -lportaudio -lsndfile -lfftw3 -L../paragui/src/.libs $(shell ../paragui/paragui-config --libs) -lX11
 #demogui_libs = -lportaudio -lsndfile -lfftw3 $(shell ../paragui/paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
