@@ -9,13 +9,10 @@ int
 main(int argc, char *argv[])
 {
   try {
-    std::string path("/home/thirsima/Work/online-demo-libs");
-
     config("usage: acoustics [OPTION...]\n")
       ('h', "help", "", "", "display help")
-      ('b', "hmms-base=BASENAME", "arg", 
-       path + "/mfcc_speecon_mag_tri_25.5.2006_10", "basename for HMM files")
-      ('d', "decoder=COMMAND", "arg", "", "decoder command to run")
+      ('b', "hmms-base=BASENAME", "arg must", "", "basename for HMM files")
+      ('d', "decoder=COMMAND", "arg must", "", "decoder command to run")
       ('C', "clusters=FILE", "arg", "", "Gaussian clustering file")
       ('\0', "eval-minc=FLOAT", "arg", "0", "minimum ratio of top clusters to evaluate")
       ('\0', "eval-ming=FLOAT", "arg", "0", "minimum ratio of Gaussians to evaluate")
@@ -23,17 +20,17 @@ main(int argc, char *argv[])
       ;
 
     rec.dec_command.clear();
-    rec.dec_command +=
-      "./decoder "
-//      " --verbose" 
-      " --binlm /share/work/thirsima/morph160000_4gram_1e-8.bin" 
-      " --lookahead /share/work/thirsima/morph160000_2gram.bin" 
-      " --lexicon /share/work/thirsima/morph160000.lex" 
-      " --ph " + config["hmms-base"].get_str() + ".ph"
-      " --dur " + config["hmms-base"].get_str() + ".dur"
-      " --lm-scale 35" 
-      " --token-limit 30000" 
-      " --beam 200";
+//     rec.dec_command +=
+//       "./decoder "
+// //      " --verbose" 
+//       " --binlm /share/work/thirsima/morph160000_4gram_1e-8.bin" 
+//       " --lookahead /share/work/thirsima/morph160000_2gram.bin" 
+//       " --lexicon /share/work/thirsima/morph160000.lex" 
+//       " --ph " + config["hmms-base"].get_str() + ".ph"
+//       " --dur " + config["hmms-base"].get_str() + ".dur"
+//       " --lm-scale 35" 
+//       " --token-limit 30000" 
+//       " --beam 200";
       
     config.default_parse(argc, argv);
     if (config.arguments.size() != 0)
