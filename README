@@ -17,11 +17,16 @@ libphysfs-dev
 g++
 fort77
 
-paragui and lapackpp use the GNU Autotools build system, so you have to call
+paragui and lapackpp use the GNU Autotools build system.
 
-./autogen.sh
+For lapackpp, call:
+
 ./configure --enable-static=yes --enable-shared=no
 make
 
-in both project directories. Don't call make install. Then call make in all the
-other project directories.
+For paragui:
+
+./configure --enable-internalphysfs --enable-static=yes --enable-shared=no
+make
+
+Don't call make install. Then call make in all the other project directories.
