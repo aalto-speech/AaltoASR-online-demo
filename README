@@ -21,6 +21,7 @@ paragui and lapackpp use the GNU Autotools build system.
 
 For lapackpp, call:
 
+./autogen.sh
 ./configure --enable-static=yes --enable-shared=no
 make
 
