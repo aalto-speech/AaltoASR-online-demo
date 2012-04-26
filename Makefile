@@ -22,7 +22,7 @@ ifeq ($(ARCH),i686)
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	-I ../paragui/include \
-	$(shell ../paragui/paragui-config --cflags) \
+	$(shell ../paragui-online-demo/paragui-config --cflags) \
 	-I../lapackpp/include \
 	-I/usr/include/SDL
 #	-I/share/puhe/linux/include
@@ -36,7 +36,7 @@ ifeq ($(ARCH),x86_64)
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	-I ../paragui/include \
-	$(shell ../paragui/paragui-config --cflags) \
+	$(shell ../paragui-online-demo/paragui-config --cflags) \
 	-I../lapackpp/include \
 	-I/usr/include/SDL
 #	-I/share/puhe/x86_64/include/hcld \
