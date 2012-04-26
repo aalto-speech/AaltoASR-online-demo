@@ -23,7 +23,8 @@ INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	-I ../paragui/include \
 	$(shell ../paragui/paragui-config --cflags) \
-	-I../lapackpp/include
+	-I../lapackpp/include \
+	-I/usr/include/SDL
 #	-I/share/puhe/linux/include
 #	-I/share/puhe/linux/include/lapackpp
 # -L/share/puhe/linux/lib
@@ -36,7 +37,8 @@ INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
 	-I ../paragui/include \
 	$(shell ../paragui/paragui-config --cflags) \
-	-I../lapackpp/include
+	-I../lapackpp/include \
+	-I/usr/include/SDL
 #	-I/share/puhe/x86_64/include/hcld \
 #	-I$(LAPACKPP_PATH)/include/lapackpp \
 #	-I/share/puhe/x86_64/include \
