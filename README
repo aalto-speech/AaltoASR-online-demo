@@ -1,4 +1,4 @@
-To build online-demo, checkout decoder, aku, lapackpp, and paragui-online-demo projects from
+To build online-demo, checkout decoder, aku, lapackpp, and paragui projects from
 CVS, into the same directory where you have online-demo project.
 
 In Debian based systems, you need to install the following packages:
@@ -17,7 +17,7 @@ libphysfs-dev
 g++
 fort77
 
-paragui-online-demo and lapackpp use the GNU Autotools build system.
+paragui and lapackpp use the GNU Autotools build system.
 
 For lapackpp, call:
 
@@ -25,9 +25,11 @@ For lapackpp, call:
 ./configure --enable-static=yes --enable-shared=no
 make
 
-For paragui-online-demo:
+For paragui:
 
-./autogen.sh
+aclocal
+automake
+autoconf
 ./configure --enable-internalphysfs --enable-static=yes --enable-shared=no
 make
 

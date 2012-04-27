@@ -11,7 +11,7 @@ OPT = -O2
 WARNINGS = -Wall -Wno-deprecated
 AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing -Wno-sign-compare
 
-PARAGUI_PATH = ../paragui-online-demo
+PARAGUI_PATH = ../paragui
 
 LDFLAGS = \
   -L$(AKU_PATH) \
