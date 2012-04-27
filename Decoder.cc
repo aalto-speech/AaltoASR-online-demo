@@ -94,10 +94,10 @@ Decoder::message_result(bool send_all)
 //   if (last_guaranteed_history != NULL) {
 //     fprintf(stderr, "last_guaranteed_history:");
 //     TPLexPrefixTree::LMHistory *hist = last_guaranteed_history;
-//     while (hist->word_id >= 0) {
+//     while (hist->last().word_id() >= 0) {
 //       fprintf(stderr, " %d %s 0x%p ref %d\n", 
 //               hist->word_start_frame,
-//               t.word(hist->word_id).c_str(), 
+//               t.word(hist->last().word_id()).c_str(),
 //               hist,
 //               hist->get_num_references());
 //       hist = hist->prev_word;
@@ -131,9 +131,9 @@ Decoder::message_result(bool send_all)
     }
 
     message.append(str::fmt(256, "%d %d ", hist->word_start_frame, hist->word_first_silence_frame) +
-                   t.word(hist->word_id) + " ");
+                   t.word(hist->last().word_id()) + " ");
 //    message.append(str::fmt(256, "%d ", hist->word_start_frame) +
-//                   t.word(hist->word_id) + " ");
+//                   t.word(hist->last().word_id()) + " ");
   }
   message.append(str::fmt(256, "%d", frame));
   out_queue.queue.push_back(message);
