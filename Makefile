@@ -11,6 +11,8 @@ OPT = -O2
 WARNINGS = -Wall -Wno-deprecated
 AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing -Wno-sign-compare
 
+PARAGUI_PATH = ../paragui-online-demo
+
 LDFLAGS = \
   -L$(AKU_PATH) \
   -L$(DECODER_PATH) \
@@ -21,8 +23,8 @@ LDFLAGS = \
 ifeq ($(ARCH),i686)
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
-	-I ../paragui/include \
-	$(shell ../paragui-online-demo/paragui-config --cflags) \
+	-I $(PARAGUI_PATH)/include \
+	$(shell $(PARAGUI_PATH)/paragui-config --cflags) \
 	-I../lapackpp/include \
 	-I/usr/include/SDL
 #	-I/share/puhe/linux/include
@@ -35,8 +37,8 @@ ifeq ($(ARCH),x86_64)
 # /share/puhe/x86_64/stow/lapackpp-2.5.0
 INCLUDES = -I$(AKU_PATH) -I$(DECODER_PATH) \
 	-I$(DECODER_PATH)/fsalm -I$(DECODER_PATH)/misc \
-	-I ../paragui/include \
-	$(shell ../paragui-online-demo/paragui-config --cflags) \
+	-I $(PARAGUI_PATH)/include \
+	$(shell $(PARAGUI_PATH)/paragui-config --cflags) \
 	-I../lapackpp/include \
 	-I/usr/include/SDL
 #	-I/share/puhe/x86_64/include/hcld \
@@ -88,13 +90,14 @@ demogui_srcs = demogui.cc AudioStream.cc Buffer.cc \
 	scrap.cc RecognizerStatus.cc WidgetStatus.cc
 
 # Segmentation fault will occur without the -Wl,-Bdynamic.
-demogui_libs = -lportaudio -lsndfile -lfftw3 \
-  -L../paragui/src/.libs -lsigc-1.2 -lSDL -lpthread -lexpat -lfreetype -lstdc++ \
-  -lX11 \
-  -Wl,-Bstatic -lparagui -Wl,-Bdynamic
+demogui_libs = \
+  -L$(PARAGUI_PATH)/src/.libs -Wl,-Bstatic -lparagui -Wl,-Bdynamic \
+  -lportaudio -lsndfile -lfftw3 \
+  -lsigc-1.2 -lSDL -lpthread -lexpat -lfreetype -lstdc++ \
+  -lX11
 #demogui_libs = -lportaudio -lsndfile -lfftw3 -L../paragui/src/.libs $(shell ../paragui/paragui-config --libs) -lX11
 #demogui_libs = -lportaudio -lsndfile -lfftw3 $(shell ../paragui/paragui-config --libs) --static -L/usr/X11R6/lib -lphysfs -lz -laa -lgpm -lX11 -lXext -lslang-utf8 -ldl -ljack
-demogui: $(demogui_srcs:%.cc=%.o) ../paragui/src/.libs/libparagui.a
+demogui: $(demogui_srcs:%.cc=%.o) $(PARAGUI_PATH)/src/.libs/libparagui.a
 
 srcs = $(decoder_srcs) $(recognizer_srcs) $(gui_srcs) $(demogui_srcs)
 objs = $(srcs:%.cc=%.o)
