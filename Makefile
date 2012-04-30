@@ -7,7 +7,7 @@ DECODER_PATH = ../decoder/src
 AKU_PATH = ../aku
 # $(ROOT)/aku
 
-OPT = -O2
+OPT = -g -O2
 WARNINGS = -Wall -Wno-deprecated
 AUX_CXXFLAGS ?= -Wall -fno-strict-aliasing -Wno-sign-compare
 
