@@ -7,6 +7,8 @@
 #include <pgtheme.h>
 #include <pgstring.h>
 
+#include <vector>
+
 /** This class has been copied from pgmultilineedit.h and made a few changes
  * that were impossible to implement by deriving. */
 class WidgetMultiLineEdit : public PG_LineEdit {
@@ -35,7 +37,7 @@ protected:
   bool eventMouseButtonDown(const SDL_MouseButtonEvent* button);
   bool eventMouseMotion(const SDL_MouseMotionEvent* motion);
   bool eventMouseButtonUp(const SDL_MouseButtonEvent* button);
-  virtual void InsertChar(const PG_Char* c);
+  virtual void InsertChar(const PG_Char& c);
   virtual void DeleteChar(Uint16 pos);
   bool handleScroll(PG_ScrollBar* widget, long data);
 
