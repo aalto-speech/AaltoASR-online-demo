@@ -36,7 +36,7 @@ Application::initialize(unsigned int width, unsigned int height)
     return false;
   }
   this->m_app->LoadTheme("demo", true, "./");
-  this->m_app->SetCaption("Online-demo", NULL);
+  this->m_app->SetCaption("Online-demo", "");
   this->m_app->RedrawBackground(PG_Rect(0, 0, this->m_app->GetScreenWidth(), this->m_app->GetScreenHeight()));
   this->m_app->FlipPage();
 
