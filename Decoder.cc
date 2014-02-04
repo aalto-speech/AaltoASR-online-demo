@@ -93,7 +93,7 @@ Decoder::message_result(bool send_all)
   // Debugging guaranteed histories
 //   if (last_guaranteed_history != NULL) {
 //     fprintf(stderr, "last_guaranteed_history:");
-//     TPLexPrefixTree::LMHistory *hist = last_guaranteed_history;
+//     LMHistory *hist = last_guaranteed_history;
 //     while (hist->last().word_id() >= 0) {
 //       fprintf(stderr, " %d %s 0x%p ref %d\n", 
 //               hist->word_start_frame,
@@ -118,7 +118,7 @@ Decoder::message_result(bool send_all)
     message.append("part ");
   
   for (int i = hist_vec.size() - 1; i >= 0; i--) {
-    TPLexPrefixTree::LMHistory *hist = hist_vec[i];
+    LMHistory *hist = hist_vec[i];
     assert(hist->reference_count > 0);
     if (hist->previous->reference_count == 1) {
       if (all_guaranteed)

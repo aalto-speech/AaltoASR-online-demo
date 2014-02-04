@@ -23,7 +23,7 @@ public:
   bool paused;
   bool adaptation;
 
-  TPLexPrefixTree::LMHistory *last_guaranteed_history;
+  LMHistory *last_guaranteed_history;
 };
 
 #endif /* DECODER_HH */
