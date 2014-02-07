@@ -1,8 +1,9 @@
 #include "Decoder.hh"
 #include "str.hh"
 
-Decoder::Decoder()
-  : paused(false), 
+Decoder::Decoder(const char * hmm_path, const char * dur_path)
+  : t(0, hmm_path, dur_path),
+    paused(false),
     adaptation(false),
     last_guaranteed_history(NULL)
 {
@@ -17,21 +18,20 @@ Decoder::init(conf::Config &config)
 
   verbose = config["verbose"].specified;
 
-  t.select_decoder(0);
   t.set_optional_short_silence(1);
   t.set_cross_word_triphones(1);
   
-  if (verbose)
-    fprintf(stderr, "decoder: reading phoneme model %s\n", 
-	    config["ph"].get_c_str());
-  t.hmm_read(config["ph"].get_c_str());
-
-  if (config["dur"].specified) {
-    if (verbose)
-      fprintf(stderr, "decoder: reading duration model %s\n",
-	      config["dur"].get_c_str());
-    t.duration_read(config["dur"].get_c_str());
-  }
+//  if (verbose)
+//    fprintf(stderr, "decoder: reading phoneme model %s\n",
+//	    config["ph"].get_c_str());
+//  t.hmm_read(config["ph"].get_c_str());
+//
+//  if (config["dur"].specified) {
+//    if (verbose)
+//      fprintf(stderr, "decoder: reading duration model %s\n",
+//	      config["dur"].get_c_str());
+//    t.duration_read(config["dur"].get_c_str());
+//  }
 
   t.set_lm_lookahead(1);
   

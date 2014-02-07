@@ -7,7 +7,7 @@
 
 class Decoder {
 public:
-  Decoder();
+  Decoder(const char * hmm_path, const char * dur_path = NULL);
   void init(conf::Config &conf);
   void reset();
   void run();

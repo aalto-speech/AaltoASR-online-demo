@@ -1,6 +1,7 @@
 #ifndef MESSENGER_HH
 #define MESSENGER_HH
 
+#include <cstdlib>
 #include <sys/select.h>
 #include <string>
 #include <vector>

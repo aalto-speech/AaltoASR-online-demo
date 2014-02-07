@@ -6,7 +6,6 @@
 #include "Decoder.hh"
 
 conf::Config config;
-Decoder decoder;
 
 int
 main(int argc, char *argv[])
@@ -32,6 +31,25 @@ main(int argc, char *argv[])
     if (config.arguments.size() != 0)
       config.print_help(stderr, 1);
 
+    const char * ph;
+    const char * dur = NULL;
+
+    bool verbose = config["verbose"].specified;
+    if (verbose)
+      fprintf(stderr, "decoder: reading phoneme model %s\n",
+    	  config["ph"].get_c_str());
+
+    ph = config["ph"].get_c_str();
+
+
+    if (config["dur"].specified) {
+      if (verbose)
+        fprintf(stderr, "decoder: reading duration model %s\n",
+  	      config["dur"].get_c_str());
+      dur = config["dur"].get_c_str();
+    }
+
+    Decoder decoder (ph, dur);
     decoder.init(config);
     decoder.run();
   }
