@@ -2,7 +2,7 @@ To build ld online-demo, checkout AaltoASR and build and install it normally.
 
 E.g.
 
-    git checkout https://github.com/aalto-speech/AaltoASR.git
+    git clone https://github.com/aalto-speech/AaltoASR.git
     cd AaltoASR
     mkdir build && cd build
     cmake -DCMAKE_INSTALL_PREFIX=../dest ..
@@ -37,13 +37,13 @@ Creating DEB package for demo laptops
 
 A .deb package containing all necessaties for the online demo can be created.
 
-    git checkout https://github.com/aalto-speech/AaltoASR.git
+    git clone https://github.com/aalto-speech/AaltoASR.git
     cd AaltoASR
     mkdir build && cd build
     cmake -DCMAKE_INSTALL_PREFIX=../dest ..
     make install
     cd ../../
-    git checkout git@github.com:aalto-speech/AaltoASR-online-demo.git
+    git clone git@github.com:aalto-speech/AaltoASR-online-demo.git
     cd AaltoASR-online-demo
     mkdir build && cd build
     cmake -DAaltoASR_PREFIX=../../AaltoASR/dest -DModel_DIR=/m/work/t40511_research/online-demo/models ..
