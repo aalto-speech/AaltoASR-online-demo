@@ -46,7 +46,7 @@ A .deb package containing all necessaties for the online demo can be created.
     git clone git@github.com:aalto-speech/AaltoASR-online-demo.git
     cd AaltoASR-online-demo
     mkdir build && cd build
-    cmake -DAaltoASR_PREFIX=../../AaltoASR/dest -DModel_DIR=/m/work/t40511_research/online-demo/models ..
+    cmake -DAaltoASR_PREFIX=../../AaltoASR/dest -DModels_DIR=/m/work/t40511_research/online-demo/models ..
     make package
 
 Make sure the path for Model_DIR is correct.
