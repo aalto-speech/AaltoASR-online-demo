@@ -4,6 +4,22 @@
 #include "WindowRecognizer.hh"
 #include "WindowSettings.hh"
 
+std::string find_theme_path() {
+	enum { BUFFERSIZE = 1024 };
+	char buf[BUFFERSIZE];
+	ssize_t len = readlink("/proc/self/exe", buf, sizeof(buf)-1);
+
+	if (len != -1) {
+	  buf[len] = '\0';
+	}
+	else {
+	  exit(1);
+	}
+	std::string path =  std::string(buf);
+	int beginIdx = path.rfind('/');
+	return path.substr(0, beginIdx) + "/../share/aalto-online-demo/theme";
+}
+
 Application::Application()
 {
   this->m_recognizer = NULL;
@@ -35,7 +51,8 @@ Application::initialize(unsigned int width, unsigned int height)
     fprintf(stderr, "Resolution %dx%d not supported\n", width, height);
     return false;
   }
-  this->m_app->LoadTheme("demo", true, "./");
+  fprintf(stderr, "theme path: %s\n", find_theme_path().c_str());
+  this->m_app->LoadTheme("demo", true, find_theme_path().c_str());
   this->m_app->SetCaption("Online-demo", "");
   this->m_app->RedrawBackground(PG_Rect(0, 0, this->m_app->GetScreenWidth(), this->m_app->GetScreenHeight()));
   this->m_app->FlipPage();

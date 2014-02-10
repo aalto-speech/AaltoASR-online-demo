@@ -49,4 +49,4 @@ add_subdirectory( decoder )
 add_subdirectory( recognizer )
 add_subdirectory( demogui )
 
-
+install(DIRECTORY theme DESTINATION share/aalto-online-demo )

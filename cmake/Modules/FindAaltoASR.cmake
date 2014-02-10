@@ -3,12 +3,17 @@
 #  AaltoASR_FOUND          - True if AaltoASR found
 
 # HINTS:
-# AaltoASR_BUILD_DIR
+# AaltoASR_PREFIX_
 
 if(DEFINED AaltoASR_PREFIX)
+if(NOT IS_ABSOLUTE ${AaltoASR_PREFIX} )
+set(AaltoASR_PREFIX ${CMAKE_BINARY_DIR}/${AaltoASR_PREFIX})
+endif()
+
+message("Looking for AaltoASR in ${AaltoASR_PREFIX} ") 
 FIND_PATH(AaltoASR_INCLUDE_DIR NAMES HmmNetBaumWelch.hh  
 PATHS ${AaltoASR_PREFIX}/include )
-
+message("AaltoASR_INCLUDE_DIR = ${AaltoASR_INCLUDE_DIR}")
 FIND_PATH(AaltoASR_INCLUDE_DIR_Lapack NAMES lapackpp.h
 PATHS ${AaltoASR_PREFIX}/include
 PATH_SUFFIXES lapackpp )
