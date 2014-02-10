@@ -1,0 +1,10 @@
+[configuration]
+lm=
+lm_la=
+hmm=
+
+decoder_args = ""
+
+;Note that the decoder and decoder args are added automatically to the recognizer command
+recognizer_args = ""
+

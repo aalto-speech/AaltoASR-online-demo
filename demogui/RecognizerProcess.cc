@@ -35,7 +35,8 @@ RecognizerProcess::start()
     // Child process enters here.
     // Parse the parameters to exec-function.
     std::vector<std::string> args = str::split(this->m_connect, " ", true);
-    args.push_back(this->m_script);
+    std::vector<std::string> scriptargs = str::split(this->m_script, " ", true);
+    args.insert(args.end(), scriptargs.begin(), scriptargs.end());
 
     char **arg_array = new char*[args.size() + 1];
 
