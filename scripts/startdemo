@@ -1,0 +1,102 @@
+#!/usr/bin/env python
+from __future__ import print_function
+from ConfigParser import SafeConfigParser
+
+import os
+import subprocess
+import sys
+
+class Model(object):
+    def __init__(self, name, description, recogizer_args, decoder_args, beam, lmscale):
+        self.name = name
+        self.description = description
+        self.recognizer_args = recogizer_args
+        self.decoder_args = decoder_args
+        self.beam = beam
+        self.lmscale = lmscale
+
+    def run(self):
+        print("Running model {}".format(self.name))
+
+    def get_script_part(self):
+        pass
+
+
+def read_model(directory, model):
+    parser = SafeConfigParser(dict(dir=directory))
+    parser.read(os.path.join(directory, 'config'))
+
+    return Model(model,
+                 parser.get(model, 'description'),
+                 parser.get(model, 'recognizer_args'),
+                 parser.get(model, 'decoder_args'),
+                 parser.get(model, 'beam'),
+                 parser.get(model, 'lmscale'))
+
+def select(my_dir):
+    model_dir = os.path.join(my_dir, '..', 'share', 'aalto-online-demo', 'models')
+
+
+    parser = SafeConfigParser(dict(dir=model_dir))
+    parser.read(os.path.join(model_dir, 'config'))
+
+    models = [read_model(model_dir, m) for m in parser.sections()]
+
+    models.sort()
+    if len(models) == 0:
+        exit("No models found in {}".format(model_dir))
+
+    for i, model in enumerate(models):
+        print("{}) {} - {}".format(i+1, model.name, model.description))
+
+    response = raw_input("Make your choice (1): ")
+    try:
+        model = models[int(response) - 1]
+    except:
+        model = models[0]
+
+    return model
+
+def run_recognizer(my_dir, model_name):
+    model = read_model(os.path.join(my_dir, '..', 'share', 'aalto-online-demo', 'models'), model_name)
+    command = ['{}/recognizer'.format(my_dir),
+               '-d', "{}/decoder {}".format(my_dir, model.decoder_args)]
+    command.extend(model.recognizer_args.split())
+
+    print(" ".join(command))
+    subprocess.call(command,
+                    stdin=sys.stdin,
+                    stdout=sys.stdout,
+                    stderr=sys.stderr)
+
+
+def guess_screen_resolution():
+    output = subprocess.Popen('xrandr | grep "\*" | cut -d" " -f4', shell=True, stdout=subprocess.PIPE).communicate()[0]
+    w, h = output.split('\n')[0].split('x', 1)
+    return int(w)-15, int(h)-15
+
+if __name__ == "__main__":
+    my_dir = os.path.dirname(os.path.realpath(__file__))
+    if len(sys.argv) == 3 and sys.argv[1] == 'recognizer':
+        run_recognizer(my_dir, sys.argv[2])
+    else:
+        w,h = guess_screen_resolution()
+        model = select(my_dir)
+
+        command = ['{}/demogui'.format(my_dir),
+                   '-w',
+                   str(w),
+                   '-h',
+                   str(h),
+                   '--beam',
+                   str(model.beam),
+                   '--lmscale',
+                   str(model.lmscale),
+                   '--script',
+                   '{} recognizer {}'.format(os.path.realpath(__file__),
+                                             model.name)]
+        print(" ".join(command))
+        subprocess.call(command,
+                        stdin=sys.stdin,
+                        stdout=sys.stdout,
+                        stderr=sys.stderr)
