@@ -3,6 +3,8 @@
 #include "msg.hh"
 #include "str.hh"
 
+#include <unistd.h>
+
 namespace msg {
 
   void
