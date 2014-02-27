@@ -530,7 +530,8 @@ bool WidgetMultiLineEdit::eventKeyDown(const SDL_KeyboardEvent* key) {
         return true; 
 
       case SDLK_RETURN: 
-        InsertChar('\n'); 
+        c = '\n'; 
+        InsertChar(&c); 
         SetCursorPos(my_cursorPosition); 
         return true;
         
@@ -648,7 +649,7 @@ void WidgetMultiLineEdit::SetCursorPos(int p) {
   //Update();
 } 
 
-void WidgetMultiLineEdit::InsertChar(const PG_Char& c) { 
+void WidgetMultiLineEdit::InsertChar(const PG_Char* c) { 
   my_allowHiddenCursor = false; 
   if (my_mark != -1 && my_mark != my_cursorPosition) {
     DeleteSelection(); 
