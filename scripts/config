@@ -41,7 +41,7 @@ lex=%(dir)s/wsj_20k_cmu_0.7a_tri.lex
 hmm=%(dir)s/wsj_284_ml_gain4000_occ400_17.11.2010_25/wsj_284_ml_gain4000_occ400_17.11.2010_25
 
 
-decoder_args = --binlm %(lm)s --lookahead %(lm_la)s --lexicon %(lex)s --ph %(hmm)s.ph --dur %(hmm)s.dur --lm-scale 50 --token-limit 25000 --beam 200
+decoder_args = --binlm %(lm)s --lookahead %(lm_la)s --lexicon %(lex)s --ph %(hmm)s.ph --dur %(hmm)s.dur --lm-scale 50 --token-limit 25000 --beam 200 --words
 
 ;Note that the decoder and decoder args are added automatically to the recognizer command
 recognizer_args = -b %(hmm)s -C %(hmm)s.gcl --eval-ming 0.08
@@ -56,9 +56,9 @@ description=Finglish 5k
 lm=%(dir)s/aurora_3gram.bin
 lm_la=%(dir)s/aurora_2gram.bin
 lex=%(dir)s/wsj_20k_cmu_0.7a_tri.lex
-hmm=%(dir)s/wsj0dsp_ml_gain2500_occ200_26.1.2011_28/wsj0dsp_ml_gain2500_occ200_26.1.2011_28"
+hmm=%(dir)s/wsj0dsp_ml_gain2500_occ200_26.1.2011_28/wsj0dsp_ml_gain2500_occ200_26.1.2011_28
 
-decoder_args = --binlm %(lm)s --lookahead %(lm_la)s --lexicon %(lex)s --ph %(hmm)s.ph --dur %(hmm)s.dur --lm-scale 40 --token-limit 25000 --beam 220
+decoder_args = --binlm %(lm)s --lookahead %(lm_la)s --lexicon %(lex)s --ph %(hmm)s.ph --dur %(hmm)s.dur --lm-scale 40 --token-limit 25000 --beam 220 --words
 
 ;Note that the decoder and decoder args are added automatically to the recognizer command
 recognizer_args = -b %(hmm)s -C %(hmm)s.gcl --eval-ming 0.15
@@ -75,7 +75,7 @@ lmscale=40
 ;hmm=%(dir)s/test_mfcc_noisy_trained/test_mfcc_noisy_trained
 
 
-;decoder_args = --binlm %(lm)s --lookahead %(lm_la)s --lexicon %(lex)s --ph %(hmm)s.ph --dur %(hmm)s.dur --lm-scale 40 --token-limit 20000 --beam 200
+;decoder_args = --binlm %(lm)s --lookahead %(lm_la)s --lexicon %(lex)s --ph %(hmm)s.ph --dur %(hmm)s.dur --lm-scale 40 --token-limit 20000 --beam 200 --words
 
 ;Note that the decoder and decoder args are added automatically to the recognizer command
 ;recognizer_args = -b %(hmm)s -C %(hmm)s.gcl --eval-ming 0.10
