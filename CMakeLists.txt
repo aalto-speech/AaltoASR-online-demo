@@ -26,7 +26,7 @@ ExternalProject_Add(paragui_ext
    PREFIX ${CMAKE_BINARY_DIR}/vendor/paragui
    GIT_REPOSITORY https://github.com/aalto-speech/paragui.git
    GIT_TAG onlinedemoversion 
-   UPDATE_COMMAND "./autogen.sh; ./autogen.sh"
+   UPDATE_COMMAND "./autogen.sh; ./autogen.sh; ./autogen.sh"
    CONFIGURE_COMMAND <SOURCE_DIR>/configure --enable-static=yes --enable-shared=no --prefix=<INSTALL_DIR>
    BUILD_COMMAND make
    BUILD_IN_SOURCE 1
@@ -58,7 +58,7 @@ install(DIRECTORY ${Models_DIR} DESTINATION share/aalto-online-demo )
 set (CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Peter Smit")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
-set(CPACK_PACKAGE_VERSION 0.1.2)
+set(CPACK_PACKAGE_VERSION 0.1.3)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsdl1.2debian, libsigc++-1.2-5c2, libphysfs1, libexpat1, libfreetype6, libportaudio2, libfftw3-bin, libsndfile1, liblapack3gf, libgfortran3")
 include(CPack)
 
