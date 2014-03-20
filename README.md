@@ -52,3 +52,12 @@ A .deb package containing all necessaties for the online demo can be created.
 Make sure the path for Model_DIR is correct.
 
 This will create a package that can be installed on any Ubuntu laptop. After that, the demo can be started with the command 'startdemo'
+
+
+Audio Issues
+============
+If selecting a microphone in pulseaudio does not work, create the file ~/.asoundrc with the following contents:
+
+    pcm.pulse { type pulse }
+    ctl.pulse { type pulse }
+    
