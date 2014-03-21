@@ -52,3 +52,5 @@ A .deb package containing all necessaties for the online demo can be created.
 Make sure the path for Model_DIR is correct.
 
 This will create a package that can be installed on any Ubuntu laptop. After that, the demo can be started with the command 'startdemo'
+
+Note that sometimes the make package will fail because of "no ./configure in src/physfs". In that case, cd to build/vendor/paragui/src/paragui_ext/ and run autogen.sh. After that you can run make package again.

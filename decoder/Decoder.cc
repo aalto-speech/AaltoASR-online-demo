@@ -17,9 +17,28 @@ Decoder::init(conf::Config &config)
   //
 
   verbose = config["verbose"].specified;
-
+  
+  if (config["words"].specified)
+    t.set_silence_is_word(false);
+  
   t.set_optional_short_silence(1);
   t.set_cross_word_triphones(1);
+
+  t.set_require_sentence_end(true);
+  
+  t.set_print_text_result(0);
+  
+  t.set_global_beam(config["beam"].get_float());
+  
+  
+  t.set_token_limit(config["token-limit"].get_int());
+  t.set_prune_similar(3);
+  
+  t.set_duration_scale(1);
+  
+  t.set_lm_scale(config["lm-scale"].get_float());
+  
+  t.set_lm_lookahead(1);
   
 //  if (verbose)
 //    fprintf(stderr, "decoder: reading phoneme model %s\n",
@@ -33,11 +52,9 @@ Decoder::init(conf::Config &config)
 //    t.duration_read(config["dur"].get_c_str());
 //  }
 
-  t.set_lm_lookahead(1);
   
-  if (config["words"].specified)
-    t.set_silence_is_word(false);
-  else
+  
+  if (!config["words"].specified)
     t.set_word_boundary("<w>");
   
   if (verbose)
@@ -45,7 +62,7 @@ Decoder::init(conf::Config &config)
 	    config["lexicon"].get_c_str());
   t.lex_read(config["lexicon"].get_c_str());
   t.set_sentence_boundary("<s>", "</s>");
-  t.set_require_sentence_end(true);
+  
 
   if (verbose)
     fprintf(stderr, "decoder: reading language model %s\n",
@@ -58,13 +75,11 @@ Decoder::init(conf::Config &config)
   t.read_lookahead_ngram(config["lookahead"].get_c_str(), 1);
   t.prune_lm_lookahead_buffers(0, 4);
 
-  t.set_prune_similar(3);
-  t.set_token_limit(config["token-limit"].get_int());
-  t.set_global_beam(config["beam"].get_float());
-  t.set_lm_scale(config["lm-scale"].get_float());
-  t.set_duration_scale(1);
+
+
+  
   t.use_one_frame_acoustics();
-  t.set_print_text_result(0);
+  
   t.reset(0);
 
   // Set collection of state histories for adaptation
