@@ -15,7 +15,7 @@ In Debian based systems, you need to install the following packages:
     g++
     fort77
 
-To build ld online-demo, checkout AaltoASR and build and install it normally.
+To build online-demo, checkout AaltoASR and build and install it normally.
 
 E.g.
 
