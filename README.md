@@ -19,7 +19,7 @@ To build online-demo, checkout AaltoASR and build and install it normally.
 
 E.g.
 
-    git clone https://github.com/aalto-speech/AaltoASR.git
+    git clone git@github.com:aalto-speech/AaltoASR.git
     cd AaltoASR
     mkdir build && cd build
     cmake -DCMAKE_INSTALL_PREFIX=../dest ..
@@ -28,7 +28,7 @@ E.g.
 
 After this, give the installation prefix of AaltoASR as prefix:
 
-    git clone https://github.com/aalto-speech/AaltoASR-online-demo.git
+    git clone git@github.com:aalto-speech/AaltoASR-online-demo.git
     cd AaltoASR-online-demo
     mkdir build && cd build
     cmake -DAaltoASR_PREFIX=../../AaltoASR/dest ..
@@ -39,7 +39,7 @@ Creating DEB package for demo laptops
 
 A .deb package containing all necessaties for the online demo can be created.
 
-    git clone https://github.com/aalto-speech/AaltoASR.git
+    git clone git@github.com:aalto-speech/AaltoASR.git
     cd AaltoASR
     mkdir build && cd build
     cmake -DCMAKE_INSTALL_PREFIX=../dest ..
