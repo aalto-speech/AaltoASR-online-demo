@@ -26,7 +26,8 @@ ExternalProject_Add(paragui_ext
    PREFIX ${CMAKE_BINARY_DIR}/vendor/paragui
    GIT_REPOSITORY https://github.com/aalto-speech/paragui.git
    GIT_TAG onlinedemoversion 
-   UPDATE_COMMAND "./autogen.sh; ./autogen.sh; ./autogen.sh"
+   UPDATE_COMMAND "./autogen.sh; ./autogen.sh"
+   PATCH_COMMAND "./autogen.sh"
    CONFIGURE_COMMAND <SOURCE_DIR>/configure --enable-static=yes --enable-shared=no --prefix=<INSTALL_DIR>
    BUILD_COMMAND make
    BUILD_IN_SOURCE 1
