@@ -33,10 +33,7 @@ def read_model(directory, model):
                  parser.get(model, 'beam'),
                  parser.get(model, 'lmscale'))
 
-def select(my_dir):
-    model_dir = os.path.join(my_dir, '..', 'share', 'aalto-online-demo-data', 'models')
-
-
+def select(model_dir, my_dir):
     parser = SafeConfigParser(dict(dir=model_dir))
     parser.read(os.path.join(model_dir, 'config'))
 
@@ -57,8 +54,8 @@ def select(my_dir):
 
     return model
 
-def run_recognizer(my_dir, model_name):
-    model = read_model(os.path.join(my_dir, '..', 'share', 'aalto-online-demo-data', 'models'), model_name)
+def run_recognizer(model_dir, my_dir, model_name):
+    model = read_model(model_dir, model_name)
     command = ['{}/recognizer'.format(my_dir),
                '-d', "{}/decoder {}".format(my_dir, model.decoder_args)]
     command.extend(model.recognizer_args.split())
@@ -77,11 +74,21 @@ def guess_screen_resolution():
 
 if __name__ == "__main__":
     my_dir = os.path.dirname(os.path.realpath(__file__))
+    model_dir = os.path.join(my_dir, '..', 'share', 'aalto-online-demo-data', 'models')
+    if not os.path.exists(os.path.join(model_dir, 'config')):
+        model_dir = os.path.join('/', 'usr', 'share', 'aalto-online-demo-data', 'models')
+    if not os.path.exists(os.path.join(model_dir, 'config')):
+        model_dir = os.path.join('/', 'work', 'asr', 'online-demo', 'models')
+    else:
+        sys.exit("Can't find any model dir")
+
+    print("Using {} for models".format(model_dir))
+
     if len(sys.argv) == 3 and sys.argv[1] == 'recognizer':
-        run_recognizer(my_dir, sys.argv[2])
+        run_recognizer(model_dir, my_dir, sys.argv[2])
     else:
         w,h = guess_screen_resolution()
-        model = select(my_dir)
+        model = select(model_dir, my_dir)
 
         command = ['{}/demogui'.format(my_dir),
                    '-w',
