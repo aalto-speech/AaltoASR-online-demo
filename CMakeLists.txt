@@ -53,13 +53,11 @@ add_subdirectory( scripts )
 
 install(DIRECTORY theme DESTINATION share/aalto-online-demo )
 
-install(DIRECTORY ${Models_DIR} DESTINATION share/aalto-online-demo )
-
 ###############
 set (CPACK_GENERATOR "DEB")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Peter Smit")
 set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE amd64)
-set(CPACK_PACKAGE_VERSION 0.1.5)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsdl1.2debian, libsigc++-1.2-5c2, libphysfs1, libexpat1, libfreetype6, libportaudio2, libfftw3-bin, libsndfile1, liblapack3gf, libgfortran3")
+set(CPACK_PACKAGE_VERSION 0.1.7)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libsdl1.2debian, libsigc++-1.2-5c2, libphysfs1, libexpat1, libfreetype6, libportaudio2, libfftw3-bin, libsndfile1, liblapack3gf, libgfortran3, aaltoasr-online-demo-data")
 include(CPack)
 

@@ -37,7 +37,16 @@ After this, give the installation prefix of AaltoASR as prefix:
 Creating DEB package for demo laptops
 =====================================
 
-A .deb package containing all necessaties for the online demo can be created.
+The executables and data are in separate packages.
+
+To create a data package do:
+    git clone git@github.com:aalto-speech/AaltoASR-online-demo.git
+    cd AaltoASR-online-demo/data
+    ./make_new_package.sh
+
+This always creates a new package and bumps the version number automatically. The current package can also be found in /work/asr/online-demo (automatically copied)
+
+To make an executables package do:
 
     git clone git@github.com:aalto-speech/AaltoASR.git
     cd AaltoASR
@@ -47,11 +56,12 @@ A .deb package containing all necessaties for the online demo can be created.
     cd ../../
     git clone git@github.com:aalto-speech/AaltoASR-online-demo.git
     cd AaltoASR-online-demo
+    #Bump version number in CMakeLists.txt if anything has changed
     mkdir build && cd build
-    cmake -DAaltoASR_PREFIX=../../AaltoASR/dest -DModels_DIR=/m/work/t40511_research/online-demo/models ..
+    cmake -DAaltoASR_PREFIX=../../AaltoASR/dest ..
     make package
 
-Make sure the path for Model_DIR is correct.
+When installing the packages (with dpkg -i), install the data package first.
 
 This will create a package that can be installed on any Ubuntu laptop. After that, the demo can be started with the command 'startdemo'
 

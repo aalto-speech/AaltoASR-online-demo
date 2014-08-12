@@ -34,7 +34,7 @@ def read_model(directory, model):
                  parser.get(model, 'lmscale'))
 
 def select(my_dir):
-    model_dir = os.path.join(my_dir, '..', 'share', 'aalto-online-demo', 'models')
+    model_dir = os.path.join(my_dir, '..', 'share', 'aalto-online-demo-data', 'models')
 
 
     parser = SafeConfigParser(dict(dir=model_dir))
@@ -58,7 +58,7 @@ def select(my_dir):
     return model
 
 def run_recognizer(my_dir, model_name):
-    model = read_model(os.path.join(my_dir, '..', 'share', 'aalto-online-demo', 'models'), model_name)
+    model = read_model(os.path.join(my_dir, '..', 'share', 'aalto-online-demo-data', 'models'), model_name)
     command = ['{}/recognizer'.format(my_dir),
                '-d', "{}/decoder {}".format(my_dir, model.decoder_args)]
     command.extend(model.recognizer_args.split())
