@@ -40,6 +40,7 @@ Creating DEB package for demo laptops
 The executables and data are in separate packages.
 
 To create a data package do:
+
     git clone git@github.com:aalto-speech/AaltoASR-online-demo.git
     cd AaltoASR-online-demo/data
     ./make_new_package.sh
