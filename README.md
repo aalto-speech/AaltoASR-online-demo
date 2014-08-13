@@ -45,7 +45,7 @@ To create a data package do:
     cd AaltoASR-online-demo/data
     ./make_new_package.sh
 
-This always creates a new package and bumps the version number automatically. The current package can also be found in /work/asr/online-demo (automatically copied)
+This always creates a new package and bumps the version number automatically. The current package can also be found in /work/asr/demos/aaltoasr-online-demo (automatically copied)
 
 To make an executables package do:
 
