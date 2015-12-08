@@ -64,8 +64,9 @@ public:
   /** Opens the audio stream.
    * \param input_stream true if input stream should be opened.
    * \param output_stream true if output stream should be opened.
+   * \param select_devices true if the user should select input/output device.
    * \return false if failed to open the stream. */
-  bool open(bool input_stream, bool output_stream);
+  bool open(bool input_stream, bool output_stream, bool select_devices);
 
   /** Closes the audio stream. */
   void close();

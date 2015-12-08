@@ -53,7 +53,6 @@ private:
 
   RecognizerProcess *m_recognizer; //!< Recognizer process.
   PG_Application *m_app; //!< ParaGUI application.
-  
 };
 
 #endif /*APPLICATION_HH_*/

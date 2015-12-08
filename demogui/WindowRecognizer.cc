@@ -41,7 +41,8 @@ WindowRecognizer::WindowRecognizer(RecognizerProcess *recognizer)
 
 WindowRecognizer::~WindowRecognizer()
 {
-  delete m_audio_input;
+  if (m_audio_input != NULL)
+    delete m_audio_input;
 }
 
 void

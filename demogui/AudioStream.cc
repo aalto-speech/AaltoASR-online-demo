@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 #include <sndfile.h>
 #include <portaudio.h>
 #include "AudioStream.hh"
@@ -83,7 +84,7 @@ AudioStream::~AudioStream()
 	pthread_mutex_destroy(&this->m_outputbuffer_lock);
 }
 
-bool AudioStream::open(bool input_stream, bool output_stream)
+bool AudioStream::open(bool input_stream, bool output_stream, bool select_devices)
 {
 	PaStreamParameters *input_params = NULL;
 	PaStreamParameters *output_params = NULL;
@@ -125,6 +126,22 @@ bool AudioStream::open(bool input_stream, bool output_stream)
 		cerr << i << ": " << name << ", " << num_channels << " channels" << endl;
 	}
 
+	PaDeviceIndex input_device;
+	if (select_devices) {
+		cerr << "Select recording device (" << Pa_GetDefaultInputDevice() << "): ";
+		string line;
+		getline(cin, line);
+		try {
+			input_device = stoi(line);
+		}
+		catch (invalid_argument &) {
+			input_device = Pa_GetDefaultInputDevice();
+		}
+	}
+	else {
+		input_device = Pa_GetDefaultInputDevice();
+	}
+
 	cerr << "Enumerating playback devices." << endl;
 	for (PaDeviceIndex i = 0; i < num_devices; ++i) {
 		const PaDeviceInfo * info = Pa_GetDeviceInfo(i);
@@ -137,17 +154,33 @@ bool AudioStream::open(bool input_stream, bool output_stream)
 		if (num_channels < 1)
 			continue;
 		string name = info->name;
-		if (i == Pa_GetDefaultInputDevice()) {
+		if (i == Pa_GetDefaultOutputDevice()) {
 			name = "[" + name + "]";
 		}
 		cerr << i << ": " << name << ", " << num_channels << " channels" << endl;
+	}
+
+	PaDeviceIndex output_device;
+	if (select_devices) {
+		cerr << "Select playback device (" << Pa_GetDefaultOutputDevice() << "): ";
+		string line;
+		getline(cin, line);
+		try {
+			output_device = stoi(line);
+		}
+		catch (invalid_argument &) {
+			output_device = Pa_GetDefaultOutputDevice();
+		}
+	}
+	else {
+		output_device = Pa_GetDefaultOutputDevice();
 	}
 
 	if (input_stream) {
 		// Set parameters for input stream.
 		const PaDeviceInfo *input_device_info;
 		input_params = new PaStreamParameters;
-		input_params->device = Pa_GetDefaultInputDevice();
+		input_params->device = input_device;
 		input_params->channelCount = 1;
 		input_params->sampleFormat = PA_AUDIO_FORMAT;
 		input_device_info = Pa_GetDeviceInfo(input_params->device);
@@ -160,7 +193,7 @@ bool AudioStream::open(bool input_stream, bool output_stream)
 		// Set parameters for output stream.
 		const PaDeviceInfo *output_device_info;
 		output_params = new PaStreamParameters;
-		output_params->device = Pa_GetDefaultOutputDevice();
+		output_params->device = output_device;
 		output_params->channelCount = 1;
 		output_params->sampleFormat = PA_AUDIO_FORMAT;
 		output_device_info = Pa_GetDeviceInfo(output_params->device);

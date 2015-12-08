@@ -25,7 +25,7 @@ AudioInputController::AudioInputController(msg::OutQueue *out_queue)
 bool
 AudioInputController::initialize()
 {
-  if (!this->m_audio_stream.open(true, true)) {
+  if (!this->m_audio_stream.open(true, true, false)) {
     fprintf(stderr, "Failed to open audio stream.\n");
     return false;
   }

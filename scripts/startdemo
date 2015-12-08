@@ -78,7 +78,7 @@ if __name__ == "__main__":
     if not os.path.exists(os.path.join(model_dir, 'config')):
         model_dir = os.path.join('/', 'usr', 'share', 'aalto-online-demo-data', 'models')
     if not os.path.exists(os.path.join(model_dir, 'config')):
-        model_dir = os.path.join('/', 'work', 'asr', 'demos', 'aaltoasr-online-demo', 'models')
+        model_dir = os.path.join('/', 'teamwork', 't40511_asr', 'demos', 'aaltoasr-online-demo', 'models')
     else:
         sys.exit("Can't find any model dir")
 
