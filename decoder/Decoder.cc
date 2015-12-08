@@ -2,7 +2,7 @@
 #include "str.hh"
 
 Decoder::Decoder(const char * hmm_path, const char * dur_path)
-  : t(0, hmm_path, dur_path),
+  : t(hmm_path, dur_path),
     paused(false),
     adaptation(false),
     last_guaranteed_history(NULL)
@@ -10,7 +10,7 @@ Decoder::Decoder(const char * hmm_path, const char * dur_path)
 }
 
 void
-Decoder::init(conf::Config &config)
+Decoder::init(aku::conf::Config &config)
 {
 
   // Initialize decoder
@@ -123,7 +123,7 @@ Decoder::message_result(bool send_all)
 //   if (last_guaranteed_history != NULL)
 //     tp.ensure_all_paths_contain_history(last_guaranteed_history);
 
-  tp.get_path(hist_vec, true, send_all ? NULL : last_guaranteed_history);
+  tp.get_best_final_token().get_lm_history(hist_vec, send_all ? NULL : last_guaranteed_history);
   bool all_guaranteed = true;
   msg::Message message(msg::M_RECOG);
 

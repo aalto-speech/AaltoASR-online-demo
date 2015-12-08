@@ -2,13 +2,14 @@
 #define DECODER_HH
 
 #include <Toolbox.hh>
+#include <conf.hh>
 #include "msg.hh"
 #include "conf.hh"
 
 class Decoder {
 public:
   Decoder(const char * hmm_path, const char * dur_path = NULL);
-  void init(conf::Config &conf);
+  void init(aku::conf::Config &conf);
   void reset();
   void run();
   void send_state_history();

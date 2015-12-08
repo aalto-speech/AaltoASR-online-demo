@@ -42,8 +42,7 @@ demogui.cc AudioStream.cc Buffer.cc
 	scrap.cc RecognizerStatus.cc WidgetStatus.cc
 )
 
-add_executable( demogui ${DEMOGUISOURCES} )
-add_dependencies( demogui paragui_ext)
+add_executable(demogui ${DEMOGUISOURCES})
+add_dependencies(demogui paragui_ext)
 
 install(TARGETS demogui DESTINATION bin)
-

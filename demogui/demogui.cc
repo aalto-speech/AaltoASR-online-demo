@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 {
 
   try {
-  conf::Config config;
+  aku::conf::Config config;
 
   config('\0', "beam", "arg", "", "Beam value for recognizer.")
     ('\0', "lmscale", "arg", "", "Language model scale value for recognizer.")

@@ -3,7 +3,7 @@
 #include "io.hh"
 
 Recognizer rec;
-conf::Config config;
+aku::conf::Config config;
 
 int
 main(int argc, char *argv[])

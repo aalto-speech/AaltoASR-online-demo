@@ -12,6 +12,7 @@ In Debian based systems, you need to install the following packages:
     libsdl-dev
     libexpat-dev
     libphysfs-dev
+    libfreetype6-dev
     g++
     fort77
 

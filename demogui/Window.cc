@@ -2,6 +2,7 @@
 #include "Window.hh"
 #include "WindowMessageBox.hh"
 #include <pgapplication.h>
+#include <unistd.h>  // usleep
 
 Window::Window()
 {
