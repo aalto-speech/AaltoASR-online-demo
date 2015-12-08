@@ -131,8 +131,8 @@ Decoder::message_result(bool send_all)
     message.append("all ");
   else
     message.append("part ");
-  
-  for (int i = hist_vec.size() - 1; i >= 0; i--) {
+
+  for (int i = 0; i < hist_vec.size(); ++i) {
     LMHistory *hist = hist_vec[i];
     assert(hist->reference_count > 0);
     if (hist->previous->reference_count == 1) {
