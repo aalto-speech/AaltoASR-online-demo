@@ -8,11 +8,14 @@ Find_Package ( Freetype REQUIRED )
 Find_Package ( PhysFS REQUIRED )
 Find_Package ( EXPAT REQUIRED )
 Find_Package ( Portaudio REQUIRED )
+Find_Package ( X11 REQUIRED )
+Find_Package ( SNDFILE REQUIRED )
 
 link_libraries (
-     ${SDL_LIBRARY} ${SigC++_LIBRARIES} ${ParaGUI_LIBRARIES}
-${PHYSFS_LIBRARY} ${EXPAT_LIBRARY} ${FREETYPE_LIBRARY} ${Portaudio_LIBRARY} ${FFTW_LIBRARIES}
-    common
+ ${SDL_LIBRARY} ${SigC++_LIBRARIES} ${ParaGUI_LIBRARIES}
+ ${PHYSFS_LIBRARY} ${EXPAT_LIBRARY} ${FREETYPE_LIBRARY} ${Portaudio_LIBRARY} ${FFTW_LIBRARIES}
+ ${X11_LIBRARIES} ${SNDFILE_LIBRARIES}
+ common
 )
 
 include_directories (
@@ -23,7 +26,6 @@ include_directories (
  ${FREETYPE_INCLUDE_DIRS}
  ${AaltoASR_INCLUDE_DIRS}
 )
-
 
 set(DEMOGUISOURCES
 demogui.cc AudioStream.cc Buffer.cc  
